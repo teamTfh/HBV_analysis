@@ -11,38 +11,42 @@ output:
     number_sections: true
 ---
 
+# Introduction
+
+This document details the process of cleaning, preparing, and analyzing humoral data related to HBV vaccination. The analysis involves several steps, including data import, merging of different batches, handling of duplicates, and integration of metadata. The primary goal is to explore the antibody responses over time, particularly in different age groups and vaccine types.
 
 ```{r block1-importdata}
+# Block 1: Data Import and Library Loading
 
+# --- Load Libraries ---
+# This section loads all the necessary R packages for data manipulation, visualization, and statistical analysis.
+library(reshape)      # Data reshaping
+library(reshape2)     # More data reshaping
+library(ggplot2)      # Plotting
+library(dplyr)        # Data manipulation
+library(readr)        # Reading CSV files
+library(readxl)       # Reading Excel files
+library(ggpubr)       # Publication-ready plots
+library(gridExtra)    # Arranging grid layouts
+library(cowplot)      # Arranging plots
+library(rstatix)      # Statistical tests
+library(tidyr)        # Tidy data principles
+library(GGally)       # Advanced plots
+library(ggbeeswarm)   # Beeswarm plots
+library(plotly)       # Interactive plots
+library(patchwork)    # Combining ggplot plots
+library(extrafont)    # Using custom fonts
+library(writexl)      # Writing to Excel files
+library(lubridate)    # Date-time manipulation
+library(ggnewscale)   # Multiple color scales in ggplot
+library(ggrepel)      # Repel overlapping text labels
 
-#---load libraries -----
-library(reshape)
-library(reshape2)
-library(ggplot2)
-library(dplyr)
-library(readr)
-library(readxl)
-library(ggpubr)
-library(gridExtra)
-library(cowplot)
-library(rstatix)
-library(tidyr)
-library(GGally)
-library(ggbeeswarm)
-library(plotly)
-library(patchwork)
-library(extrafont)
-library(writexl)
-library(plotly)
-library(lubridate)
-library(ggnewscale)
-library(ggrepel)
+library(emmeans)      # Estimated marginal means
+library(lme4)         # Linear mixed-effects models
+library(lmerTest)     # Tests for lme4 models
 
-library(emmeans)
-library(lme4)
-library(lmerTest)
-
-#-----theme-------
+# --- Custom Theme ---
+# A custom ggplot theme is defined for consistent plot styling.
 ct2 <- theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -55,7 +59,8 @@ ct2 <- theme_bw() +
         axis.ticks.x.bottom = element_blank())
 
 
-#-----------load data-------
+# --- Load Data ---
+# Data from multiple batches are loaded from different files.
 b0 <- read_xlsx("./data/??_elisa_output.xlsx")
 part_merge <- read_xlsx("./data/traditional_elisa_merged_batch_cmrs_rs.batch1.xlsx")
 b2 <- read_csv("./data/20240802_hbv_elisa_batch2_riddhimaa.csv")
@@ -63,36 +68,39 @@ b3 <- read_csv("./data/20241112_hbv_elisa_batch3_riddhimaa.csv")
 b4 <- read_csv("./data/20250402_hbv_elisa_batch4_riddhimaa.csv")
 b5 <- read_csv("./data/20250620_hbv_elisa_batch5_riddhimaa.csv")
 
-#--------format each batch -------------
-#batch2
+# --- Format Each Batch ---
+# Each batch is formatted to have consistent column names and data types.
+# This involves extracting subject IDs, timepoints, and ELISA values from different column structures.
+
+# Batch 2
 b2$timepoint <- tolower(substr(b2$SAMPLE, 1, 4))
 b2$subject <- paste0("00", substr(b2$SAMPLE, 6,7))
 b2$elisa <- b2$`[ ]`
 b2$collected_by <- "RS"
 b2$experiment <- as.character("20240802")
 
-#batch3
+# Batch 3
 b3$timepoint <- tolower(substr(b3$SAMPLE, 4, 7))
 b3$subject <- paste0("00", substr(b3$SAMPLE, 1,2))
 b3$elisa <- b3$`[ ]`
 b3$collected_by <- "RS"
 b3$experiment <- as.character("20241112")
 
-#batch4
+# Batch 4
 b4$timepoint <- tolower(substr(b4$SAMPLE, 4, 7))
 b4$subject <- paste0("00", substr(b4$SAMPLE, 1,2))
 b4$elisa <- b4$`[ ]`
 b4$collected_by <- "RS"
 b4$experiment <- as.character("20250402")
 
-#batch5
+# Batch 5
 b5$timepoint <- tolower(b5$B)
 b5$subject <- substr(b5$A, 10,13)
 b5$elisa <- b5$mIU
 b5$collected_by <- "RS"
 b5$experiment <- as.character("20250620")
 
-#batch #??
+# Batch 0 (unlabeled)
 b0$timepoint <- paste0("v", substr(b0$`Event Name`, 7, 7), "w", substr(b0$`Event Name`, 16, 16))
 b0$subject <- substr(b0$`Participant ID`, 6, 9)
 b0$experiment <- "??"
@@ -104,7 +112,8 @@ b0$note <- ifelse(
   NA
 )
 
-#all merge
+# --- Merge All Batches ---
+# The formatted batches are merged into a single dataframe.
 colnames(part_merge)
 b2$note <- NA
 b3$note <- NA
@@ -112,6 +121,7 @@ b4$note <- NA
 b5$note <- NA
 b0$note
 
+# --- Load and Process REDCap Metadata ---
 rs.redcap <- read.csv("./data/202506_redcap_meta.csv")
 rs.redcap$subject <- substr(rs.redcap$Participant.ID, 6, 9)
 rs.redcap <- rs.redcap %>%
@@ -120,25 +130,26 @@ rs.redcap$timepoint <- paste0("v", substr(rs.redcap$Event.Name, 7,7), "w", subst
 rs.redcap$elisa <- rs.redcap$ELISA.Value
 
 
-
+# The following commented out code was likely used for initial data validation,
+# checking for overlaps between the ELISA data and the REDCap metadata.
 # overlap <- df %>%
 #   semi_join(rs.redcap, by = c("subject", "timepoint", "elisa"))
 rs.redcap$note <- "other"
 rs.redcap$experiment <- NA
 rs.redcap$collected_by <- NA
 
+# Anti-join to find non-matched rows, expecting none.
 not_matched <- rs.redcap %>%
-  anti_join(rs.redcap, by = c("subject", "timepoint", "elisa")) #nothing missing
+  anti_join(rs.redcap, by = c("subject", "timepoint", "elisa"))
 not_matched
 
-#cols include: elisa, subject, timepoint, experiment, collected_by, note
+# Set common columns for merging.
 part_merge
 part_merge$experiment <- as.character(part_merge$experiment)
-
 keep_cols <- c("elisa", "subject", "timepoint", "experiment", "collected_by", "note")
-
 part_merge$elisa <- part_merge$mIU
 
+# Bind rows from all batches.
 merged <- bind_rows(
   select(part_merge, all_of(keep_cols)),
   select(b0, all_of(keep_cols)),
@@ -146,23 +157,22 @@ merged <- bind_rows(
   select(b3, all_of(keep_cols)),
   select(b4, all_of(keep_cols)),
   select(b5, all_of(keep_cols))
-  
-  #,
-  #select(rs.redcap, all_of(keep_cols))
 )
-not_matched <- rs.redcap %>%
-  anti_join(rs.redcap, by = c("subject", "timepoint", "elisa"))
 
+# --- Save Merged Data ---
+# The raw merged data, including duplicates, is saved to a CSV file.
 write.csv(merged, "./outs/20250828_full_merged_elisa_updated_with_duplicates.csv")
 
-#--------clean data---------
-#what to do about duplicates?
+# --- Clean Data ---
+# This section handles duplicates and filters out irrelevant data.
 df <- merged
 
+# Remove rows with specific notes indicating issues or repeats.
 table(df$note)
-df <- df %>% #remove 1000x 
+df <- df %>%
   filter(!grepl(c("1000x_dilution|repeat|yes_elisa_value_issue"), note, ignore.case = TRUE))
 
+# Identify and handle duplicate rows.
 dup_rows <- df %>%
   group_by(elisa, subject, timepoint) %>%
   filter(n() > 1) %>%
@@ -170,7 +180,7 @@ dup_rows <- df %>%
 dup_rows
 
 to_remove <- dup_rows %>% filter(experiment == "??")
-no_dup <- df %>% #remove duplicate rows
+no_dup <- df %>% # Remove duplicate rows from the unlabeled experiment.
   anti_join(to_remove, by = c("elisa", "subject", "timepoint", "experiment"))
 
 dup_rows2 <- no_dup %>% 
@@ -178,17 +188,23 @@ dup_rows2 <- no_dup %>%
   filter(n() > 1) %>%
   ungroup()
 
+# The following commented out lines were likely for intermediate data checks.
 #no_dup <- no_dup %>% filter(!is.na(elisa))
 #table(no_dup$experiment)
 #df <- no_dup 
 
+# Filter out irrelevant timepoints and subjects.
 df <- df %>% filter(!timepoint %in% c("16", "17", "18")) %>% 
   filter(!subject %in% c("0"))
 
+# Save the cleaned data with unique measurements.
 write_xlsx(df, "./outs/20250828_hbv_merged_elisa_data_unqiue_measure.xlsx")
+# The following lines were likely for saving intermediate data or cleaning the environment.
 #write_xlsx(df, "./outs/20250828_hbv_merged_elisa_data.xlsx")
 #rm(list = setdiff(ls(), "df"))
-#------- duplicated measurements ---------------------------
+
+# --- Handle Duplicated Measurements ---
+# This section deals with cases where there are multiple measurements for the same subject at the same timepoint.
 df
 df <- df %>% filter(!is.na(elisa))
 length(unique(df$subject))
@@ -196,25 +212,28 @@ unique(df$subject)
 table(df$experiment)
 
 unique_combinations <- unique(df[, c("subject", "timepoint")]) 
-
 unique_combinations
 
+# Identify rows with duplicated subject-timepoint combinations.
 dup_rows <- df %>%
   group_by(subject, timepoint) %>%
   filter(n() > 1) %>%
   ungroup()
 
+# Visualize the duplicated measurements for a specific subject.
 dup_rows %>% 
   filter(subject == "0018") %>%
   ggplot(aes(x = timepoint, y = elisa)) +
   geom_point(aes(color = note)) + geom_line(aes(group = subject)) + ct2 +
   facet_wrap(~ subject)
 
+# Visualize all duplicated measurements.
 dup_rows %>% 
   ggplot(aes(x = timepoint, y = elisa)) +
   geom_point(aes(color = note)) + geom_line(aes(group = subject)) + ct2 +
   facet_wrap(~ subject)
 
+# Plot all data points to visually inspect for duplicates and other issues.
 df %>% 
   ggplot(aes(x = timepoint, y = elisa)) +
   geom_point(aes(color = note)) + geom_line(aes(group = subject)) + ct2 +
@@ -224,6 +243,7 @@ df %>%
   ggplot(aes(x = timepoint, y = elisa)) +
   geom_point(aes(color = note)) + geom_line(aes(group = subject)) + ct2 
 
+# Calculate the percentage deviation for duplicated measurements.
 temp <- dup_rows %>%
   group_by(subject, timepoint) %>%
   mutate(
@@ -232,35 +252,39 @@ temp <- dup_rows %>%
   ) %>%
   ungroup()
 
+# Visualize the percentage deviation.
 temp %>% ggplot(aes(x = timepoint, y = percent_dev)) +
   geom_quasirandom() + ct2
 
-#removing negatives
-#set negatives to low value 0.01
+# --- Remove Negative Values ---
+# Negative ELISA values are set to a small positive value (0.01).
 df <- df %>%
   mutate(elisa = ifelse(elisa <= 0, 0.01, elisa))
 
-df1 <- df %>% #averaged multiple measurements
+# --- Average Multiple Measurements ---
+# For duplicated subject-timepoint entries, the ELISA values are averaged.
+df1 <- df %>%
   group_by(subject, timepoint) %>%
   summarise(
     elisa = mean(elisa, na.rm = TRUE),
-    note    = paste(unique(note), collapse = ", "),  # combine unique notes
-    experiment = paste(unique(experiment), collapse = ", "), # other cols
+    note    = paste(unique(note), collapse = ", "),
+    experiment = paste(unique(experiment), collapse = ", "),
     collected_by = paste(unique(collected_by), collapse = ", "),
     n = n()
   ) %>%
   ungroup()
 
+# Check for remaining duplicates.
 dup_rows <- df1 %>%
   group_by(subject, timepoint) %>%
   filter(n() > 1) %>%
   ungroup()
-
 dup_rows
 
-write_xlsx(df1, "./outs/20250828_hbv_merged_elisa_duplicates_avg.xlsx") #duplicates are averaged
+# Save the data with averaged duplicates.
+write_xlsx(df1, "./outs/20250828_hbv_merged_elisa_duplicates_avg.xlsx")
 
-#corresponding to lymph node samples
+# Visualize data for subjects with lymph node samples.
 df1 %>%
   filter(subject %in% c("0022", "0029", "0033", "0036", "0041", "0043", "0058", "0069", "0076", "0063")) %>%
   ggplot(aes(x = timepoint, y = elisa)) +
@@ -268,10 +292,11 @@ df1 %>%
 
 df <- df1
 
+# Clean up the environment.
 rm(list = setdiff(ls(), c("df", "ct2")))
 
-#------add meta-----------------
-
+# --- Add Metadata ---
+# Metadata, such as participant demographics and vaccination status, is added to the main dataframe.
 meta <- read_excel("data/202502 HBV metadata.xlsx", 
                                    col_types = c("text", "text", "text", 
                                                  "text", "date", "text", "text", "date", 
@@ -283,6 +308,8 @@ meta <- read_excel("data/202502 HBV metadata.xlsx",
 
 meta$subject <- substr(meta$ParticipantID, 10, 13)
 df <- left_join(df, meta, by = "subject")
+
+# Create a 'group' variable based on vaccination status and product.
 df <- df %>%
   mutate(group = case_when(
     StatusAtEnrollment == "Previous Hep B Vx" & Product == "EngerixB"  ~ "Booster",
@@ -290,6 +317,7 @@ df <- df %>%
     StatusAtEnrollment == "No Hep B Vx" & Product == "Heplisav"  ~ "CpG"
   ))
 
+# Merge additional metadata from REDCap.
 meta2 <- read.csv("./data/202506_redcap_meta.csv")
 meta2$subject <- substr(meta2$Participant.ID, 6, 9)
 colnames(meta2)
@@ -305,45 +333,53 @@ temp <- df %>%
     by = c("subject", "timepoint")
   )
 
-
-
-
+# Check for duplicates after merging metadata.
 temp %>%
   group_by(subject, timepoint) %>%
   summarize(n = n(), .groups = "drop") %>%
   filter(n > 1)
 
+# Remove any remaining duplicates after merging metadata.
 df <- temp %>%
   distinct(subject, timepoint, .keep_all = TRUE)
 
+# Save the final merged data with metadata.
 write_xlsx(df, "./outs/20250828_hbv_merged_elisa_final_with_meta.xlsx")
 df <- read_xlsx("./outs/20250828_hbv_merged_elisa_final_with_meta.xlsx")
 
-#-------organize-------------
+# --- Organize and Derive New Variables ---
+# This section creates new variables for analysis and visualization.
 table(df$group)
 
+# Plot ELISA values over time for each group.
 df %>% ggplot(aes(y = elisa, x = timepoint)) +
   geom_line(aes(group = subject)) + geom_point() + ct2 + facet_wrap(~group)
 
+# The following commented out line was likely used to filter out a specific timepoint for the Booster group.
 #df <- df %>% filter(!(group == "Booster" & timepoint ==  "v2w4"))
 
+# Create a binary variable for lymph node biopsy.
 df <- df %>%
   mutate(lnbx = ifelse(subject %in% c("0022","0029","0033","0036","0041","0043","0058","0069","0076","0063"), 
                        "yes", 
                        "no"))
 
 df$lnbx
+
+# Define protection status based on ELISA levels at a specific timepoint.
 df <- df %>%
   group_by(subject) %>%
   mutate(end_protection_status = ifelse(any(group == "Alum" & timepoint == "v3w4" & elisa > 10),
                                     "Responder",NA)) %>%
   ungroup()
 
+# Create a binary variable for ELISA > 10.
 df <- df %>%
   group_by(subject) %>%
   mutate(`elisa_greater_10` = ifelse(elisa > 10, "yes", "no")) %>%
   ungroup()
 
+# Visualize protection status over time for the Alum group.
 df %>%
   filter(group == "Alum") %>%
   ggplot(aes(x = timepoint, y = elisa)) + 
@@ -351,6 +387,7 @@ df %>%
   geom_line(aes(color = end_protection_status, group = subject)) +ct2 +
   scale_y_log10(labels = scales::label_number()) 
 
+# Visualize ELISA > 10 status over time for the Alum group.
 df %>%
   filter(group == "Alum") %>%
   ggplot(aes(x = timepoint, y = elisa)) + 
@@ -358,9 +395,10 @@ df %>%
   geom_line(aes(color = elisa_greater_10, group = subject)) +ct2 +
   scale_y_log10(labels = scales::label_number()) 
 
+# Create an age group variable.
 df$age <- df$Age.at.time.of.Consent
 
-
+# The following lines are for exploring the age variable.
 colnames(df)
 df %>%
   filter(group == "Alum") %>%
@@ -369,6 +407,7 @@ df %>%
 
 class(df$age)
 
+# Visualize age distribution by group.
 df %>%
   distinct(subject, .keep_all = TRUE) %>% 
   #filter(group == "Alum") %>%
@@ -384,8 +423,8 @@ df %>%
   scale_fill_manual(values = c("lightgrey", "red")) + ct2 +
   ylim(18, 100)
 
-
 ggsave("./outs/lnbx_group_age.pdf", height = 2.5, width = 3)
+# The following commented out code shows an alternative way to highlight specific data points.
   #geom_violin() +
   # geom_point(
   #   data = . %>% filter(lnbx == "yes"),
@@ -395,14 +434,14 @@ ggsave("./outs/lnbx_group_age.pdf", height = 2.5, width = 3)
   #   shape = 21,
   #   stroke = 1
   # ) 
-  
 
-
+# Check for missing age data for a specific subject.
 #0015 missing one age point
 df %>%
   filter(subject == "0015") %>% 
   pull(age)
 
+# Calculate mean and standard deviation of age for each group.
 df %>%
   distinct(subject, .keep_all = TRUE) %>%  # one row per subject
   group_by(group) %>%
@@ -414,7 +453,8 @@ df %>%
 df %>% group_by(group) %>%
   distinct(subject, .keep_all = TRUE) %>%  
   summarize(mean_age = mean(age, na.rm = TRUE))
-  
+
+# Create age groups based on the age variable.
 df <- df %>%
   mutate(age_group = cut(
     age,
@@ -423,7 +463,7 @@ df <- df %>%
     labels = c("18-49", "50+")
   ))
 
-#age bmi
+# Explore the relationship between age and BMI.
 df$bmi<-df$BMI..calculated.
 df$sex <- df$Biological.Sex
 df%>%
@@ -433,19 +473,18 @@ df%>%
   geom_rug(size=0.1)+
   ct2
 
-
-#save df, no duplicates, no negatives, averaged multiple measurements for same subject/timepoint
+# Save the final processed data.
 write_xlsx(df, "./outs/20250829_merged_elisa_noDup_noNeg_avg_wMeta") #here 
 df <- read_xlsx("./outs/20250829_merged_elisa_noDup_noNeg_avg_wMeta")
 
 
-#---------exploration-----------
-#alum adj
+# --- Exploratory Data Analysis ---
+# This section focuses on the "Alum" group, exploring the effect of age on ELISA responses.
 df.alum <- df %>%
   filter(group == "Alum", !timepoint == "v3w3", elisa > 0) %>%
   drop_na(elisa, age_group, subject)
 
-
+# Plot individual and mean ELISA levels over time by age group.
 df.alum %>%
   ggplot(aes(x = timepoint, y = elisa)) +
   geom_point(aes(color = age_group), size = 1) +
@@ -454,10 +493,8 @@ df.alum %>%
   new_scale_color() +
   stat_summary(fun=mean, geom="line", 
                aes(color=age_group, group = age_group), size = 0.7) +
-  
   scale_color_manual(values = c("#28b57c","#ce2fbf")) + 
   new_scale_color() +
-  
   stat_summary(fun=mean, geom="point", shape = 21, group = 1, 
                aes(fill = age_group), color = "black", size = 2)+
   scale_fill_manual(
@@ -472,7 +509,7 @@ df.alum %>%
   #labs(x = "", y = "anti-HBsAg IgG (U/mL)", color = "Age", fill = "Age")+
   ct2  + theme(strip.text = element_blank())
 
-#working out mean and quartile
+# Calculate arithmetic mean and confidence intervals.
 df.alum.mean <- df.alum %>% #arith mean
   filter(group == "Alum") %>%
   filter(!timepoint == "v3w3") %>%
@@ -484,13 +521,15 @@ df.alum.mean <- df.alum %>% #arith mean
          CI_lower = mean + qt((1-0.95)/2, n - 1) * sem,
          CI_upper = mean - qt((1-0.95)/2, n - 1) * sem)
 
+# Plot the arithmetic mean with confidence intervals.
 ggplot(df_mean, aes(x=timepoint, y=mean, color = age_group, group = age_group)) +
   geom_line(aes(x=timepoint, y=mean, color=age_group)) +
   geom_ribbon(aes(ymin=CI_lower,ymax=CI_upper,fill=age_group),color="grey70",alpha=0.4) +ct2 + 
   ylab("elisa")+
   scale_y_log10(labels = scales::label_number()) 
   
-
+# --- Geometric Mean and Quartiles ---
+# Functions are defined to calculate geometric mean and quartiles for visualization.
 geo_mean <- function(x) {
   x <- x[x > 0]          
   if (length(x) == 0) {  
@@ -499,6 +538,7 @@ geo_mean <- function(x) {
   exp(mean(log(x)))
 }
 
+# Calculate quartiles for the Alum group.
 df_quart <- df.alum %>%
   group_by(timepoint, age_group) %>%
   summarise(
@@ -507,11 +547,10 @@ df_quart <- df.alum %>%
     .groups = "drop"
   )
 
-#------alum age----------
+# Plot with geometric mean and quartiles.
 df.alum %>%
   drop_na(elisa, age_group, subject) %>%   # remove any rows with NA in key columns
   ggplot(aes(x = timepoint, y = elisa)) +
-  
   geom_ribbon(
     data = df_quart,
     aes(x = timepoint, ymin = Q1, ymax = Q3, 
@@ -521,17 +560,14 @@ df.alum %>%
   stat_summary(fun = geo_mean, geom = "line",
                aes(x = as.numeric(factor(timepoint)), 
                    y = elisa, color = age_group, group = age_group)) +
-
   geom_point(aes(color = age_group), size = 1) +
   geom_line(aes(group = subject, color = age_group), size = 0.2) +
   scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") + 
   new_scale_color() +
   stat_summary(fun = geo_mean, geom="line", 
                aes(color=age_group, group = age_group), size = 0.7) +
-  
   scale_color_manual(values = c("#E66100","#5D3A9B")) + 
   new_scale_color() +
-  
   stat_summary(fun = geo_mean, geom="point", shape = 21, group = 1, 
                aes(fill = age_group), color = "black", size = 2)+
   scale_fill_manual(
@@ -545,13 +581,12 @@ df.alum %>%
   scale_y_log10(labels = scales::label_number()) + 
   #labs(x = "", y = "anti-HBsAg IgG (U/mL)", color = "Age", fill = "Age")+
   ct2  + theme(strip.text = element_blank())
-#ribbon still looks funky
+# The ribbon in the plot above looks funky, which might indicate an issue with the data or the plotting code.
 
-
+# Define a function to calculate geometric mean and quartiles.
 geo_summary <- function(x) {
   x <- x[x > 0]  
   if (length(x) == 0) return(data.frame(y = NA, ymin = NA, ymax = NA))
-  
   logx <- log(x)
   data.frame(
     y    = exp(mean(logx)),                         # geometric mean
@@ -560,16 +595,16 @@ geo_summary <- function(x) {
   )
 }
 
+# Plot with individual lines and geometric mean.
 df.alum %>%
   drop_na(elisa, age_group, subject) %>%   
   ggplot(aes(x = timepoint, y = elisa)) +
-  
   # individual spaghetti lines
   geom_point(aes(color = age_group), size = 1) +
   geom_line(aes(group = subject, color = age_group), size = 0.2) +
   scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") + 
   new_scale_color() +
-  
+  # The following commented out code shows an alternative way to plot a ribbon.
   # # quartile ribbon (computed in log space)
   # stat_summary(
   #   fun.data = geo_summary,
@@ -577,7 +612,6 @@ df.alum %>%
   #   aes(fill = age_group, group = age_group),
   #   alpha = 0.2
   # ) +
-  
   # geometric mean line
   stat_summary(
     fun.data = geo_summary,
@@ -585,7 +619,6 @@ df.alum %>%
     aes(color = age_group, group = age_group),
     size = 0.7
   ) +
-  
   # geometric mean points
   stat_summary(
     fun.data = geo_summary,
@@ -595,17 +628,15 @@ df.alum %>%
     color = "black",
     size = 2
   ) +
-  
   scale_fill_manual(values = c("#E66100","#5D3A9B")) +
   scale_color_manual(values = c("#E66100","#5D3A9B")) +
-  
   geom_hline(yintercept = 10, linetype = "dashed", color = "red") +
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
   theme(strip.text = element_blank())
 
-
-# Run Wilcoxon test for each timepoint
+# --- Statistical Testing ---
+# A Wilcoxon test is used to compare ELISA levels between age groups at each timepoint.
 stat.test <- df.alum %>%
   drop_na(elisa, age_group, subject) %>%
   group_by(timepoint) %>%
@@ -615,18 +646,16 @@ stat.test <- df.alum %>%
   add_xy_position(x = "timepoint", dodge = 0.8)
 stat.test <- stat.test %>% filter(!p.adj.signif == "ns")
 stat.test <- stat.test %>%
-  mutate(y.position = c(2.8, 3, 3, 3, 2.7)[seq_len(n())])  # example
+  mutate(y.position = c(2.8, 3, 3, 3, 2.7)[seq_len(n())])
 
-# Now plot
+# Plot with significance annotations.
 df.alum %>%
   drop_na(elisa, age_group, subject) %>%
   ggplot(aes(x = timepoint, y = elisa)) +
-  
   geom_point(aes(color = age_group), size = 1, alpha = 0.5) +
   geom_line(aes(group = subject, color = age_group), size = 0.2, alpha = 0.5) +
   scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") + 
   new_scale_color() +
-  
   stat_summary(fun.data = geo_summary,
                geom = "line",
                aes(color = age_group, group = age_group),
@@ -637,37 +666,29 @@ df.alum %>%
                aes(fill = age_group, group = age_group),
                color = "black",
                size = 2) +
-  
   scale_fill_manual(values = c("#E66100","#5D3A9B")) +
   scale_color_manual(values = c("#E66100","#5D3A9B")) +
   geom_hline(yintercept = 10, linetype = "dashed", color = "red") +
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
   theme(strip.text = element_blank()) +
-  
-  # Add p-value significance annotations
   stat_pvalue_manual(stat.test, 
-                     label = "p.adj.signif",  # shows *, **, ***
+                     label = "p.adj.signif",
                      tip.length = 0.01,
                      hide.ns = TRUE)
-
 ggsave("./outs/elisa_timecourse_with_sig.pdf", height = 3, width = 5)
 
-
-#geo mean with 95% CI
+# Define a function to calculate geometric mean and 95% confidence intervals.
 geo_mean_CI <- function(x) {
   x <- x[x > 0]  # drop non-positive values
   if (length(x) == 0) return(data.frame(y = NA, ymin = NA, ymax = NA))
-  
   logx <- log(x)
   n <- length(logx)
   mean_log <- mean(logx)
   se_log <- sd(logx) / sqrt(n)
-  
   # 95% CI on log scale
   CI_lower <- mean_log - 1.96 * se_log
   CI_upper <- mean_log + 1.96 * se_log
-  
   data.frame(
     y = exp(mean_log),       # geometric mean
     ymin = exp(CI_lower),    # lower CI
@@ -675,10 +696,10 @@ geo_mean_CI <- function(x) {
   )
 }
 
+# Plot with geometric mean and 95% confidence intervals.
 df.alum %>%
   drop_na(elisa, age_group, subject) %>%
   ggplot(aes(x = timepoint, y = elisa, group = age_group)) +
-  
   # 95% CI ribbon
   stat_summary(
     fun.data = geo_mean_CI,
@@ -686,7 +707,6 @@ df.alum %>%
     aes(fill = age_group),
     alpha = 0.25
   ) +
-  
   # Geomean line
   stat_summary(
     fun.data = geo_mean_CI,
@@ -694,7 +714,7 @@ df.alum %>%
     aes(color = age_group),
     size = 0.5
   ) +
-  
+  # The following commented out code shows how to add points for the geomean.
   # Geomean points
   # stat_summary(
   #   fun.data = geo_mean_CI,
@@ -705,15 +725,14 @@ df.alum %>%
   # 
   scale_fill_manual(values = c("#E66100","#5D3A9B")) +
   scale_color_manual(values = c("#E66100","#5D3A9B")) +
-  
   geom_hline(yintercept = 10, linetype = "dashed", color = "red") +
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
   #theme(strip.text = element_blank())+  
   scale_x_discrete(expand = c(0, 0))
-
 ggsave("./outs/titers_timecourse_age.pdf", height = 2.5, width = 4)
 
+# Plot with individual lines, geometric mean, and 95% confidence intervals.
 df.alum %>%
   drop_na(elisa, age_group, subject) %>%
   ggplot(aes(x = timepoint, y = elisa, group = age_group)) +
@@ -727,7 +746,6 @@ df.alum %>%
     aes(fill = age_group),
     alpha = 0.25
   ) +
-  
   # Geomean line
   stat_summary(
     fun.data = geo_mean_CI,
@@ -735,7 +753,7 @@ df.alum %>%
     aes(color = age_group),
     size = 0.5
   ) +
-  
+  # The following commented out code shows how to add points for the geomean.
   # Geomean points
   # stat_summary(
   #   fun.data = geo_mean_CI,
@@ -746,19 +764,18 @@ df.alum %>%
   # 
   scale_fill_manual(values = c("#E66100","#5D3A9B")) +
   scale_color_manual(values = c("#E66100","#5D3A9B")) +
-  
   geom_hline(yintercept = 10, linetype = "dashed", color = "red") +
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
   #theme(strip.text = element_blank())+  
   scale_x_discrete(expand = c(0, 0))
-
 ggsave("./outs/titers_timecourse_age_all.pdf", height = 2.5, width = 4)
 
-
+# Plot with highlighted lymph node biopsy samples.
 df.alum %>% #highlight lnbx samples 
   drop_na(elisa, age_group, subject) %>%
   ggplot(aes(x = timepoint, y = elisa, group = age_group)) +
+  # The following commented out code shows how to add individual lines.
   #geom_line(aes(group = subject, color = age_group), size = 0.2) +
   #scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") + 
   new_scale_color() +
@@ -769,7 +786,6 @@ df.alum %>% #highlight lnbx samples
     aes(fill = age_group),
     alpha = 0.25
   ) +
-  
   # Geomean line
   stat_summary(
     fun.data = geo_mean_CI,
@@ -777,7 +793,7 @@ df.alum %>% #highlight lnbx samples
     aes(color = age_group),
     size = 0.5
   ) +
-  
+  # The following commented out code shows how to add points for the geomean.
   # Geomean points
   # stat_summary(
   #   fun.data = geo_mean_CI,
@@ -788,7 +804,6 @@ df.alum %>% #highlight lnbx samples
   # 
   scale_fill_manual(values = c("#E66100","#5D3A9B")) +
   scale_color_manual(values = c("#E66100","#5D3A9B")) +
-  
   geom_hline(yintercept = 10, linetype = "dashed", color = "red") +
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
@@ -820,26 +835,24 @@ ggsave("./outs/timecourse_lnbx_highlight.pdf",  height = 2.5, width = 4)
 
 unique(df$timepoint)
 
-
-
-
-#-------lme-------
-
+# --- Linear Mixed-Effects Model ---
+# A linear mixed-effects model (LME) is used to analyze the interaction between timepoint and age group.
+# The following commented out code shows a basic LME model.
 # df.alum %>%
 #   #mutate(log_elisa = log(elisa)) %>%
 #   lmer(log(elisa) ~ timepoint * age_group + (1 | subject), data = .) %>%
 #   anova()
 
-#basic
+# Basic LME model
 fit <- lmer(log(elisa) ~ timepoint * age_group + (1|subject), data = df.alum)
 aov_tab <- anova(fit)
 pval <- signif(aov_tab["timepoint:age_group", "Pr(>F)"], 3)
 pval
 summary(fit)
+# The following commented out code shows how to get p-values using Kenward-Roger's approximation.
 #anova(fit, ddf = "Kenward-Roger")
 
-
-#adjusting for baseline
+# LME model adjusting for baseline
 temp <- df.alum %>%
   filter(!subject == "0082") %>% #no v1w0
   group_by(subject) %>%
@@ -859,7 +872,7 @@ fit <- lmer(
 aov_tab <- anova(fit)
 pval <- signif(aov_tab["timepoint:age_group", "Pr(>F)"], 3)
 
-
+# Plot the LME results.
 df.alum %>%
   mutate(
     timepoint = factor(timepoint, 
@@ -870,9 +883,7 @@ df.alum %>%
   ggplot(aes(x = timepoint, y = elisa)) +
   geom_line(aes(group = subject, color = age_group), size = 0.5) +
   scale_color_manual(values = c("#FFD699", "#D8C4F5"), guide = "none") + 
-  
   new_scale_color() +  
-  
   geom_smooth(
     method = "lm", se = TRUE,
     aes(color = age_group, group = age_group),
@@ -888,22 +899,23 @@ df.alum %>%
            hjust = 0) + xlab("")
 ggsave ("./outs/lme_ageGroup_time_interaction.pdf", height = 4, width = 6)
 
-
+# Bar plot of protection status.
 df.alum %>% filter(timepoint %in% c("v1w1", "v2w4", "v3w4")) %>%
   ggplot(aes(x = timepoint, fill = elisa_greater_10)) +
   geom_bar(position = "fill") +
            ct2 + 
   scale_fill_manual(values = c("white", "grey")) + xlab ("") +
   scale_y_continuous(labels = scales::percent, expand = c(0, 0))
-  
 ggsave("./outs/alum.protection.bar.pdf", width = 4, height = 3)  
 
+# --- Analysis of Booster Group ---
+# This section analyzes the data for the "Booster" group.
 df.boost <- df %>% filter(group == "Booster")
 df.boost %>%
   ggplot(aes(x = timepoint, y = elisa)) + geom_point() +
   geom_line(aes(group = subject))
 
-#compare v1w0 with v1w4 -- booster
+# Paired Wilcoxon test to compare timepoints in the booster group.
 stat.test <- df.boost %>%
   filter(timepoint %in% c("v1w0", "v1w1","v1w4")) %>%
   group_by(subject) %>%
@@ -916,6 +928,7 @@ stat.test <- df.boost %>%
   add_xy_position(x = "timepoint")
 stat.test
 
+# Plot the booster group timecourse.
 df.boost %>%
   #filter(timepoint %in% c("v1w0", "v1w4")) %>%
   filter(!timepoint %in% c("v2w4")) %>%
@@ -928,6 +941,7 @@ df.boost %>%
 #+ 
  # facet_wrap(~lnbx)
 
+# Paired Wilcoxon test for the 18-49 age group in the booster group.
 stat.test <- df.boost %>%
   filter(timepoint %in% c("v1w0", "v1w1","v1w4")) %>%
   filter(age_group == "18-49") %>%
@@ -941,6 +955,7 @@ stat.test <- df.boost %>%
   add_xy_position(x = "timepoint")
 stat.test
 
+# Plot the booster group timecourse faceted by age group.
 df.boost %>%
   #filter(timepoint %in% c("v1w0", "v1w4")) %>%
   filter(!timepoint %in% c("v2w4")) %>%
@@ -952,22 +967,19 @@ df.boost %>%
   scale_y_log10(labels = scales::label_number())+ 
   facet_wrap(~age_group)
 
-#-------booster  and alum timecourse------
-
+# --- Booster and Alum Timecourse ---
+# The following commented out code was likely for comparing the booster and alum groups over time.
 #geo mean with 95% CI
 geo_mean_CI <- function(x) {
   x <- x[x > 0]  # drop non-positive values
   if (length(x) == 0) return(data.frame(y = NA, ymin = NA, ymax = NA))
-  
   logx <- log(x)
   n <- length(logx)
   mean_log <- mean(logx)
   se_log <- sd(logx) / sqrt(n)
-  
   # 95% CI on log scale
   CI_lower <- mean_log - 1.96 * se_log
   CI_upper <- mean_log + 1.96 * se_log
-  
   data.frame(
     y = exp(mean_log),       # geometric mean
     ymin = exp(CI_lower),    # lower CI
@@ -975,6 +987,7 @@ geo_mean_CI <- function(x) {
   )
 }
 
+# The following commented out code was likely for statistical testing and plotting.
 # stat.test <- df.alum %>%
 #   #filter(timepoint %in% c("v1w0", "v1w4")) %>%
 #   #group_by(group) %>%   # test within each vaccine group
@@ -1039,6 +1052,7 @@ geo_mean_CI <- function(x) {
 
 df.boost <- df.boost %>% filter(!timepoint == "v2w4")
 
+# Paired Wilcoxon test for the booster group.
 stat.test <- df.boost %>%
   #filter(timepoint %in% c("v1w0", "v1w4")) %>%
   #group_by(group) %>%   # test within each vaccine group
@@ -1050,21 +1064,20 @@ stat.test <- df.boost %>%
   adjust_pvalue(method = "BH") %>%
   add_significance("p.adj")
 
-#stat.test <- stat.test %>% filter(!p.adj.signif == "ns")
+#stat.test <- stat.test %>% filter(!p.adj.sig == "ns")
 stat.test <- stat.test %>% add_xy_position(x = "timepoint")
 stat.test$y.position <- c(2, 2.2, 2.3)
 
-#-----booster--------
+# --- Booster Group Analysis ---
 df.boost %>%
   drop_na(elisa, age_group, subject) %>%   
   ggplot(aes(x = timepoint, y = elisa)) +
-  
   # individual spaghetti lines
   geom_point(aes(color = age_group), size = 1) +
   geom_line(aes(group = subject, color = age_group), size = 0.2) +
   scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") + 
   new_scale_color() +
-  
+  # The following commented out code shows how to add a quartile ribbon.
   # # quartile ribbon (computed in log space)
   # stat_summary(
   #   fun.data = geo_summary,
@@ -1072,7 +1085,6 @@ df.boost %>%
   #   aes(fill = age_group, group = age_group),
   #   alpha = 0.2
   # ) +
-  
   # geometric mean line
   stat_summary(
     fun.data = geo_summary,
@@ -1080,7 +1092,6 @@ df.boost %>%
     aes(color = age_group, group = age_group),
     size = 0.7
   ) +
-  
   # geometric mean points
   stat_summary(
     fun.data = geo_summary,
@@ -1090,17 +1101,14 @@ df.boost %>%
     color = "black",
     size = 2
   ) +
-  
   scale_fill_manual(values = c("#E66100","#5D3A9B")) +
   scale_color_manual(values = c("#E66100","#5D3A9B")) +
-  
   geom_hline(yintercept = 10, linetype = "dashed", color = "red") +
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
   theme(strip.text = element_blank())
 
-
-# Run Wilcoxon test for each timepoint
+# Wilcoxon test for age group comparison in the booster group.
 stat.test <- df.boost %>%
   drop_na(elisa, age_group, subject) %>%
   group_by(timepoint) %>%
@@ -1112,16 +1120,14 @@ stat.test <- df.boost %>%
 stat.test <- stat.test %>%
    mutate(y.position = c(2.7,2.7,3)[seq_len(n())])  # example
 
-# Now plot
+# Plot with significance annotations.
 df.boost %>%
   drop_na(elisa, age_group, subject) %>%
   ggplot(aes(x = timepoint, y = elisa)) +
-  
   geom_point(aes(color = age_group), size = 1, alpha = 0.5) +
   geom_line(aes(group = subject, color = age_group), size = 0.2, alpha = 0.5) +
   scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") + 
   new_scale_color() +
-  
   stat_summary(fun.data = geo_summary,
                geom = "line",
                aes(color = age_group, group = age_group),
@@ -1132,22 +1138,20 @@ df.boost %>%
                aes(fill = age_group, group = age_group),
                color = "black",
                size = 2) +
-  
   scale_fill_manual(values = c("#E66100","#5D3A9B")) +
   scale_color_manual(values = c("#E66100","#5D3A9B")) +
   geom_hline(yintercept = 10, linetype = "dashed", color = "red") +
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
   theme(strip.text = element_blank()) +
-  
   # Add p-value significance annotations
   stat_pvalue_manual(stat.test, 
-                     label = "p.adj.signif",  # shows *, **, ***
+                     label = "p.adj.signif",
                      tip.length = 0.01,
                      hide.ns = FALSE)
-
 ggsave("./outs/boost_elisa_timecourse_with_sig.pdf", height = 3, width = 3)
 
+# Wilcoxon test for timepoint comparison in the booster group.
 stat.test <- df.boost %>%
   drop_na(elisa, age_group, subject) %>%
   #group_by(subject) %>%
@@ -1159,7 +1163,7 @@ stat.test
 # stat.test <- stat.test %>% filter(!p.adj.signif == "ns")
 stat.test <- stat.test %>% mutate(y.position = c(3,3.2,3.5)[seq_len(n())])  # example
 
-# Now plot
+# Plot with significance annotations.
 df.boost %>%
   drop_na(elisa, age_group, subject) %>%
   ggplot(aes(x = timepoint, y = elisa)) +
@@ -1180,30 +1184,10 @@ df.boost %>%
   scale_y_log10(labels = scales::label_number()) +
   ct2 +
   theme(strip.text = element_blank()) +
-  
   # Add p-value significance annotations
   stat_pvalue_manual(stat.test, 
-                     label = "p.adj.signif",  # shows *, **, ***
+                     label = "p.adj.signif",
                      tip.length = 0.01,
                      hide.ns = FALSE)
-
 ggsave("./outs/boost_timecourse.pdf", height = 3, width = 3)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```
