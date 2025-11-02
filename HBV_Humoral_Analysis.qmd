@@ -15,13 +15,12 @@ output:
 
 This document details the process of cleaning, preparing, and analyzing humoral data related to HBV vaccination. The analysis involves several steps, including data import, merging of different batches, handling of duplicates, and integration of metadata. The primary goal is to explore the antibody responses over time, particularly in different age groups and vaccine types.
 
-```{r block1-importdata}
+```{r call-libraries, echo=FALSE, message=FALSE, warning=FALSE}
 # Block 1: Data Import and Library Loading
 
 # --- Load Libraries ---
 # This section loads all the necessary R packages for data manipulation, visualization, and statistical analysis.
-library(reshape)      # Data reshaping
-library(reshape2)     # More data reshaping
+library(reshape2)     # data reshaping
 library(ggplot2)      # Plotting
 library(dplyr)        # Data manipulation
 library(readr)        # Reading CSV files
@@ -31,14 +30,14 @@ library(gridExtra)    # Arranging grid layouts
 library(cowplot)      # Arranging plots
 library(rstatix)      # Statistical tests
 library(tidyr)        # Tidy data principles
-library(GGally)       # Advanced plots
+# library(GGally)       # Advanced plots
 library(ggbeeswarm)   # Beeswarm plots
 library(plotly)       # Interactive plots
 library(patchwork)    # Combining ggplot plots
-library(extrafont)    # Using custom fonts
-library(writexl)      # Writing to Excel files
-library(lubridate)    # Date-time manipulation
-library(ggnewscale)   # Multiple color scales in ggplot
+# library(extrafont)    # Using custom fonts
+# library(writexl)      # Writing to Excel files
+# library(lubridate)    # Date-time manipulation
+# library(ggnewscale)   # Multiple color scales in ggplot
 library(ggrepel)      # Repel overlapping text labels
 
 library(emmeans)      # Estimated marginal means
@@ -59,14 +58,18 @@ ct2 <- theme_bw() +
         axis.ticks.x.bottom = element_blank())
 
 
+```
+
+```{r load-and-merge-data}
+
 # --- Load Data ---
 # Data from multiple batches are loaded from different files.
-b0 <- read_xlsx("./data/??_elisa_output.xlsx")
-part_merge <- read_xlsx("./data/traditional_elisa_merged_batch_cmrs_rs.batch1.xlsx")
-b2 <- read_csv("./data/20240802_hbv_elisa_batch2_riddhimaa.csv")
-b3 <- read_csv("./data/20241112_hbv_elisa_batch3_riddhimaa.csv")
-b4 <- read_csv("./data/20250402_hbv_elisa_batch4_riddhimaa.csv")
-b5 <- read_csv("./data/20250620_hbv_elisa_batch5_riddhimaa.csv")
+b0 <- read_xlsx("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/elisa_output.xlsx")
+part_merge <- read_xlsx("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/traditional_elisa_merged_batch_cmrs_rs.batch1.xlsx")
+b2 <- read_csv("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/20240802_hbv_elisa_batch2_riddhimaa.csv")
+b3 <- read_csv("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/20241112_hbv_elisa_batch3_riddhimaa.csv")
+b4 <- read_csv("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/20250402_hbv_elisa_batch4_riddhimaa.csv")
+b5 <- read_csv("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/20250620_hbv_elisa_batch5_riddhimaa.csv")
 
 # --- Format Each Batch ---
 # Each batch is formatted to have consistent column names and data types.
@@ -122,7 +125,7 @@ b5$note <- NA
 b0$note
 
 # --- Load and Process REDCap Metadata ---
-rs.redcap <- read.csv("./data/202506_redcap_meta.csv")
+rs.redcap <- read.csv("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/202506_redcap_meta.csv")
 rs.redcap$subject <- substr(rs.redcap$Participant.ID, 6, 9)
 rs.redcap <- rs.redcap %>%
   filter(!grepl("optional", Event.Name, ignore.case = TRUE))
@@ -161,7 +164,7 @@ merged <- bind_rows(
 
 # --- Save Merged Data ---
 # The raw merged data, including duplicates, is saved to a CSV file.
-write.csv(merged, "./outs/20250828_full_merged_elisa_updated_with_duplicates.csv")
+# write.csv(merged, "R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/outs/20250828_full_merged_elisa_updated_with_duplicates.csv")
 
 # --- Clean Data ---
 # This section handles duplicates and filters out irrelevant data.
@@ -196,13 +199,19 @@ dup_rows2 <- no_dup %>%
 # Filter out irrelevant timepoints and subjects.
 df <- df %>% filter(!timepoint %in% c("16", "17", "18")) %>% 
   filter(!subject %in% c("0"))
+```
 
+
+```{r write-merged-data}
 # Save the cleaned data with unique measurements.
-write_xlsx(df, "./outs/20250828_hbv_merged_elisa_data_unqiue_measure.xlsx")
+write_xlsx(df, "R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/outs/20250828_hbv_merged_elisa_data_unqiue_measure.xlsx")
 # The following lines were likely for saving intermediate data or cleaning the environment.
 #write_xlsx(df, "./outs/20250828_hbv_merged_elisa_data.xlsx")
 #rm(list = setdiff(ls(), "df"))
+```
 
+```{r handle_duplicates}
+# Block 2: Handle Duplicates and Add Metadata
 # --- Handle Duplicated Measurements ---
 # This section deals with cases where there are multiple measurements for the same subject at the same timepoint.
 df
@@ -294,6 +303,8 @@ df <- df1
 
 # Clean up the environment.
 rm(list = setdiff(ls(), c("df", "ct2")))
+```
+
 
 # --- Add Metadata ---
 # Metadata, such as participant demographics and vaccination status, is added to the main dataframe.
@@ -1189,5 +1200,5 @@ df.boost %>%
                      label = "p.adj.signif",
                      tip.length = 0.01,
                      hide.ns = FALSE)
-ggsave("./outs/boost_timecourse.pdf", height = 3, width = 3)
+ggsave("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/outs/boost_timecourse.pdf", height = 3, width = 3)
 ```
