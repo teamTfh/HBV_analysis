@@ -1,0 +1,308 @@
+ParticipantID,StatusAtEnrollment,KnownNR,Product,DateEnrolled,YearsSinceLastVax,HBsAb1,HBsAb1date,HBsAb2,HBsAb2date,HBcAb,HBcAbdate,SmokingStatus,PackYear,YearsSinceQuit,PastHistory,CurrentMeds,Heightcm,V1weightkg,V2weightkg,V3weightkg,Notes,ImmunizationHx,V1W0.laterality,V2W0.laterality,V3W0.laterality
+NLV-HBVX-0001,Previous Hep B Vx,Y,EngerixB,7/7/2022,25,NA,NA,NA,NA,,,Never,NA,NA,Anxiety;Gastroesophageal reflux disease;NA;NA,clonazepam; fluoxetine; guafacine,177.8,91.9,NA,NA,,,,,
+NLV-HBVX-0002,No Hep B Vx,NA,EngerixB,9/6/2022,NA,NA,NA,NA,NA,,,Active,10,NA,Alcohol use;Pancreatitis;Diabetes mellitus;NA,metformin; glyburide,184,100.1,NA,NA,,,,,
+NLV-HBVX-0003,No Hep B Vx,NA,EngerixB,9/13/2022,NA,NA,NA,NA,NA,,,Quit,1,10,Deep venous thrombosis;Gastroesophageal reflux disease;Bilateral temporomandibular joint pain;NA,pantoprazole; tizanidine,182.9,85,NA,84.3,,,,,
+NLV-HBVX-0004,Previous Hep B Vx,N,EngerixB,11/17/2022,NA,154.97,9/28/2021,NA,NA,,,Never,NA,NA,Depression;Obesity;NA;NA,risperidone; divalproex; sertraline,185.4,133.6,NA,NA,,,,,
+NLV-HBVX-0005,Previous Hep B Vx,N,EngerixB,1/12/2023,25,479,11/26/2019,1000,2/19/2025,,,Quit,5,11,Alcohol use;Gastroesophageal reflux disease;Prediabetes;Substance use,omeprazole; cholecalciferol; polyethylene glycol,170.2,97.7,NA,NA,,,,,
+NLV-HBVX-0006,Previous Hep B Vx,Y,EngerixB,1/12/2023,NA,NA,NA,NA,NA,,,Quit,20,23,Diabetes mellitus;Coronary artery disease;Gastroesophageal reflux disease;Paroxysmal atrial fibrillation,rosuvastatin;finasteride;sitagliptin;tamsulosin,177.8,80.5,NA,NA,,,,,
+NLV-HBVX-0007,No Hep B Vx,NA,EngerixB,1/18/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,Depression;Hypertension;Anxiety;Insomnia,bupropion;cholecalciferol;losartan;amlodipine,167.6,80.6,NA,82.7,,,,,
+NLV-HBVX-0008,No Hep B Vx,NA,Heplisav,1/19/2023,NA,0,8/2/2018,567.22,10/1/2019,,,Quit,NA,57,Irritable bowel syndrome;Osteopenia;Breast cancer;Hypertension,olmesartan;hyoscyamine;mirabegron;NA,157.5,53.6,NA,NA,,,,,
+NLV-HBVX-0009,No Hep B Vx,NA,EngerixB,3/2/2023,NA,Positive,7/21/2021,NA,NA,,,Quit,110,37,Osteoporosis;Depression;Anxiety;Hypothyroidism,denosumab;escitalopram;ondansetron;fexofenadine,162.6,63.8,NA,NA,,,,,
+NLV-HBVX-0010,No Hep B Vx,NA,EngerixB,3/7/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,Alcohol use;Arthritis;Vertigo;NA,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,170.8,70.5,NA,NA,,,,,
+NLV-HBVX-0011,Previous Hep B Vx,N,EngerixB,3/9/2023,17,31.7,8/16/2021,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,truvada;NA;NA;NA,172.7,67,NA,NA,,,,,
+NLV-HBVX-0012,Previous Hep B Vx,Y,EngerixB,3/9/2023,16,1.54,7/30/2024,NA,NA,,,Never,NA,NA,Osteopenia;Macular degeneration;Bladder atony;NA,solifenacin;cholecalciferol;NA;NA,157.5,63.5,NA,NA,,,,,
+NLV-HBVX-0013,Previous Hep B Vx,N,EngerixB,3/14/2023,25,Positive,3/8/2022,NA,NA,,,Never,NA,NA,Migraines;NA;NA;NA,NA;NA;NA;NA,154.9,53.2,NA,NA,,,,,
+NLV-HBVX-0014,Previous Hep B Vx,N,EngerixB,3/30/2023,8,NA,NA,NA,NA,,,Never,NA,NA,Hyperlipidemia;NA;NA;NA,atorvastatin;NA;NA;NA,165.1,64.2,NA,NA,,,,,
+NLV-HBVX-0015,No Hep B Vx,NA,EngerixB,5/4/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,Diabetes mellitus;Hyperlipidemia;Depression;Insomnia,atorvastatin;metformin;trazodone;venlafaxine,182.9,98.2,NA,96.4,,,,,
+NLV-HBVX-0016,No Hep B Vx,NA,Heplisav,5/9/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,Bronchiectasis;NA;NA;NA,NA;NA;NA;NA,165.1,53,NA,NA,,,,,
+NLV-HBVX-0017,Previous Hep B Vx,N,EngerixB,5/11/2023,11,9599,1/8/2018,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,sildenafil;NA;NA;NA,180.3,71,NA,NA,,,,,
+NLV-HBVX-0018,No Hep B Vx,NA,EngerixB,5/16/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,154.9,47.8,NA,46.9,,,,,
+NLV-HBVX-0019,Previous Hep B Vx,N,EngerixB,5/30/2023,24,NA,NA,NA,NA,,,Never,NA,NA,Obesity;Allergic rhinitis;NA;NA,cetirizine;NA;NA;NA,188,133.4,NA,NA,,,,,
+NLV-HBVX-0020,No Hep B Vx,NA,EngerixB,6/1/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,Hepatitis C resolved;NA;NA;NA,testosterone;NA;NA;NA,182.9,97.5,NA,101.8,,"Covid-19 Vaccine, Moderna:02/03/2021;03/03/2021;11/10/2021  __
+Pneumococcal Polysaccharide Vaccine, 23:07/13/2015 __
+Zoster:04/16/2015
+ 
+",LD,LD,LD
+NLV-HBVX-0021,No Hep B Vx,NA,EngerixB,6/8/2023,NA,NA,NA,NA,NA,,,Active,10,NA,Coronary artery disease;Hypertension;NA;NA,aspirin;atorvastatin;NA;NA,185.4,92.2,89.4,92.7,,"Covid-19 Vaccine, Moderna:03/11/2021;04/08/2021;12/30/2021",LD,LD,RD
+NLV-HBVX-0022,Previous Hep B Vx,N,EngerixB,7/13/2023,19,NA,NA,NA,NA,,,Never,NA,NA,Diabetes mellitus;Nonalcoholic steatohepatitis;Gastroesophageal reflux disease;Colon cancer,minoxidil;atorvastatin;amlodipine;metformin,154.9,59.1,NA,NA,,"Covid-19 Vaccine, AstraZeneca:12/18/2020;01/15/2021        ___
+Covid-19 Vaccine, Pfizer:10/01/2021 RD;05/12/2022 LD; 10/25/2022 LD  ___ 
+IPV:03/15/2023;04/12/2023 ___
+Influenza Vaccine >/= 65 Years, Quadrivalent, High Dose:08/25/2020;09/07/2021 ___
+Influenza Vaccine, Quadrivalent, Nasal:10/22/2014 ___
+Pneumococcal Conjugate Vaccine, 13 Valent:04/16/2015 ___
+Pneumococcal Polysaccharide Vaccine, 23:10/22/2014 ___
+Tdap:09/05/2019;09/16/2019 ___
+Zoster Vaccine Recombinant, Adjuvanted:03/18/2019;03/11/2020
+
+",LD,,
+NLV-HBVX-0023,No Hep B Vx,NA,EngerixB,7/13/2023,NA,NA,NA,NA,NA,,,Active,11,NA,NA;NA;NA;NA,NA;NA;NA;NA,182.9,96.2,104.9,97.5,,"Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021 ___
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD
+NLV-HBVX-0024,Previous Hep B Vx,N,EngerixB,7/18/2023,10,NA,NA,NA,NA,,,Active,15,NA,Obesity;Gastroesophageal reflux disease;Allergic rhinitis;Hypertension,lisinopril;omeprazole;hydrocodone;NA,160,90.8,NA,NA,,"Covid-19 Vaccine, AstraZeneca:11/16/2020;12/14/2020  ___
+Covid-19 Vaccine, Pfizer:02/14/2022 ___
+Hepatitis B Vaccine Adult:01/11/2011 ___
+Influenza Vaccine:01/11/2011 ___
+MMR:01/11/2011
+
+",LD,,
+NLV-HBVX-0025,Previous Hep B Vx,NA,EngerixB,7/20/2023,5,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,190.5,106.6,NA,NA,,"Covid-19 Vaccine, Pfizer:04/24/2021;05/17/2021;12/07/2021;08/19/2022;11/07/2022  ___
+Hepatitis B Vaccine:11/13/2018  ___
+Influenza Vaccine:10/27/2011;12/12/2013;  ___
+Tdap:12/12/2013 ___ 
+Vaccinia (Jynneos):08/14/2022;10/05/2022 
+
+",LD,,
+NLV-HBVX-0026,Previous Hep B Vx,Y,EngerixB,7/27/2023,2,4164,3/28/2022,NA,NA,,,Never,NA,NA,Anemia;Asthma;NA;NA,levonorgestrel;albuterol;NA;NA,162.6,62.8,NA,NA,,"Covid-19 Vaccine, Pfizer:12/31/2020 LD;01/26/2021 LD;10/27/2021 LD  ___
+Hepatitis B Vaccine (recombinant), adjuvant:04/29/2021 LD ___
+Hepatitis B Vaccine:06/04/2019 RD;07/24/2019 LD ___
+Influenza Vaccine >/=18 Years, Quadrivalent:09/17/2019 LD;09/09/2020 LD;10/13/2021 RD;09/13/2022 LD ___
+MMR:06/04/2019;07/24/2019
+ 
+",LD,,
+NLV-HBVX-0027,No Hep B Vx,NA,EngerixB,8/1/2023,NA,NA,NA,NA,NA,,,Quit,5,20,Diabetes mellitus;Gastroesophageal reflux disease;NA;NA,NA;NA;NA;NA,177.8,74.5,78.4,77.2,,,,,
+NLV-HBVX-0028,No Hep B Vx,NA,EngerixB,9/26/2023,NA,0,3/29/2023,NA,NA,,,Quit,30,20,Diabetes mellitus;Coronary artery disease;Hypertension;Aspirin,NA;NA;NA;NA,182.9,80.8,84.9,87.5,,,,,
+NLV-HBVX-0029,Previous Hep B Vx,N,EngerixB,9/27/2023,NA,Positive,6/22/2023,NA,NA,,,Never,NA,NA,Hypertension;NA;NA;NA,lisinopril;NA;NA;NA,165.1,97.7,NA,NA,,,,,
+NLV-HBVX-0030,No Hep B Vx,NA,Heplisav,10/4/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,160.2,73.2,NA,NA,,,,,
+NLV-HBVX-0031,No Hep B Vx,NA,Heplisav,10/11/2023,NA,NA,NA,NA,NA,,,Quit,NA,3,Depression;NA;NA;NA,NA;NA;NA;NA,172.7,85.4,NA,NA,,,,,
+NLV-HBVX-0032,Previous Hep B Vx,N,EngerixB,10/17/2023,26,NA,NA,NA,NA,,,Active,5,NA,NA;NA;NA;NA,NA;NA;NA;NA,193,69.4,NA,NA,,,,,
+NLV-HBVX-0033,Previous Hep B Vx,N,EngerixB,10/24/2023,14,496,9/12/2022,NA,NA,,,Quit,10,13,Herpes simplex 1;Hyperlipidemia;NA;NA,truvada;valacyclovir;NA;NA,181,103.9,NA,NA,,,,,
+NLV-HBVX-0034,Previous Hep B Vx,N,EngerixB,11/1/2023,5,Positive,8/2/2018,NA,NA,,,Never,NA,NA,Hypothyroidism;Allergic rhinitis;Gastroesophageal reflux disease;Allergic rhinitis,truvada;levothyroxine;escitalopram;levocetirizine,177.8,75.7,NA,NA,,,,,
+NLV-HBVX-0035,Previous Hep B Vx,N,EngerixB,11/7/2023,24,NA,NA,NA,NA,,,Never,NA,NA,Vitamin D insufficiency;NA;NA;NA,cholecalciferol;NA;NA;NA,180.3,64.2,NA,NA,,,,,
+NLV-HBVX-0036,Previous Hep B Vx,N,EngerixB,11/15/2023,1,0,8/15/2022,NA,NA,,,Never,NA,NA,Benign prostatic hyperplasia;Hyperlipidemia;Allergic rhinitis;NA,rosuvastatin;loratadine;tamsulosin;NA,172.7,75.5,NA,NA,,,,,
+NLV-HBVX-0037,No Hep B Vx,NA,EngerixB,12/5/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,Dermatitis;Allergic rhinitis;Glaucoma;NA,cetirizine;NA;NA;NA,157.5,54,54.4,53.3,,,,,
+NLV-HBVX-0038,No Hep B Vx,NA,EngerixB,12/5/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,Glaucoma;Allergic rhinitis;Asthma;NA,cholecalciferol;loratadine;NA;NA,157.5,97.9,96,89.4,,,,,
+NLV-HBVX-0039,No Hep B Vx,NA,EngerixB,12/11/2023,NA,1000,2/12/2024,NA,NA,,,Never,NA,NA,Depression;Gastroesophageal reflux disease;Insomnia;Morton's neuroma,diclofenac;glycopyrrolate;NA;NA,175.2,72.7,72.2,69.6,,,,,
+NLV-HBVX-0040,No Hep B Vx,NA,EngerixB,12/13/2023,NA,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,172.7,109.8,105.8,95.3,,,,,
+NLV-HBVX-0041,Previous Hep B Vx,N,EngerixB,1/4/2024,22,NA,NA,NA,NA,,,Never,NA,NA,Migraines;Sciatica;NA;NA,gabapentin;naproxen;NA;NA,188,88.6,NA,NA,,,,,
+NLV-HBVX-0042,Previous Hep B Vx,N,EngerixB,1/16/0204,10,NA,NA,NA,NA,,,Never,NA,NA,Irritable bowel syndrome;NA;NA;NA,NA;NA;NA;NA,180.3,61.6,NA,NA,,,,,
+NLV-HBVX-0043,No Hep B Vx,NA,EngerixB,1/18/2024,NA,14.7,10/16/2023,NA,NA,,,Never,NA,NA,Gastric bypass;Anemia;Obesity;Endometriosis,bupropion;liraglutide;famotidine;NA,154.9,92.1,87,84.5,,,,,
+NLV-HBVX-0044,No Hep B Vx,NA,EngerixB,1/23/2024,NA,NA,NA,NA,NA,,,Quit,10,14,Chronic kidney disease;Hypertension;NA;NA,NA;NA;NA;NA,170.2,77.4,75.4,70.6,,,,,
+NLV-HBVX-0045,No Hep B Vx,NA,EngerixB,1/30/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,165.1,79.7,80.1,82.5,,,,,
+NLV-HBVX-0046,Previous Hep B Vx,N,EngerixB,1/31/2024,2,2160,7/25/2024,NA,NA,,,Never,NA,NA,Hyperlipidemia;Gastroesophageal reflux disease;Vitamin D deficiency;Sleep apnea,atorvastatin;ezetimibe;NA;NA,162.6,69.7,NA,NA,,,,,
+NLV-HBVX-0047,Previous Hep B Vx,Y,EngerixB,3/12/2024,8,NA,NA,NA,NA,,,Never,NA,NA,Anxiety;Gastroesophageal reflux disease;NA;NA,alprazolam;hydroxyzine;ondansetron;NA,160,54,NA,NA,,,,,
+NLV-HBVX-0048,No Hep B Vx,NA,Heplisav,3/13/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,Ulcerative colitis;Hyperlipidemia;Uterine fibroids;NA,rosuvastatin;meclizine;NA;NA,160,74.3,74.7,NA,,,,,
+NLV-HBVX-0049,No Hep B Vx,NA,EngerixB,3/14/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,Depression;Melanoma;Glaucoma;Allergic rhinitis,escitalopram;NA;NA;NA,177.8,80.2,79.2,79.8,,,,,
+NLV-HBVX-0050,No Hep B Vx,NA,EngerixB,3/19/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,Depression;Anxiety;Allergic rhinitis;Breast cancer,cetirizine;venlafaxine;risperidone;buspirone,160,89.2,91.4,94.1,,,,,
+NLV-HBVX-0051,No Hep B Vx,NA,EngerixB,3/26/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,172.7,66.4,66.2,66.2,,,,,
+NLV-HBVX-0052,No Hep B Vx,NA,Heplisav,4/3/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,Benign prostatic hyperplasia;NA;NA;NA,NA;NA;NA;NA,162.6,55.4,54.7,NA,,,,,
+NLV-HBVX-0053,No Hep B Vx,NA,EngerixB,4/23/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,Depression;Insomnia;Herpes simplex;Chronic back pain,bupropion;quetiapine;acyclovir;tramadol,175.3,73.9,72.7,68.3,,,,,
+NLV-HBVX-0054,Previous Hep B Vx,N,EngerixB,5/7/2024,NA,96,11/4/2020,NA,NA,,,Quit,0.5,28,Anxiety;Gastroesophageal reflux disease;Herpes simplex;Insomnia,bupropion;tirzepatide;atorvastatin;descovy,172.7,86,NA,NA,,,,,
+NLV-HBVX-0055,Previous Hep B Vx,N,EngerixB,5/15/2024,17,NA,NA,NA,NA,,,Never,NA,NA,Hypertension;Hyperlipidemia;NA;NA,atorvastatin;lisinopril;NA;NA,165.1,102.2,NA,NA,,,,,
+NLV-HBVX-0056,No Hep B Vx,NA,EngerixB,6/4/2024,NA,Positive,2/24/2025,NA,NA,,,Quit,15,19,HIV;? resolved HBV;Stroke;Depression,etravirine;darunavir;atorvastatin;bupropion,180.3,81.3,81.6,77.1,? resolved HBV,,,,
+NLV-HBVX-0057,No Hep B Vx,NA,EngerixB,6/4/2024,NA,0,6/3/2024,NA,NA,,,Quit,NA,15,Osteoarthritis;Hyperlipidemia;NA;NA,atorvastatin;gabapentin;NA;NA,188,104.2,102.4,99.9,,"•        Covid-19 Vaccine, Moderna        09/01/2020, 09/29/2020, 10/08/2021, 05/11/2022
+•        Covid-19 Vaccine, Moderna (Annual Formula)        09/22/2023, 11/27/2024
+•        Covid-19 Vaccine, Moderna Bivalent        12/14/2022
+•        H1N1 Vaccine Injectable        12/08/2009
+•        Hepatitis B Vaccine Adult IM        06/04/2024, 07/10/2024, 01/14/2025
+•        INFLUENZA VACCINE >/= 65 YEARS, QUADRIVALENT        09/22/2023
+•        Influenza Vaccine >/= 65 Years, High Dose, Trivalent, Preservative Free        11/06/2018, 11/07/2019, 10/28/2020, 11/01/2021, 11/28/2022, 11/27/2024
+•        Influenza Vaccine, Quadrivalent        10/14/2015, 11/01/2016, 11/01/2017
+•        Influenza Vaccine, Trivalent, Preservative Free        10/14/2015, 11/01/2016, 11/01/2017, 11/07/2019, 09/22/2023
+•        Mpox, Live, Preservative Free        09/20/2022, 11/28/2022
+•        Pneumococcal Conjugate Vaccine, 13 Valent        07/27/2016
+•        Pneumococcal Conjugate Vaccine, 20 Valent        11/27/2024
+•        Pneumococcal Polysaccharide Vaccine, 23        05/07/2019
+•        RSV, Adjuvanted (AREXVY)        02/21/2024
+•        Tdap        11/13/2019
+•        Zoster        02/08/2017
+•        Zoster Vaccine Recombinant, Adjuvanted        03/12/2020, 05/11/2020
+
+
+",,,
+NLV-HBVX-0058,No Hep B Vx,NA,EngerixB,6/5/2024,NA,3.2,4/20/2021,NA,NA,,,Never,NA,NA,Irritable bowel syndrome;Anxiety;NA;NA,NA;NA;NA;NA,175.3,88.3,87,86.7,,,,,
+NLV-HBVX-0059,Previous Hep B Vx,NA,EngerixB,9/11/2024,8,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,180.3,89.9,NA,NA,,,,,
+NLV-HBVX-0060,Previous Hep B Vx,N,EngerixB,9/24/2024,4,NA,NA,NA,NA,,,Quit,20,14,Ulcerative colitis;Hypertension;NA;NA,donepezil;losartan;mesalamine;bupropion,177.8,59,NA,NA,,,,,
+NLV-HBVX-0061,Previous Hep B Vx,N,EngerixB,9/26/2024,6,NA,NA,NA,NA,,,Never,NA,NA,Celiac disease;Depression;Gastroesophageal reflux disease;Insomnia,sertraline;propanolol;trazodone;spironolactone,165.1,59.9,NA,NA,,,,,
+NLV-HBVX-0062,No Hep B Vx,NA,EngerixB,10/2/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,Juvenile rheumatoid arthritis;Endometriosis;Migraines;Asthma,metformin;methylphenidate;;,,,,,,,,,
+NLV-HBVX-0063,No Hep B Vx,NA,EngerixB,12/10/2024,NA,NA,NA,NA,NA,,,Never,NA,NA,Hypertension;NA;NA;NA,loratadine;amlodipine;losartan;hydrochlorothiazide,165.1,58.1,58.1,55.3,,,,,
+NLV-HBVX-0064,No Hep B Vx,NA,Heplisav,12/10/2024,NA,NA,NA,NA,NA,,,Active,2,NA,Asthma;NA;NA;NA,NA;NA;NA;NA,160,52.2,NA,NA,,,,,
+NLV-HBVX-0065,No Hep B Vx,NA,EngerixB,1/15/2025,NA,NA,NA,NA,NA,,,Never,NA,NA,Multinodular goiter;Hyperthyroidism subclinical;Glaucoma;Essential tremor,estradiol;cholecalciferol;NA;NA,165.1,69.4,68,,,,,,
+NLV-HBVX-0066,Previous Hep B Vx,N,EngerixB,1/29/2025,NA,11.1,11/1/2024,NA,NA,,,Quit,5,2,NA;NA;NA;NA,NA;NA;NA;NA,162.6,51.9,NA,NA,,,,,
+NLV-HBVX-0067,No Hep B Vx,NA,EngerixB,1/30/2025,NA,NA,NA,NA,NA,,,Active,28.6,NA,Insomnia;Chronic back pain;NA;NA,aspirin;ramelteon;NA;NA,165.1,62.1,62.1,,,,,,
+NLV-HBVX-0068,Previous Hep B Vx,N,EngerixB,2/11/2025,NA,40.52,12/30/2024,NA,NA,,,Quit,2.5,22,Hepatitis C resolved;Hypertension;Hyperlipidemia;NA,chlorthalidone;rosuvastatin;NA;NA,175.3,77.1,NA,NA,"Core negative, 2024","•	Covid-19 Vaccine, Moderna	03/01/2021, 03/29/2021, 10/25/2021, 04/08/2022
+•	Covid-19 Vaccine, Moderna (Annual Formula)	09/22/2023
+•	Hepatitis A Vaccine Adult IM	01/01/2012, 02/01/2012
+•	Hepatitis B Vaccine Adult IM	01/01/2012, 02/01/2012, 06/01/2012
+•	Influenza Vaccine >/= 65 Years, High Dose, Trivalent, Preservative Free	10/29/2019, 10/14/2020, 02/14/2022
+•	Influenza Vaccine, Quadrivalent	12/09/2011, 11/01/2012, 02/03/2015, 11/17/2016, 10/15/2018
+•	Influenza Vaccine, Trivalent	12/03/2010, 11/15/2012, 10/29/2013, 12/02/2015, 10/12/2016
+•	Meningococcal Polysaccharide Vaccine SW >/= 2Yrs (Menomune)	02/28/2014
+•	Pneumococcal Conjugate Vaccine, 13 Valent	09/16/2015, 11/17/2016
+•	Pneumococcal Polysaccharide Vaccine, 23	03/25/2011, 07/17/2014, 01/08/2021
+•	Pneumococcal, Formulation not known	03/25/2011
+•	Tdap	10/29/2019
+•	Tetanus and Diphtheria, Formulation not known	03/25/2011
+•	Zoster	07/01/2014
+•	Zoster Vaccine Recombinant, Adjuvanted	07/25/2020, 05/13/2024
+",,,
+NLV-HBVX-0069,No Hep B Vx,NA,Heplisav,2/11/2025,NA,NA,NA,NA,NA,,,Quit,10,2,NA;NA;NA;NA,NA;NA;NA;NA,167.6,77.1,77.1,NA,,NA,,,
+NLV-HBVX-0070,Previous Hep B Vx,N,EngerixB,2/18/2025,20,2.7,7/15/2015,NA,NA,,,Quit,2,43,Hypertension;Hypothyroidism;Macular degeneration;Osteopenia,levothyroxine;ramipril;hydrochlorothiazide;atorvastatin,154.9,79.4,NA,NA,"Core negative, 2015","•	Covid-19 Vaccine, Moderna	01/14/2021, 02/12/2021, 11/04/2021, 05/05/2022
+•	Covid-19 Vaccine, Moderna (Annual Formula)	10/09/2023
+•	INFLUENZA VACCINE >/= 65 YEARS, QUADRIVALENT	11/20/2023
+•	Influenza Vaccine >/= 65 Years, High Dose, Trivalent, Preservative Free	10/14/2016, 11/28/2018, 10/30/2019
+•	Influenza Vaccine >/= 65 Years, Quadrivalent, High Dose, Preservative Free	11/28/2018, 09/15/2020, 10/10/2021, 10/27/2022
+•	Influenza Vaccine >/=6 Months, Quadrivalent, Preservative Free, IM	10/22/2017
+•	Influenza Vaccine Quadrivalent, Preservative Free, Im	10/22/2017
+•	Pneumococcal Conjugate Vaccine, 20 Valent	08/19/2024
+•	RSV, Adjuvanted (AREXVY)	11/29/2023
+•	Typhoid VICPS Vaccine IM	11/23/2015
+•	Zoster Vaccine Recombinant, Adjuvanted	01/14/2022, 04/02/2022
+",,,
+NLV-HBVX-0071,No Hep B Vx,NA,EngerixB,2/19/2025,NA,NA,NA,NA,NA,,,Quit,5,45,Hypertension;Osteoporosis;Chronic low back pain;NA,NA;NA;NA;NA,152.4,52.2,,,,,,,
+NLV-HBVX-0072,Previous Hep B Vx,NA,EngerixB,3/5/2025,NA,Positive,3/21/2024,NA,NA,,,Active,20,NA,Chronic obstructive pulmonary disease;Depression;Hypertension;Resolved HBV,lisinopril;bupropion;budesonide-formoterol;quetiapine,170.2,71.2,NA,NA,Core positive,,,,
+NLV-HBVX-0073,Previous Hep B Vx,NA,EngerixB,3/6/2025,18,NA,NA,NA,NA,,,Never,NA,NA,Depression;NA;NA;NA,escitalopram;NA;NA;NA,,70.8,NA,NA,,NA,,,
+NLV-HBVX-0074,Previous Hep B Vx,NA,EngerixB,3/11/2025,18,NA,NA,NA,NA,,,Never,NA,NA,Anxiety;ADHD;NA;NA,methylphenidate;sertraline;NA;NA,162.6,54.9,NA,NA,,,,,
+NLV-HBVX-0075,Previous Hep B Vx,NA,EngerixB,3/18/2025,8,NA,NA,NA,NA,,,Never,NA,NA,Hypertension;Coronary artery disease;Squamous cell skin cancer;Depression,aspirin;atorvastatin;valsartan;semaglutide,177.8,93,NA,NA,,"1vCOV-mRNA, 100mcg/0.5mL (Moderna) (Covid-19 Vaccine, Moderna)9/4/2021
+
+1vCOV-mRNA, 30mcg/0.3mL, 12y+ (Pfizer) (Covid-19 Vaccine, Pfizer (Purple Cap))2/9/2021, 1/20/2021
+
+1vCOV-mRNA, tris-suc, 12y+ (Pfizer) (Covid-19 Vaccine, Pfizer (Gray Cap))6/14/2022
+
+2vCOV-mRNA, 50mcg/0.5mL, 6y+ (Moderna) (Covid-19 Vaccine, Moderna Bivalent)4/27/2023
+
+COVID-19, Ad26, 0.5mL (Janssen) (Covid-19 Vaccine, Janssen)12/20/2021
+
+COVID-19, mRNA, 2023-24, 2024-25,  30mcg/0.3mL, 12y+ (COMIRNATY) (Covid-19 Vaccine, Pfizer (Annual Formula))10/26/2024, 10/16/2023
+
+COVID-19, mRNA, 2023-24, 2024-25, 50mcg/0.5mL,12y+ (Spikevax) (Covid-19 Vaccine, Moderna (Annual Formula))3/7/2024
+
+Hep B GE20 yrs (Engerix, Recombivax) (Hepatitis B Vaccine Adult IM)3/18/2025 (Invalid) , 2/14/2017, 10/10/2016, 4/6/2016
+
+Influenza, IIV3,IM, High dose (GE65yrs) (Influenza Vaccine >/= 65 Years, High Dose, Trivalent, Preservative Free)9/24/2019, 10/8/2014
+
+Influenza, aIIV3,IM,Adjuvanted(GE65 yrs) (Influenza Vaccine >/=65 Years, Trivalent, PF)10/28/2024
+
+Influenza, aIIV4,IM,Adjuvanted(GE65 yrs) (INFLUENZA VACCINE >/= 65 YEARS, QUADRIVALENT)9/13/2023
+
+Influenza-IIV4, IM, High dose (GE65 yrs) (Influenza Vaccine >/= 65 Years, Quadrivalent, High Dose, Preservative Free)9/4/2021
+
+Pneum Conj (PCV20) (Pneumococcal Conjugate Vaccine, 20 Valent)11/18/2024
+
+RSV Vaccine (AREXVY) (RSV, Adjuvanted (AREXVY))11/15/2023
+
+Tdap11/18/2024
+
+Zoster (shingles, Shingrix) (Zoster Vaccine Recombinant, Adjuvanted)
+
+",,,
+NLV-HBVX-0076,Previous Hep B Vx,NA,EngerixB,3/19/2025,NA,Positive,8/20/2018,NA,NA,,,Never,NA,NA,HIV;Colon cancer;Obesity;Chronic renal failure stage II,metformin;empaglifozin;biktarvy;atorvastatin,180.3,95.7,NA,NA,"Core negative, 2018;  CD4 count 409 (2022); ",,,,
+NLV-HBVX-0077,No Hep B Vx,NA,EngerixB,3/19/2025,NA,NA,NA,NA,NA,,,Never,NA,NA,Hypertension;NA;NA;NA,amlodipine;NA;NA;NA,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,,,
+NLV-HBVX-0078,No Hep B Vx,NA,EngerixB,3/20/2025,NA,NA,NA,NA,NA,,,Never,NA,NA,Raynaud's disease;Hypertension;Hyperlipidemia;Left bundle branch block,aspirin;atorvastatin;gabapentin;valsartan,162.6,46.7,,,,,,,
+NLV-HBVX-0079,Previous Hep B Vx,NA,EngerixB,4/1/2025,NA,Positive,3/25/2025,NA,NA,,,Never,NA,NA,Polycystic ovarian syndrome;NA;NA;NA,medroxyprogesterone;NA;NA;NA,,67.4,NA,NA,,,,,
+NLV-HBVX-0080,No Hep B Vx,NA,EngerixB,4/8/2025,NA,NA,NA,NA,NA,,,Never,NA,NA,Depression;NA;NA;NA,paroxetine;NA;NA;NA,160,61.2,,,,,,,
+NLV-HBVX-0081,Previous Hep B Vx,NA,EngerixB,4/9/2025,0.1,NA,NA,NA,NA,,,Never,NA,NA,Osteoarthritis;NA;NA;NA,NA;NA;NA;NA,177.8,83.1,NA,NA,,,,,
+NLV-HBVX-0082,No Hep B Vx,NA,EngerixB,4/15/2025,NA,NA,NA,NA,NA,,,Never,NA,NA,Diabetes mellitus;Coronary artery disease;Squamous cell skin cancer;Hyperlipidemia,semaglutide;atorvastatin;finasteride;lisinopril,175.3,77.1,,,,"•        COVID-19 MRNA Bivalent Vaccine Booster Pfizer-Biontech 30 mcg/0.3mL IM SUSP        12/06/2022
+•        COVID-19 mRNA Vaccine (Moderna Spikevax) 12 Years+        03/11/2024
+•        COVID-19 mRNA Vaccine (Pfizer Comirnaty) 12 Years+        09/01/2024
+•        COVID-19 vector-nr rS-Ad26 vaccine(J&J Janssen) 0.5 mL        12/01/2020
+•        Covid-19 mRNA vaccine (MODERNA) IM 100 mcg/0.5 mL        01/25/2022
+•        H1N1        01/01/2010
+•        Influenza Adult(3yr and up)        10/02/2018
+•        Influenza Inj Quad Historical(aka FLU,unspecified)        10/01/2013
+•        Influenza Quad Adjuvanted prefilled syringe (FluAd) 65yrs+ historical        09/15/2023
+•        Influenza, High Dose Quad (PF) >65yr (CONNECT SITES ONLY) Historical        08/24/2021
+•        Influenza, High Dose,65+, Connect Sites Only        08/15/2024
+•        Pneumococcal 13-valent Conjugate (Prevnar 13)        09/06/2017
+•        Pneumococcal NOS        10/01/2003
+•        Pneumococcal Polysaccharide (Pneumovax)        12/20/2014
+•        RSV Adult Monovalent (Arexvy)        11/13/2023
+•        Tdap        07/18/2018
+•        Zoster(Shingrix)        06/24/2019
+•        Zoster(Zostavax)        11/19/2015",,,
+NLV-HBVX-0083,Previous Hep B Vx,NA,EngerixB,5/6/2025,30,NA,NA,NA,NA,NA,NA,Active,15,NA,Alcohol use disorder,NA,188,64.5,NA,NA,,"Covid-19 Vaccine, Pfizer:01/11/2022;04/19/2022 ___
+Tdap:11/24/2015 
+",RD,,
+NLV-HBVX-0084,No Hep B Vx,NA,EngerixB,5/13/2025,NA,NA,NA,NA,NA,,,Quit	,15,3,Asthma;Depression;Hyperlipidemia;NA,bupropion;truvada;acyclovir;NA,180.3,98.7,NA,,,,,,
+NLV-HBVX-0085,No Hep B Vx,NA,EngerixB,5/20/2025,NA,NA,NA,NA,NA,NA,NA,Quit,9,53,Chronic kidney disease;Hypertension;Hyperlipidemia;Osteoarthritis;Benign prostatic hyperplasia;Attention deficit hyperactivity disorder,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,169.5,70.4,70.3,,,"Covid-19 Vaccine, Pfizer:01/26/2021;03/08/2021;01/03/2022;10/08/2022;11/02/2023;10/17/2025 ___
+Human Papillomavirus (HPV4-Gardasil):09/10/2012;11/28/2012 ___
+Influenza Vaccine >/=18 Years, Quadrivalent, High-dose:10/08/2022 ___
+Influenza Vaccine, Adjuvanted:10/17/2025 ___
+Pneumococcal conjugate PCV13:12/01/2011 ___
+Zoster Zostavax:07/11/2013
+ 
+",LD,LD,
+NLV-HBVX-0086,No Hep B Vx,NA,EngerixB,5/27/2025,NA,NA,NA,NA,NA,,,Never,NA,NA,Hereditary transthyretin amyloidosis;Peripheral neuropathy;Achalasia;Ehlers-Danlos syndrome,duloxetine;buspirone;pyridostigmine;eplontersen,157.5,77.7,,,,"•        Covid-19 Vaccine, Moderna        02/22/2021, 02/22/2021, 03/22/2021, 03/22/2021, 12/01/2021
+•        Covid-19 Vaccine, Moderna Bivalent        11/14/2022
+•        Influenza Vaccine >/= 3 Years, Quadrivalent, Preservative Free, IM        10/28/2024
+•        Influenza Vaccine Quadrivalent, Preservative Free, Im        12/14/2016, 10/29/2019, 10/28/2022, 11/07/2023
+•        Influenza Vaccine, Formulation not known        12/01/2021
+•        Tdap        12/14/2016, 04/02/2018",,,
+NLV-HBVX-0087,No Hep B Vx,NA,Heplisav,5/28/2025,NA,NA,NA,NA,NA,,,Active,12.5,NA,Intracranial hypertension;Breast cancer;Gastroesophageal reflux disease;NA,semaglutide;gabapentin;metformin;sertraline,165.1,102.1,,,,"•        Covid-19 Vaccine, Janssen        03/08/2021
+•        Covid-19 Vaccine, Moderna        12/15/2021
+•        Covid-19 Vaccine, Moderna (Annual Formula)        10/24/2023",,,
+NLV-HBVX-0088,No Hep B Vx,NA,EngerixB,6/3/2025,NA,NA,NA,NA,NA,,,Quit,8,4,Diabetes mellitus;Coronary artery disease;Obesity;Hypertension,metformin;NA;NA;NA,190.5,140.6,,,,,,,
+NLV-HBVX-0089,No Hep B Vx,NA,EngerixB,6/5/2025,NA,NA,NA,NA,NA,,,Never,NA,NA,NA;NA;NA;NA,NA;NA;NA;NA,162.6,61.2,,,,,,,
+NLV-HBVX-0090,No Hep B Vx,NA,Heplisav,6/10/2025,NA,NA,NA,NA,NA,NA,NA,Active,10,NA,Obesity;Anxiety;Depression,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,177.8,170.9,167.8,,,NA,LD,LD,
+NLV-HBVX-0091,Previous Hep B Vx,N,EngerixB,7/10/2025,23,62.3,2/19/2025,NA,NA,NA,NA,Never,NA,NA,Hypothyroidism;Migraines;Hyperlipidemia;Vitamin B12 deficiency; Vitamin D deficiency,levothyroxine;cyanocobalamin;cholecalciferol;norethindrone-ethinyl estradiol,167.6,63.5,NA,NA,,"Covid-19 Vaccine, Pfizer:12/23/2020;01/11/2021;11/15/2021 LD;10/07/2022 RD;10/10/2023 ___
+Hepatitis B Vaccine:08/28/2001;10/04/2001;02/14/2002 ___
+Influenza Vaccine >/=18 Years, Quadrivalent:09/13/2022 RD ___
+Influenza Vaccine >/=6 Months, Quadrivalent:09/17/2019 LD, 09/15/2020 LD, 09/24/2021 LD ___
+Influenza Vaccine, Quadrivalent:09/21/2023 ___
+MMR:10/16/1985, 05/13/1996, 05/15/2013 ___
+Tdap:10/26/2010, 04/02/2018
+ 
+",RD,,
+NLV-HBVX-0092,No Hep B Vx,NA,EngerixB,7/30/2025,NA,0,7/25/2024,NA,NA,0,07/25/2024,Never,NA,NA,Spinal arthritis;Renal cancer;Cataract;Enlarged prostate;Gastroesophageal reflux disease;Hyperlipidemia;Hypertension,Aspirin;Atorvastatin;Famotidine;Losartan,185.4,79.3,80.2,,,"Covid-19 Vaccine, Pfizer:03/02/2021;03/30/2021;10/09/2021;11/01/2022;06/28/2023;03/28/2022;09/26/2023;11/21/2024 ___
+Influenza Vaccine Quadrivalent:09/15/2020 ___
+Influenza Vaccine, Trivalent:11/21/2024 ___
+Pneumococcal Polysaccharide Vaccine, 23:09/15/2020 ___
+
+",LD,LD,
+NLV-HBVX-0093,No Hep B Vx,NA,EngerixB,7/31/2025,NA,NA,NA,NA,NA,NA,NA,Active,25.4,NA,Low back pain;Osteoarthritis,NA,172.7,82.5,NA,,,"Covid-19 Vaccine, Moderna:05/04/2021;06/03/2021;12/26/2021 ___
+Influenza Vaccine Quadrivalent, High Dose:03/20/2025  ___
+Tdap:09/07/2023",LD,LD,
+NLV-HBVX-0094,No Hep B Vx,NA,Heplisav,8/5/2025,NA,0,7/21/2025,NA,NA,,,Never,NA,NA,Hyperlipidemia;Anxiety;Depression;Seasonal allergies,fluticasone;NA;NA;NA,170.2,100.7,,,,"•        Covid-19 Vaccine, Moderna        04/01/2021, 04/29/2021, 11/18/2021
+•        Covid-19 Vaccine, Moderna (Annual Formula)        10/20/2023
+•        Covid-19 Vaccine, Pfizer (Annual Formula)        10/29/2024
+•        Covid-19 Vaccine, Pfizer Bivalent (Gray Cap)        10/14/2022
+•        DTP        02/26/1976, 04/22/1976, 07/01/1976, 06/30/1977
+•        H1N1 Vaccine Injectable        11/19/2009
+•        H1N1 Vaccine, Nasal        12/02/2009
+•        INFLUENZA VACCINE >/=6 MONTHS, QUADRIVALENT, PRESERVATIVE FREE        10/21/2018
+•        Influenza Vaccine >/=6 Months, Quadrivalent, Preservative Free, IM        02/08/2023
+•        Influenza Vaccine >/=6 Months, Trivalent, Preservative Free, IM        10/29/2024
+•        Influenza Vaccine Quadrivalent, Preservative Free, Im        08/16/2020, 10/20/2023
+•        Influenza Vaccine, Trivalent        11/06/2013, 10/09/2017
+•        Influenza Vaccine, Trivalent, Preservative Free        10/13/2014, 10/11/2015
+•        MMR        12/03/1976, 08/23/2018, 09/26/2018
+•        OPV        02/26/1976, 04/22/1976, 07/01/1976, 06/30/1977
+•        Tdap        10/27/2023",,,
+NLV-HBVX-0095,No Hep B Vx,NA,Heplisav,9/10/2025,NA,NA,NA,NA,NA,,,Quit,19,1,NA;NA;NA;NA,NA;NA;NA;NA,180.3,67.5,,,,"1vCOV-mRNA, 30mcg/0.3mL, 12y+ (Pfizer) (Covid-19 Vaccine, Pfizer (Purple Cap))9/21/2021",,,
+NLV-HBVX-0096,No Hep B Vx,NA,EngerixB,9/24/2025,NA,0,8/19/2024,NA,NA,NA,NA,Never,NA,NA,Monoclonal gammopathy of undetermined significance;Osteoporosis;Gilbert's disease,alendronate,167.6,50.3,,,,"Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024 ___
+Zoster:09/30/2022;11/28/2022",LD,,
+NLV-HBVX-0097,No Hep B Vx,NA,Heplisav,10/8/2025,NA,NA,NA,NA,NA,NA,NA,Active,20,NA,Albinism;Cataracts;Seasonal allergies;Hepatitis C resolved,NA,177.8,82.55,,,,"Covid-19 Vaccine, Pfizer:04/23/2021;05/20/2021;08/10/2022;02/13/2023",LD,,
+NLV-HBVX-0098,No Hep B Vx,NA,EngerixB,10/9/2025,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,Allergic rhinitis,NA,160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003 ___ 
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999 ___
+MMR:06/22/2000;08/19/2003 ___
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003 ___
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024 ___
+Influenza Vaccine:12/05/2023;10/30/2024 ___
+Tdap:02/12/2024 ___
+Varicella:01/04/1999;08/04/2011 
+",LD,,
+NLV-HBVX-0099,No Hep B Vx,NA,EngerixB,10/21/2025,NA,0,3/15/2023,NA,NA,0,03/15/2023,Active,13,NA	,Osteoarthritis;Hypertension;NA;NA,Lisinopril;NA;NA;NA,182.9,109.5,,,,"Covid-19 Vaccine, Moderna:09/21/2021;09/28/2021;10/25/2021 ___
+Tdap:01/25/2024",LD,,
+NLV-HBVX-0100,No Hep B Vx,NA,EngerixB,10/30/2025,NA,NA,NA,NA,NA,NA,NA,Active,26,NA	,Alcohol use disorder,NA,157.5,48,,,,"Covid-19 Vaccine, Pfizer:02/25/2021;03/18/2021;10/05/2021;05/11/2022;09/29/2022;12/02/2023;11/22/2024  ___
+Influenza Vaccine >/=6 Months, Trivalent:09/20/2024;09/19/2025   ___
+Influenza Vaccine Quadrivalent:09/30/2019;10/28/2020;12/18/2021;09/29/2022;12/02/2023  ___
+Influenza Vaccine, Trivalent:09/24/2014;02/11/2016;10/28/2016;11/29/2017  ___
+Influenza Vaccine, Trivalent:10/01/2018  ___
+Pneumococcal Conjugate Vaccine, 20 Valent:12/29/2022  ___
+Pneumococcal Polysaccharide Vaccine, 23:10/28/2016, 02/12/2021  ___
+RSV, Adjuvanted (AREXVY):12/02/2023  ___
+Tdap:02/15/2011;09/24/2014;05/03/2021  ___
+Zoster Vaccine Recombinant, Adjuvanted:06/29/2021;12/19/2022
+
+",LD,,
+NLV-HBVX-0101,Previous Hep B Vx,NA,EngerixB,10/30/2025,NA,16.31,8/1/2024,NA,NA,0,08/01/2024,NA,NA,NA,Coronary artery disease;Diabetes mellitus;Chronic kidney disease;Basal cell carcinoma,Aspirin;Losartan;Atorvastatin,188,92.7,,,Unknown date of HBV vaccination,"Covid-19 Vaccine, Pfizer:02/04/2021;02/26/2021;10/05/2021;05/11/2022;09/29/2022;06/29/2023;11/22/2024 ___
+Influenza Vaccine >/= 65 Years, High Dose, Trivalent:11/29/2017;10/08/2018;11/22/2024  ___
+Influenza Vaccine Quadrivalent, High Dose:10/28/2020;12/09/2021;09/29/2022   ___
+Influenza Vaccine, Trivalent:11/09/2016;09/30/2019  ___
+Pneumococcal Conjugate Vaccine, 13 Valent:06/29/2021  ___
+Pneumococcal Polysaccharide Vaccine, 23:12/19/2012;12/29/2022 ___
+RSV, Adjuvanted (AREXVY):12/02/2023 ___
+Tdap:03/21/2014;06/29/2021 ___
+Zoster Vaccine Recombinant, Adjuvanted:07/12/2021;09/10/2021
+
+",RD,,
