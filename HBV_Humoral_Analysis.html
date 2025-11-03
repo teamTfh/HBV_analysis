@@ -127,9 +127,9 @@ window.Quarto = {
 </header>
 
 
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
 <p>This document details the process of cleaning, preparing, and analyzing humoral data related to HBV vaccination. The analysis involves several steps, including data import, merging of different batches, handling of duplicates, and integration of metadata. The primary goal is to explore the antibody responses over time, particularly in different age groups and vaccine types.</p>
+<section id="load-libraries" class="level1">
+<h1>Load libraries</h1>
 </section>
 <section id="load-data" class="level1">
 <h1>— Load Data —</h1>
@@ -411,15 +411,11 @@ lgl (2): E, F
        1000x_dilution                repeat yes_elisa_value_issue 
                    43                    15                    36 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="fu">c</span>(<span class="st">"1000x_dilution|repeat|yes_elisa_value_issue"</span>), note, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify and handle duplicate rows.</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(elisa, subject, timepoint) <span class="sc">%&gt;%</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>dup_rows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="fu">c</span>(<span class="st">"1000x_dilution|repeat|yes_elisa_value_issue"</span>), note, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify and handle duplicate rows.</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span>  <span class="fu">group_by</span>(elisa, subject, timepoint) <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>dup_rows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 124 × 6
     elisa subject timepoint experiment collected_by note 
@@ -440,34 +436,22 @@ lgl (2): E, F
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>no_dup <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="co"># Remove duplicate rows from the unlabeled experiment.</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(to_remove, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"elisa"</span>, <span class="st">"subject"</span>, <span class="st">"timepoint"</span>, <span class="st">"experiment"</span>))</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>dup_rows2 <span class="ot">&lt;-</span> no_dup <span class="sc">%&gt;%</span> </span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(elisa, subject, timepoint) <span class="sc">%&gt;%</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co"># The following commented out lines were likely for intermediate data checks.</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co">#no_dup &lt;- no_dup %&gt;% filter(!is.na(elisa))</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co">#table(no_dup$experiment)</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#df &lt;- no_dup </span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter out irrelevant timepoints and subjects.</span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>timepoint <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"16"</span>, <span class="st">"17"</span>, <span class="st">"18"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>subject <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save the cleaned data with unique measurements.</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(df, <span class="st">"./outs/20250828_hbv_merged_elisa_data_unqiue_measure.xlsx"</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The following lines were likely for saving intermediate data or cleaning the environment.</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#write_xlsx(df, "./outs/20250828_hbv_merged_elisa_data.xlsx")</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co">#rm(list = setdiff(ls(), "df"))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>dup_rows2 <span class="ot">&lt;-</span> no_dup <span class="sc">%&gt;%</span>   <span class="fu">group_by</span>(elisa, subject, timepoint) <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># The following commented out lines were likely for intermediate data checks.</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co">#no_dup &lt;- no_dup %&gt;% filter(!is.na(elisa))</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">#table(no_dup$experiment)</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co">#df &lt;- no_dup </span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter out irrelevant timepoints and subjects.</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>timepoint <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"16"</span>, <span class="st">"17"</span>, <span class="st">"18"</span>)) <span class="sc">%&gt;%</span>   <span class="fu">filter</span>(<span class="sc">!</span>subject <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="block-2-handle-duplicates-and-add-metadata" class="level1">
 <h1>Block 2: Handle Duplicates and Add Metadata</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Handle Duplicated Measurements ---</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># This section deals with cases where there are multiple measurements for the same subject at the same timepoint.</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This section deals with cases where there are multiple measurements for the same subject at the same timepoint.</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 520 × 6
       elisa subject timepoint experiment collected_by note 
@@ -484,12 +468,12 @@ lgl (2): E, F
 10 148.     0005    v1w1      20230707   CMRS         &lt;NA&gt; 
 # ℹ 510 more rows</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(elisa))</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(df<span class="sc">$</span>subject))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(elisa))</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(df<span class="sc">$</span>subject))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 88</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(df<span class="sc">$</span>subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(df<span class="sc">$</span>subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "0001" "0003" "0004" "0005" "0006" "0007" "0008" "0011" "0012" "0013"
 [11] "0014" "0015" "0016" "0017" "0018" "0019" "0020" "0021" "0009" "0010"
@@ -501,14 +485,14 @@ lgl (2): E, F
 [71] "0073" "0074" "0075" "0076" "0077" "0078" "0079" "0080" "0081" "0082"
 [81] "0083" "0084" "0085" "0086" "0087" "0088" "0089" "0090"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>experiment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>experiment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
       ?? 20230707 20240724 20240802 20241112 20250402 20250620 
      197       57       44       38       41       62       79 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>unique_combinations <span class="ot">&lt;-</span> <span class="fu">unique</span>(df[, <span class="fu">c</span>(<span class="st">"subject"</span>, <span class="st">"timepoint"</span>)]) </span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>unique_combinations</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>unique_combinations <span class="ot">&lt;-</span> <span class="fu">unique</span>(df[, <span class="fu">c</span>(<span class="st">"subject"</span>, <span class="st">"timepoint"</span>)]) </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>unique_combinations</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 380 × 2
    subject timepoint
@@ -525,13 +509,13 @@ lgl (2): E, F
 10 0005    v1w1     
 # ℹ 370 more rows</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify rows with duplicated subject-timepoint combinations.</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the duplicated measurements for a specific subject.</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="sc">%&gt;%</span> </span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(subject <span class="sc">==</span> <span class="st">"0018"</span>) <span class="sc">%&gt;%</span>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 <span class="sc">+</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify rows with duplicated subject-timepoint combinations.</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the duplicated measurements for a specific subject.</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="sc">%&gt;%</span> </span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(subject <span class="sc">==</span> <span class="st">"0018"</span>) <span class="sc">%&gt;%</span>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 <span class="sc">+</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -539,10 +523,10 @@ lgl (2): E, F
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize all duplicated measurements.</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="sc">%&gt;%</span> </span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 <span class="sc">+</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize all duplicated measurements.</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="sc">%&gt;%</span> </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 <span class="sc">+</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -550,10 +534,10 @@ lgl (2): E, F
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot all data points to visually inspect for duplicates and other issues.</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 <span class="sc">+</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot all data points to visually inspect for duplicates and other issues.</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 <span class="sc">+</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> subject)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`geom_line()`: Each group consists of only one observation.
 ℹ Do you need to adjust the group aesthetic?
@@ -571,8 +555,8 @@ lgl (2): E, F
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span>   <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span>   <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> note)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -580,17 +564,12 @@ lgl (2): E, F
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the percentage deviation for duplicated measurements.</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> dup_rows <span class="sc">%&gt;%</span></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span></span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">elisa_mean =</span> <span class="fu">mean</span>(elisa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">percent_dev =</span> <span class="dv">100</span> <span class="sc">*</span> (elisa <span class="sc">-</span> elisa_mean) <span class="sc">/</span> elisa_mean</span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the percentage deviation.</span></span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>temp <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> percent_dev)) <span class="sc">+</span>  <span class="fu">geom_quasirandom</span>() <span class="sc">+</span> ct2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the percentage deviation for duplicated measurements.</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> dup_rows <span class="sc">%&gt;%</span>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">elisa_mean =</span> <span class="fu">mean</span>(elisa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),    <span class="at">percent_dev =</span> <span class="dv">100</span> <span class="sc">*</span> (elisa <span class="sc">-</span> elisa_mean) <span class="sc">/</span> elisa_mean) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the percentage deviation.</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>temp <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> percent_dev)) <span class="sc">+</span>  <span class="fu">geom_quasirandom</span>() <span class="sc">+</span> ct2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -598,40 +577,37 @@ lgl (2): E, F
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Remove Negative Values ---</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Negative ELISA values are set to a small positive value (0.01).</span></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">elisa =</span> <span class="fu">ifelse</span>(elisa <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="fl">0.01</span>, elisa))</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Average Multiple Measurements ---</span></span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="co"># For duplicated subject-timepoint entries, the ELISA values are averaged.</span></span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span></span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">elisa =</span> <span class="fu">mean</span>(elisa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">note    =</span> <span class="fu">paste</span>(<span class="fu">unique</span>(note), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">experiment =</span> <span class="fu">paste</span>(<span class="fu">unique</span>(experiment), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">collected_by =</span> <span class="fu">paste</span>(<span class="fu">unique</span>(collected_by), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>()</span>
-<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Remove Negative Values ---</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Negative ELISA values are set to a small positive value (0.01).</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">elisa =</span> <span class="fu">ifelse</span>(elisa <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="fl">0.01</span>, elisa))</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Average Multiple Measurements ---</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="co"># For duplicated subject-timepoint entries, the ELISA values are averaged.</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">elisa =</span> <span class="fu">mean</span>(elisa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">note    =</span> <span class="fu">paste</span>(<span class="fu">unique</span>(note), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">experiment =</span> <span class="fu">paste</span>(<span class="fu">unique</span>(experiment), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">collected_by =</span> <span class="fu">paste</span>(<span class="fu">unique</span>(collected_by), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>()  ) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'subject'. You can override using the
 `.groups` argument.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for remaining duplicates.</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="ot">&lt;-</span> df1 <span class="sc">%&gt;%</span>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>dup_rows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for remaining duplicates.</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>dup_rows <span class="ot">&lt;-</span> df1 <span class="sc">%&gt;%</span>  <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span>  <span class="fu">ungroup</span>()</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>dup_rows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 0 × 7
 # ℹ 7 variables: subject &lt;chr&gt;, timepoint &lt;chr&gt;, elisa &lt;dbl&gt;, note &lt;chr&gt;,
 #   experiment &lt;chr&gt;, collected_by &lt;chr&gt;, n &lt;int&gt;</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize data for subjects with lymph node samples.</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>df1 <span class="sc">%&gt;%</span></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(subject <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0022"</span>, <span class="st">"0029"</span>, <span class="st">"0033"</span>, <span class="st">"0036"</span>, <span class="st">"0041"</span>, <span class="st">"0043"</span>, <span class="st">"0058"</span>, <span class="st">"0069"</span>, <span class="st">"0076"</span>, <span class="st">"0063"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> subject)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize data for subjects with lymph node samples.</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>df1 <span class="sc">%&gt;%</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(subject <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0022"</span>, <span class="st">"0029"</span>, <span class="st">"0033"</span>, <span class="st">"0036"</span>, <span class="st">"0041"</span>, <span class="st">"0043"</span>, <span class="st">"0058"</span>, <span class="st">"0069"</span>, <span class="st">"0076"</span>, <span class="st">"0063"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> subject)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject)) <span class="sc">+</span> ct2 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -639,109 +615,137 @@ lgl (2): E, F
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df1</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up the environment.</span></span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">setdiff</span>(<span class="fu">ls</span>(), <span class="fu">c</span>(<span class="st">"df"</span>, <span class="st">"ct2"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save the data with averaged duplicates.</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(df1, <span class="st">"./outs/20250828_hbv_merged_elisa_duplicates_avg.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>df.clean <span class="ot">&lt;-</span> df1</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up the environment.</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">setdiff</span>(<span class="fu">ls</span>(), <span class="fu">c</span>(<span class="st">"df.clean"</span>, <span class="st">"ct2"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="add-metadata" class="level1">
 <h1>— Add Metadata —</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Metadata, such as participant demographics and vaccination status, is added to the main dataframe.</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co"># meta &lt;- read_excel("data/202502 HBV metadata.xlsx", </span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                                    col_types = c("text", "text", "text", </span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "date", "text", "text", "date", </span></span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "text", "text", "text", "text", </span></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "text", "text", "text", "text", </span></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "text", "text", "numeric", </span></span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "numeric", "text", "text", "text", </span></span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text"))</span></span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> <span class="fu">fread</span>(<span class="st">"./data/20251102 HBV metadata.csv"</span>)</span>
-<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> meta[, subject<span class="sc">:</span><span class="er">=</span> <span class="fu">substr</span>(ParticipantID, <span class="dv">10</span>, <span class="dv">13</span>)]</span>
-<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">left_join</span>(df, meta, <span class="at">by =</span> <span class="st">"subject"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Metadata, such as participant demographics and vaccination status, is added to the main dataframe.</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co"># meta &lt;- read_excel("data/202502 HBV metadata.xlsx", </span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                                    col_types = c("text", "text", "text", </span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "date", "text", "text", "date", </span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "text", "text", "text", "text", </span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "text", "text", "text", "text", </span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text", "text", "text", "numeric", </span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "numeric", "text", "text", "text", </span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                  "text"))</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> <span class="fu">fread</span>(<span class="st">"./data/20251102 HBV metadata.csv"</span>)</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> meta[, subject<span class="sc">:</span><span class="er">=</span> <span class="fu">substr</span>(ParticipantID, <span class="dv">10</span>, <span class="dv">13</span>)]</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>df.merge <span class="ot">&lt;-</span> <span class="fu">merge</span>(meta, df.clean, <span class="at">by =</span> <span class="st">"subject"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>df.merge[, Cohort<span class="sc">:</span><span class="er">=</span> <span class="st">'PriorHBVimmunity'</span>]</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>df.merge[StatusAtEnrollment <span class="sc">==</span> <span class="st">"No Hep B Vx"</span> <span class="sc">&amp;</span> Product<span class="sc">==</span><span class="st">'EngerixB'</span>, Cohort<span class="sc">:</span><span class="er">=</span> <span class="st">'Randomized-Alum'</span>]</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>df.merge[StatusAtEnrollment <span class="sc">==</span> <span class="st">"No Hep B Vx"</span> <span class="sc">&amp;</span> Product<span class="sc">==</span><span class="st">'Heplisav'</span>, Cohort<span class="sc">:</span><span class="er">=</span> <span class="st">'Randomized-CpG'</span>]</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge additional metadata from REDCap.</span></span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>meta2 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"./data/202506_redcap_meta.csv"</span>)</span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>meta2<span class="sc">$</span>subject <span class="ot">&lt;-</span> <span class="fu">substr</span>(meta2<span class="sc">$</span>Participant.ID, <span class="dv">6</span>, <span class="dv">9</span>)</span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>meta2<span class="sc">$</span>timepoint <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"v"</span>, <span class="fu">substr</span>(meta2<span class="sc">$</span>Event.Name, <span class="dv">7</span>,<span class="dv">7</span>), <span class="st">"w"</span>, <span class="fu">substr</span>(meta2<span class="sc">$</span>Event.Name, <span class="dv">16</span>,<span class="dv">16</span>))</span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>meta2 <span class="ot">&lt;-</span> meta2 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"optional"</span>, Event.Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">merge</span>(df.merge, meta2 <span class="sc">%&gt;%</span> </span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(BMI..calculated., BMI.stratum,Age.at.time.of.Consent, subject, timepoint, X2M, X4M, Biological.Sex), </span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"subject"</span>, <span class="st">"timepoint"</span>) )</span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for duplicates after merging metadata.</span></span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>temp <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(subject, timepoint) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  subject timepoint     n
+  &lt;chr&gt;   &lt;chr&gt;     &lt;int&gt;
+1 0010    v1w1          2
+2 0021    v2w0          2
+3 0048    v1w1          2
+4 0052    v2w1          2</code></pre>
 </div>
-<p>df &lt;- left_join(df, meta, by = “subject”)</p>
-</section>
-<section id="create-a-group-variable-based-on-vaccination-status-and-product." class="level1">
-<h1>Create a ‘group’ variable based on vaccination status and product.</h1>
-<p>df &lt;- df %&gt;% mutate(group = case_when( StatusAtEnrollment == “Previous Hep B Vx” &amp; Product == “EngerixB” ~ “Booster”, StatusAtEnrollment == “No Hep B Vx” &amp; Product == “EngerixB” ~ “Alum”, StatusAtEnrollment == “No Hep B Vx” &amp; Product == “Heplisav” ~ “CpG” ))</p>
-</section>
-<section id="merge-additional-metadata-from-redcap." class="level1">
-<h1>Merge additional metadata from REDCap.</h1>
-<p>meta2 &lt;- read.csv(“R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/data/202506_redcap_meta.csv”)</p>
-<p>meta2<span class="math inline">\(subject &lt;- substr(meta2\)</span>Participant.ID, 6, 9) colnames(meta2) meta2<span class="math inline">\(timepoint &lt;- paste0("v", substr(meta2\)</span>Event.Name, 7,7), “w”, substr(meta2$Event.Name, 16,16)) meta2 &lt;- meta2 %&gt;% filter(!grepl(“optional”, Event.Name, ignore.case = TRUE))</p>
-<p>colnames(meta2) temp &lt;- df %&gt;% left_join( meta2 %&gt;% select(BMI..calculated., BMI.stratum,Age.at.time.of.Consent, subject, timepoint, X2M, X4M, Biological.Sex), by = c(“subject”, “timepoint”) )</p>
-</section>
-<section id="check-for-duplicates-after-merging-metadata." class="level1">
-<h1>Check for duplicates after merging metadata.</h1>
-<p>temp %&gt;% group_by(subject, timepoint) %&gt;% summarize(n = n(), .groups = “drop”) %&gt;% filter(n &gt; 1)</p>
-</section>
-<section id="remove-any-remaining-duplicates-after-merging-metadata." class="level1">
-<h1>Remove any remaining duplicates after merging metadata.</h1>
-<p>df &lt;- temp %&gt;% distinct(subject, timepoint, .keep_all = TRUE)</p>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove any remaining duplicates after merging metadata.</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> temp <span class="sc">%&gt;%</span> <span class="fu">distinct</span>(subject, timepoint, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a binary variable for lymph node biopsy.</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>df[, lnbx<span class="sc">:</span><span class="er">=</span><span class="fu">ifelse</span>(subject <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0022"</span>,<span class="st">"0029"</span>,<span class="st">"0033"</span>,<span class="st">"0036"</span>,<span class="st">"0041"</span>,<span class="st">"0043"</span>,<span class="st">"0058"</span>,<span class="st">"0069"</span>,<span class="st">"0076"</span>,<span class="st">"0063"</span>), <span class="st">"yes"</span>, <span class="st">"no"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in `[.data.table`(df, , `:=`(lnbx, ifelse(subject %in% c("0022", : A
+shallow copy of this data.table was taken so that := can add or remove 1
+columns by reference. At an earlier point, this data.table was copied by R (or
+was created manually using structure() or similar). Avoid names&lt;- and attr&lt;-
+which in R currently (and oddly) may copy the whole data.table. Use set* syntax
+instead to avoid copying: ?set, ?setnames and ?setattr. It's also not unusual
+for data.table-agnostic packages to produce tables affected by this issue. If
+this message doesn't help, please report your use case to the data.table issue
+tracker so the root cause can be fixed or this message improved.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a binary variable for ELISA &gt; 10.</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>df[, <span class="st">`</span><span class="at">elisa_greater_10</span><span class="st">`</span> <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(elisa <span class="sc">&gt;</span> <span class="dv">10</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>)]</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define protection status based on ELISA levels at a specific timepoint.</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># if any elisa value for a given individual is &gt;10 then classify as "Responder"</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>df[, end_protection_status <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(<span class="fu">any</span>(elisa <span class="sc">&gt;</span> <span class="dv">10</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="st">"Responder"</span>, <span class="st">"Non-responder"</span>), by <span class="ot">=</span> .(subject)]</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up the environment.</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(df.merge,temp, meta, meta2, df.clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save the final merged data with metadata.</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(df, <span class="st">"./outs/20250828_hbv_merged_elisa_final_with_meta.xlsx"</span>) df <span class="ot">&lt;-</span> <span class="fu">read_xlsx</span>(<span class="st">"./outs/20250828_hbv_merged_elisa_final_with_meta.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save the final merged data with metadata.</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fwrite</span>(df, <span class="st">"./outs/20250828_hbv_merged_elisa_final_with_meta.csv"</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(df, <span class="st">"./outs/20250828_hbv_merged_elisa_final_with_meta.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="organize-and-derive-new-variables" class="level1">
 <h1>— Organize and Derive New Variables —</h1>
-</section>
-<section id="this-section-creates-new-variables-for-analysis-and-visualization." class="level1">
-<h1>This section creates new variables for analysis and visualization.</h1>
-<p>table(df$group)</p>
-</section>
-<section id="plot-elisa-values-over-time-for-each-group." class="level1">
-<h1>Plot ELISA values over time for each group.</h1>
-<p>df %&gt;% ggplot(aes(y = elisa, x = timepoint)) + geom_line(aes(group = subject)) + geom_point() + ct2 + facet_wrap(~group)</p>
-</section>
-<section id="the-following-commented-out-line-was-likely-used-to-filter-out-a-specific-timepoint-for-the-booster-group." class="level1">
-<h1>The following commented out line was likely used to filter out a specific timepoint for the Booster group.</h1>
-<p>#df &lt;- df %&gt;% filter(!(group == “Booster” &amp; timepoint == “v2w4”))</p>
-</section>
-<section id="create-a-binary-variable-for-lymph-node-biopsy." class="level1">
-<h1>Create a binary variable for lymph node biopsy.</h1>
-<p>df &lt;- df %&gt;% mutate(lnbx = ifelse(subject %in% c(“0022”,“0029”,“0033”,“0036”,“0041”,“0043”,“0058”,“0069”,“0076”,“0063”), “yes”, “no”))</p>
-<p>df$lnbx</p>
-</section>
-<section id="define-protection-status-based-on-elisa-levels-at-a-specific-timepoint." class="level1">
-<h1>Define protection status based on ELISA levels at a specific timepoint.</h1>
-<p>df &lt;- df %&gt;% group_by(subject) %&gt;% mutate(end_protection_status = ifelse(any(group == “Alum” &amp; timepoint == “v3w4” &amp; elisa &gt; 10), “Responder”,NA)) %&gt;% ungroup()</p>
-</section>
-<section id="create-a-binary-variable-for-elisa-10." class="level1">
-<h1>Create a binary variable for ELISA &gt; 10.</h1>
-<p>df &lt;- df %&gt;% group_by(subject) %&gt;% mutate(<code>elisa_greater_10</code> = ifelse(elisa &gt; 10, “yes”, “no”)) %&gt;% ungroup()</p>
-</section>
-<section id="visualize-protection-status-over-time-for-the-alum-group." class="level1">
-<h1>Visualize protection status over time for the Alum group.</h1>
-<p>df %&gt;% filter(group == “Alum”) %&gt;% ggplot(aes(x = timepoint, y = elisa)) + geom_point(aes(group = subject, color = end_protection_status)) + geom_line(aes(color = end_protection_status, group = subject)) +ct2 + scale_y_log10(labels = scales::label_number())</p>
-</section>
-<section id="visualize-elisa-10-status-over-time-for-the-alum-group." class="level1">
-<h1>Visualize ELISA &gt; 10 status over time for the Alum group.</h1>
-<p>df %&gt;% filter(group == “Alum”) %&gt;% ggplot(aes(x = timepoint, y = elisa)) + geom_point(aes(group = subject, color = elisa_greater_10)) + geom_line(aes(color = elisa_greater_10, group = subject)) +ct2 + scale_y_log10(labels = scales::label_number())</p>
-</section>
-<section id="create-an-age-group-variable." class="level1">
-<h1>Create an age group variable.</h1>
-<p>df<span class="math inline">\(age &lt;- df\)</span>Age.at.time.of.Consent</p>
-</section>
-<section id="the-following-lines-are-for-exploring-the-age-variable." class="level1">
-<h1>The following lines are for exploring the age variable.</h1>
-<p>colnames(df) df %&gt;% filter(group == “Alum”) %&gt;% ggplot(aes(x = age)) + geom_histogram(binwidth = 5)</p>
-<p>class(df$age)</p>
-</section>
-<section id="visualize-age-distribution-by-group." class="level1">
-<h1>Visualize age distribution by group.</h1>
-<p>df %&gt;% distinct(subject, .keep_all = TRUE) %&gt;% #filter(group == “Alum”) %&gt;% ggplot(aes(x = group, y = age)) + #geom_violin(fill = “lightgrey”)+ stat_summary( fun = mean, geom = “crossbar”, color = “black”, width = 0.7, size = 0.3) + geom_quasirandom(aes(fill = lnbx), shape = 21, stroke = 0.3, size = 2) + scale_fill_manual(values = c(“lightgrey”, “red”)) + ct2 + ylim(18, 100)</p>
-<p>ggsave(“./outs/lnbx_group_age.pdf”, height = 2.5, width = 3) # The following commented out code shows an alternative way to highlight specific data points. #geom_violin() + # geom_point( # data = . %&gt;% filter(lnbx == “yes”), # aes(x = group, y = age), # fill = “blue”, # highlight color # size = 3, # shape = 21, # stroke = 1 # )</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This section creates new variables for analysis and visualization.</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>Cohort)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+PriorHBVimmunity  Randomized-Alum   Randomized-CpG 
+             109              236               33 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot ELISA values over time for each group.</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">y =</span> elisa, <span class="at">x =</span> timepoint, <span class="at">group=</span>subject)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> ct2 <span class="sc">+</span> </span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Cohort)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="HBV_Humoral_Analysis_files/figure-html/organize-new-variables-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize protection status over time for the Alum group.</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df[ Cohort <span class="sc">==</span> <span class="st">"Randomized-Alum"</span>], <span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span>   <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject, <span class="at">color =</span> end_protection_status)) <span class="sc">+</span>   <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> end_protection_status, <span class="at">group =</span> subject)) <span class="sc">+</span>ct2 <span class="sc">+</span> <span class="fu">scale_y_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_number</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="HBV_Humoral_Analysis_files/figure-html/organize-new-variables-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize ELISA &gt; 10 status over time for the Alum group.</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df[ Cohort <span class="sc">==</span> <span class="st">"Randomized-Alum"</span>], <span class="fu">aes</span>(<span class="at">x =</span> timepoint, <span class="at">y =</span> elisa)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">group =</span> subject, <span class="at">color =</span> elisa_greater_10)) <span class="sc">+</span> <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> elisa_greater_10, <span class="at">group =</span> subject)) <span class="sc">+</span>ct2 <span class="sc">+</span> <span class="fu">scale_y_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_number</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="HBV_Humoral_Analysis_files/figure-html/organize-new-variables-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The following lines are for exploring the age variable.</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df[ Cohort <span class="sc">==</span> <span class="st">"Randomized-Alum"</span>], <span class="fu">aes</span>(<span class="at">x =</span> Age.at.time.of.Consent)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>) <span class="sc">+</span> ct2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="HBV_Humoral_Analysis_files/figure-html/organize-new-variables-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize age distribution by group.</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="co"># df %&gt;% distinct(subject, .keep_all = TRUE) %&gt;% </span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#filter(group == "Alum") %&gt;% ggplot(aes(x = group, y = age)) + #geom_violin(fill = "lightgrey")+ stat_summary( fun = mean, geom = "crossbar", color = "black", width = 0.7, size = 0.3) + geom_quasirandom(aes(fill = lnbx), shape = 21, stroke = 0.3, size = 2) + scale_fill_manual(values = c("lightgrey", "red")) + ct2 + ylim(18, 100)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>ggsave(“./outs/lnbx_group_age.pdf”, height = 2.5, width = 3) # The following commented out code shows an alternative way to highlight specific data points. # geom_violin() + # geom_point( # data = . %&gt;% filter(lnbx == “yes”), # aes(x = group, y = age), # fill = “blue”, # highlight color # size = 3, # shape = 21, # stroke = 1 # )</p>
 </section>
 <section id="check-for-missing-age-data-for-a-specific-subject." class="level1">
 <h1>Check for missing age data for a specific subject.</h1>
