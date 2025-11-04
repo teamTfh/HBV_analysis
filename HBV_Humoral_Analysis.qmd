@@ -300,7 +300,6 @@ df[, end_protection_status := ifelse(any(elisa > 10, na.rm = TRUE), "Responder",
 
 df$DateEnrolled <- as.Date(df$DateEnrolled, format="%m/%d/%Y")
 df$HBsAb1date <- as.Date(df$HBsAb1date, format="%m/%d/%Y")
-df$HBsAb2date <- as.Date(df$HBsAb2date, format="%m/%d/%Y")
 df$HBcAbdate <- as.Date(df$HBcAbdate, format="%m/%d/%Y")
 
 df[, CurrentMeds.list := strsplit(CurrentMeds, split = ";")]
@@ -333,7 +332,8 @@ ggplot(df[ Cohort == "Randomized-Alum"], aes(x = timepoint, y = elisa)) +   geom
 ggplot(df[ Cohort == "Randomized-Alum"], aes(x = timepoint, y = elisa)) + geom_point(aes(group = subject, color = elisa_greater_10)) + geom_line(aes(color = elisa_greater_10, group = subject)) +ct2 + scale_y_log10(labels = scales::label_number())
 
 # The following lines are for exploring the age variable.
-ggplot(df[ Cohort == "Randomized-Alum"], aes(x = Age.at.time.of.Consent)) + geom_histogram(binwidth = 5) + ct2
+ggplot(unique(df, by='subject'), aes(y = Age.at.time.of.Consent, x=Cohort)) +
+  geom_boxplot(color='grey80', alpha=0.5) +  geom_beeswarm() + ct2
 
 # Visualize age distribution by group.
 
