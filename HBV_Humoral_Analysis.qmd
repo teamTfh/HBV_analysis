@@ -61,8 +61,131 @@ ct2 <- theme_bw() +
 ```
 
 # --- Load Data ---
+```{r revised-load-merge-data}
+b0 <- read_xlsx("./data/elisa_output.xlsx")
+part_merge <- read_xlsx("./data/traditional_elisa_merged_batch_cmrs_rs.batch1.xlsx")
+b2 <- read_csv("./data/20240802_hbv_elisa_batch2_riddhimaa.csv")
+b3 <- read_csv("./data/20241112_hbv_elisa_batch3_riddhimaa.csv")
+b4 <- read_csv("./data/20250402_hbv_elisa_batch4_riddhimaa.csv")
+b5 <- read_csv("./data/20250620_hbv_elisa_batch5_riddhimaa.csv")
 
-```{r load-and-merge-data}
+b2$ABS <- b2$notes <- NULL;  b3$ABS <- b3$notes <- NULL;   b4$ABS <- b4$notes <- NULL
+names(b2) <- names(b3) <- names(b4) <- c("SAMPLE", "elisa.HbsAb")
+joined.elisa <- merge(b3, b4, all = TRUE)
+joined.elisa <- as.data.table(joined.elisa)
+joined.elisa <- joined.elisa[!SAMPLE %like% '84']
+joined.elisa[, c('Participant','Visit') := tstrsplit(SAMPLE, "-", fill = NA)]
+
+b2 <- as.data.table(b2)
+b2[, c('Visit','Participant') := tstrsplit(SAMPLE, "-", fill = NA)]
+joined.elisa <- rbind(joined.elisa, b2)
+joined.elisa[, Participant:= paste0("hbvx-00", Participant)]
+joined.elisa$SAMPLE <- NULL
+
+b5 <- as.data.table(b5)
+b5$C <- b5$E <- b5$F <- NULL
+names(b5) <- c('Participant', 'Visit', 'elisa.HbsAb')
+b5 <- b5[!is.na(Participant)]
+b5 <- b5[, Participant := tolower(substr(Participant, 5, 13))]
+
+joined.elisa <- rbind(joined.elisa, b5)
+rm(b2, b3, b4, b5)
+
+b0$Visit <- paste0("v", substr(b0$`Event Name`, 7, 7), "w", substr(b0$`Event Name`, 16, 16))
+b0$`Event Name` <- b0$`ELISA Value Issue` <-  NULL
+names(b0) <-c('Participant', 'elisa.HbsAb', 'Visit')
+# b0$Part.Visit <- c(paste0(b0$Participant, "_", b0$Visit))
+
+joined.elisa <- rbind(joined.elisa, b0)
+
+part_merge$make.unique <- paste0(part_merge$subject,'_',part_merge$timepoint)
+part_merge <- as.data.table(part_merge)
+part_merge <- part_merge[!note %like% '1000x_dilution']
+ggplot(part_merge, aes(x = make.unique, y = mIU, color=collected_by)) + geom_point()  + ct2 
+part_merge$note <- part_merge$experiment <- part_merge$collected_by <- NULL
+names(part_merge) <- c('Participant', 'Visit', 'elisa.HbsAb','make.unique')
+part_merge[, `:=` (mIU.ave = mean(elisa.HbsAb, na.rm=T), mIU.n = .N), by=make.unique]
+part_merge[, discrepancy := abs(elisa.HbsAb - mIU.ave)]
+discrep.values <- part_merge[mIU.n>1, .(Participant, Visit, elisa.HbsAb, mIU.ave, discrepancy)]
+discrep.values[order(-discrepancy)][1:10] 
+# all of the values that are discordant look aberrantly low, so will favor taking simple max of any replicates values
+part_merge <- part_merge[, .SD[which.max(elisa.HbsAb)], by = .(Participant, Visit)]
+rm(discrep.values)
+part_merge$mIU.ave <- part_merge$mIU.n <- part_merge$discrepancy <- part_merge$make.unique <- NULL
+part_merge <- part_merge[!Participant == '0']
+part_merge[, Participant := paste0("hbvx-", Participant)]
+joined.elisa <- rbind(joined.elisa, part_merge)
+
+joined.elisa[, Visit := tolower(Visit)]
+joined.elisa[, make.unique := paste0(Participant, "_", Visit)]  # search for duplicates 
+dupl <- joined.elisa[duplicated(make.unique), make.unique]
+joined.elisa[make.unique %in% dupl][order(Participant, Visit)]
+# will take mean of duplicates
+joined.elisa <- joined.elisa[, .SD[which.max(elisa.HbsAb)], by = .(Participant, Visit)]
+rm(part_merge, b0)
+```
+
+# --- Load and Manage Metadata ---
+```{r manage-metadata}
+
+redcap.baseline.demog <- fread("./data/HepatitisBVaccineStu-Demographics.csv")
+addtl.metadata <- fread("./data/HBV metadata - DatesOffset.csv")
+
+names(redcap.baseline.demog) <- c("Participant", 'Event', 'FirstVisit', 'Age', 'Sex', 'Race', 'Ethnicity','Comments','Demog.complete','BMI','Randomization')
+redcap.baseline.demog[, Race := as.character(Race)]
+redcap.baseline.demog <- redcap.baseline.demog[, c('Demog.complete', 'Event', 'Comments','Randomization') := NULL]
+redcap.baseline.demog[, Participant := tolower(Participant) ]
+redcap.baseline.demog <- redcap.baseline.demog[!Participant %like% 'test']
+redcap.baseline.demog[, Sex := fifelse(Sex == 1, 'F', 'M')]
+redcap.baseline.demog[, Ethnicity := fifelse(Ethnicity == 1, 'Hispanic', 'Not Hispanic')]
+redcap.baseline.demog[Race == '2', Race := 'Asian']
+redcap.baseline.demog[Race == '3', Race := 'Black/AfricanAmerican']
+redcap.baseline.demog[Race == '5', Race := 'White/Caucasian']
+redcap.baseline.demog[Race == '6' | Race == '7', Race := 'Multiple/NR']
+redcap.baseline.demog[, FirstVisit := as.Date(FirstVisit, format="%m/%d/%Y")]
+
+addtl.metadata[, Participant := tolower(substr(Participant, 5, 14))]
+addtl.metadata[, DateEnrolled := as.Date(DateEnrolled, format="%m/%d/%Y")]
+addtl.metadata[, HBsAb1date := as.Date(HBsAb1date, format="%m/%d/%Y")]
+addtl.metadata[, HBcAbdate  := as.Date(HBcAbdate, format="%m/%d/%Y")]
+addtl.metadata[, DateLastVaxBeforeBiopsy  := as.Date(DateLastVaxBeforeBiopsy, format="%m/%d/%Y")]
+addtl.metadata[, Ultrasound  := as.Date(Ultrasound, format="%m/%d/%Y")]
+addtl.metadata[, StatusAtEnrollment := fifelse(StatusAtEnrollment == 'No Hep B Vx', 'HBVnaive' ,'HBVimmune')]
+addtl.metadata[, Study.arm := 'HBVnaive-Alum']
+addtl.metadata[StatusAtEnrollment == 'HBVnaive' & Product == 'Heplisav' , Study.arm := 'HBVnaive-CpG']
+addtl.metadata[StatusAtEnrollment == 'HBVimmune', Study.arm := 'HBVimmune-Alum']
+addtl.metadata[, MedsAtEnrollment := strsplit(CurrentMeds, split = ';')]
+addtl.metadata[, PastHistory := strsplit(PastHistory, split = ';')]
+addtl.metadata[, ImmunizationHx := strsplit(ImmunizationHx, split = ' ___')]
+
+addtl.metadata[, CurrentMeds := NULL]
+
+metadata <- merge(redcap.baseline.demog, addtl.metadata, by = 'Participant', all = TRUE)
+metadata[, DaysFromVaxToBiopsy := as.numeric(Ultrasound - DateLastVaxBeforeBiopsy)]
+rm(addtl.metadata, redcap.baseline.demog, dupl)
+```
+
+# --- Save Merged Metadata ---
+```{r write-metadata}
+fwrite(metadata[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 'PastHistory')], "./outs/merged_metadata.csv")
+```
+
+# --- Merge ELISA Data with Metadata ---
+```{r merge-metadata-and-elisa}
+elisa_mergeMeta <- merge(joined.elisa, metadata, by = 'Participant', all.x = TRUE)
+fwrite(elisa_mergeMeta, "./outs/elisa_mergeMeta.csv")
+
+```
+
+```{r make-interesting-plots}
+
+```
+
+
+
+
+
+```{r load-and-merge-data, eval=FALSE}
 # Data from multiple batches are loaded from different files.
 b0 <- read_xlsx("./data/elisa_output.xlsx")
 part_merge <- read_xlsx("./data/traditional_elisa_merged_batch_cmrs_rs.batch1.xlsx")
