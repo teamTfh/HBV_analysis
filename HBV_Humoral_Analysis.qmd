@@ -188,22 +188,19 @@ medianData <- elisa_mergeMeta[, .(median.elisa = median(elisa.HbsAb, na.rm = TRU
 
 ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HbsAb, x = Visit, color=AgeSplit50)) + geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  ct2 
 
-df.alum %>% ggplot(aes(x = timepoint, y = elisa)) + geom_point(aes(color = age_group), size = 1) + geom_line(aes(group = subject, color = age_group), size = 0.2) + scale_color_manual(values = c("#8FE0C0","#E0B8DF"), guide = "none") + new_scale_color() + stat_summary(fun=mean, geom="line", aes(color=age_group, group = age_group), size = 0.7) + scale_color_manual(values = c("#28b57c","#ce2fbf")) + new_scale_color() + stat_summary(fun=mean, geom="point", shape = 21, group = 1, aes(fill = age_group), color = "black", size = 2)+ scale_fill_manual( #labels = c(expression(""<"50"), expression("">="50")), values = c("#28b57c","#ce2fbf")) + scale_color_manual( #labels = c(expression(""<"50"), expression("">="50")), values = c("#28b57c","#ce2fbf")) + geom_hline(yintercept = 10, linetype = "dashed", color = "red") + # facet_wrap(~age.group, ncol = 1) + scale_y_log10(labels = scales::label_number()) + #labs(x = "", y = "anti-HBsAg IgG (U/mL)", color = "Age", fill = "Age")+ ct2 + theme(strip.text = element_blank())
+df.alum %>% ggplot(aes(x = timepoint, y = elisa)) + geom_point(aes(color = age_group), size = 1) + geom_line(aes(group = subject, color = age_group), size = 0.2) + scale_color_manual(values = c("#8FE0C0","#E0B8DF"), guide = "none") + new_scale_color() + stat_summary(fun=mean, geom="line", aes(color=age_group, group = age_group), size = 0.7) + scale_color_manual(values = c("#28b57c","#ce2fbf")) + new_scale_color() + stat_summary(fun=mean, geom="point", shape = 21, group = 1, aes(fill = age_group), color = "black", size = 2) #+ scale_fill_manual( #labels = c(expression(""<"50"), expression("">="50")), values = c("#28b57c","#ce2fbf")) + scale_color_manual( #labels = c(expression(""<"50"), expression("">="50")), values = c("#28b57c","#ce2fbf")) + geom_hline(yintercept = 10, linetype = "dashed", color = "red") + # facet_wrap(~age.group, ncol = 1) + scale_y_log10(labels = scales::label_number()) + #labs(x = "", y = "anti-HBsAg IgG (U/mL)", color = "Age", fill = "Age")+ ct2 + theme(strip.text = element_blank())
 
 # Calculate arithmetic mean and confidence intervals.
 
-df.alum.mean <- df.alum %>% #arith mean filter(group == "Alum") %>% filter(!timepoint == "v3w3") %>% group_by(timepoint, age_group) %>% summarise(n = n(), mean=mean(elisa), median = median(elisa), sd = sd(elisa)) %>% mutate(sem = sd / sqrt(n - 1), CI_lower = mean + qt((1-0.95)/2, n - 1) * sem, CI_upper = mean - qt((1-0.95)/2, n - 1) * sem)
+# df.alum.mean <- df.alum %>% #arith mean filter(group == "Alum") %>% filter(!timepoint == "v3w3") %>% group_by(timepoint, age_group) %>% summarise(n = n(), mean=mean(elisa), median = median(elisa), sd = sd(elisa)) %>% mutate(sem = sd / sqrt(n - 1), CI_lower = mean + qt((1-0.95)/2, n - 1) * sem, CI_upper = mean - qt((1-0.95)/2, n - 1) * sem)
 
 # Plot the arithmetic mean with confidence intervals.
 
-ggplot(df_mean, aes(x=timepoint, y=mean, color = age_group, group = age_group)) + geom_line(aes(x=timepoint, y=mean, color=age_group)) + geom_ribbon(aes(ymin=CI_lower,ymax=CI_upper,fill=age_group),color="grey70",alpha=0.4) +ct2 + ylab("elisa")+ scale_y_log10(labels = scales::label_number())
+# ggplot(df_mean, aes(x=timepoint, y=mean, color = age_group, group = age_group)) + geom_line(aes(x=timepoint, y=mean, color=age_group)) + geom_ribbon(aes(ymin=CI_lower,ymax=CI_upper,fill=age_group),color="grey70",alpha=0.4) +ct2 + ylab("elisa")+ scale_y_log10(labels = scales::label_number())
 
 
 
 ```
-
-
-
 
 
 ```{r load-and-merge-data, eval=FALSE}
@@ -485,6 +482,22 @@ ggplot(unique(df, by='subject'), aes(y = Age.at.time.of.Consent, x=Cohort)) +
 # new comment 
 
 ```
+
+
+
+
+# --- T tetramer plots ---
+```{r t-tetramer}
+df <- fread("./data/All CD4 tTets.csv")
+names(df) <- c("DRB0101", "DRB0701", "SpecimenID", "visit")
+df <- melt(df, id.vars = c("SpecimenID", "visit"), measure.vars = c("DRB0101", "DRB0701"), variable.name = "Marker", value.name = "Frequency")
+ggplot(df, aes(x = visit, y = Frequency, group = SpecimenID, color = SpecimenID)) +  geom_line(alpha = 0.7, size = 0.8) +  geom_point(size = 2) +  facet_wrap(~ Marker, scales = "free_y") + theme_minimal() +    labs(title = "Frequency of Parent by Visit", subtitle = "Connected by SpecimenID", y = "Frequency", x = "Visit Timepoint") +   theme(axis.text.x =element_text(angle = 45, hjust = 1)) + scale_y_log10()
+
+```
+
+
+
+
 
 # Check for missing age data for a specific subject.
 
