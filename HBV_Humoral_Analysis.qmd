@@ -164,6 +164,9 @@ addtl.metadata[, CurrentMeds := NULL]
 metadata <- merge(redcap.baseline.demog, addtl.metadata, by = 'Participant', all = TRUE)
 metadata[, DaysFromVaxToBiopsy := as.numeric(Ultrasound - DateLastVaxBeforeBiopsy)]
 rm(addtl.metadata, redcap.baseline.demog, dupl)
+
+
+
 ```
 
 # --- Save Merged Metadata ---
