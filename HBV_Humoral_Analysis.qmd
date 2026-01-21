@@ -101,8 +101,8 @@ joined.elisa <- rbind(joined.elisa, b0)
 part_merge$make.unique <- paste0(part_merge$subject,'_',part_merge$timepoint)
 part_merge <- as.data.table(part_merge)
 part_merge <- part_merge[!note %like% '1000x_dilution']
-ggplot(part_merge, aes(x = make.unique, y = mIU, color=collected_by)) + geom_point()  + ct2 
-part_merge$note <- part_merge$experiment <- part_merge$collected_by <- NULL
+
+part_merge$note <- part_merge$experiment <- part_merge$collected_by <- NULL  # remove 
 names(part_merge) <- c('Participant', 'Visit', 'elisa.HbsAb','make.unique')
 part_merge[, `:=` (mIU.ave = mean(elisa.HbsAb, na.rm=T), mIU.n = .N), by=make.unique]
 part_merge[, discrepancy := abs(elisa.HbsAb - mIU.ave)]
@@ -238,20 +238,32 @@ fwrite(elisa_mergeMeta[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 
 saveRDS(elisa_mergeMeta, "./outs/elisa_mergeMeta.RDS")
 ```
 
-# --- Make Interesting Plots ---
+# --- Break down of antibody by age ---
 ```{r make-interesting-plots}
 elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS")
 medianData <- elisa_mergeMeta[, .(median.elisa = median(elisa.HbsAb, na.rm = TRUE)), by = .(Visit, Study.arm, AgeSplit50)]
 
-ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HbsAb, x = Visit, color=AgeSplit50)) + geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  ct2 
+ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HbsAb, x = Visit, color=AgeSplit50)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
+  geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ 
+  scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  
+  ct2 
 
-df.alum %>% ggplot(aes(x = timepoint, y = elisa)) + geom_point(aes(color = age_group), size = 1) + geom_line(aes(group = subject, color = age_group), size = 0.2) + scale_color_manual(values = c("#8FE0C0","#E0B8DF"), guide = "none") + new_scale_color() + stat_summary(fun=mean, geom="line", aes(color=age_group, group = age_group), size = 0.7) + scale_color_manual(values = c("#28b57c","#ce2fbf")) + new_scale_color() + stat_summary(fun=mean, geom="point", shape = 21, group = 1, aes(fill = age_group), color = "black", size = 2) #+ scale_fill_manual( #labels = c(expression(""<"50"), expression("">="50")), values = c("#28b57c","#ce2fbf")) + scale_color_manual( #labels = c(expression(""<"50"), expression("">="50")), values = c("#28b57c","#ce2fbf")) + geom_hline(yintercept = 10, linetype = "dashed", color = "red") + # facet_wrap(~age.group, ncol = 1) + scale_y_log10(labels = scales::label_number()) + #labs(x = "", y = "anti-HBsAg IgG (U/mL)", color = "Age", fill = "Age")+ ct2 + theme(strip.text = element_blank())
+elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'] %>%
+  ggplot(aes(x = Visit, y = elisa.HbsAb, color=AgeSplit50)) + 
+  geom_boxplot(position=position_dodge(width=0.8), alpha=0.5) + 
+  geom_line(aes(group=Participant, color=AgeSplit50), alpha=0.2, position=position_dodge(width=0.8)) +
+  geom_beeswarm(aes(color=AgeSplit50), size=2, dodge.width = 0.8, alpha=0.8) + 
+  scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  
+  ct2
 
 # Calculate arithmetic mean and confidence intervals.
-
-# df.alum.mean <- df.alum %>% #arith mean filter(group == "Alum") %>% filter(!timepoint == "v3w3") %>% group_by(timepoint, age_group) %>% summarise(n = n(), mean=mean(elisa), median = median(elisa), sd = sd(elisa)) %>% mutate(sem = sd / sqrt(n - 1), CI_lower = mean + qt((1-0.95)/2, n - 1) * sem, CI_upper = mean - qt((1-0.95)/2, n - 1) * sem)
+df_mean <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum', 
+                           .(mean = mean(elisa.HbsAb, na.rm = TRUE), sd = sd(elisa.HbsAb, na.rm = TRUE),  n = .N), 
+                           by = .(Visit, AgeSplit50)]
 
 # Plot the arithmetic mean with confidence intervals.
+  
 
 # ggplot(df_mean, aes(x=timepoint, y=mean, color = age_group, group = age_group)) + geom_line(aes(x=timepoint, y=mean, color=age_group)) + geom_ribbon(aes(ymin=CI_lower,ymax=CI_upper,fill=age_group),color="grey70",alpha=0.4) +ct2 + ylab("elisa")+ scale_y_log10(labels = scales::label_number())
 
