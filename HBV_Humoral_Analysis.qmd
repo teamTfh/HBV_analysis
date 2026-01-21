@@ -124,10 +124,19 @@ joined.elisa[make.unique %in% dupl][order(Participant, Visit)]
 joined.elisa <- joined.elisa[, .SD[which.max(elisa.HbsAb)], by = .(Participant, Visit)]
 joined.elisa[, Participant := tolower(Participant)]
 rm(part_merge, b0)
+
+# > joined.elisa
+#      Participant  Visit elisa.HbsAb    make.unique
+#           <char> <char>       <num>         <char>
+#   1:   hbvx-0003   v3w0  299.523102 hbvx-0003_v3w0
+#   2:   hbvx-0003   v3w1  387.150433 hbvx-0003_v3w1
+#   3:   hbvx-0014   v1w0    5.562096 hbvx-0014_v1w0
+# 
+
 ```
 
 # --- Load and Manage Metadata ---
-```{r manage-metadata}
+```{r manage-metadata, results='hide'}
 
 redcap.baseline.demog <- fread("./data/HepatitisBVaccineStu-Demographics.csv")
 addtl.metadata <- fread("./data/HBV metadata - DatesOffset.csv")
@@ -155,18 +164,39 @@ addtl.metadata[, StatusAtEnrollment := fifelse(StatusAtEnrollment == 'No Hep B V
 addtl.metadata[, Study.arm := 'HBVnaive-Alum']
 addtl.metadata[StatusAtEnrollment == 'HBVnaive' & Product == 'Heplisav' , Study.arm := 'HBVnaive-CpG']
 addtl.metadata[StatusAtEnrollment == 'HBVimmune', Study.arm := 'HBVimmune-Alum']
-addtl.metadata[, MedsAtEnrollment := strsplit(CurrentMeds, split = ';')]
+addtl.metadata[, MedsAtEnrollment := strsplit(CurrentMeds, split = ';')] 
 addtl.metadata[, PastHistory := strsplit(PastHistory, split = ';')]
 addtl.metadata[, ImmunizationHx := strsplit(ImmunizationHx, split = ' ___')]
 
-addtl.metadata[, CurrentMeds := NULL]
-
 metadata <- merge(redcap.baseline.demog, addtl.metadata, by = 'Participant', all = TRUE)
-metadata[, DaysFromVaxToBiopsy := as.numeric(Ultrasound - DateLastVaxBeforeBiopsy)]
+metadata[, DaysFromVaxToUltrasound := as.numeric(Ultrasound - DateLastVaxBeforeBiopsy)]
 rm(addtl.metadata, redcap.baseline.demog, dupl)
 
-
-
+# > metadata
+# Key: <Participant>
+#      Participant FirstVisit   Age    Sex                  Race    Ethnicity   BMI StatusAtEnrollment KnownNR  Product DateEnrolled YearsSinceLastVax
+#           <char>     <Date> <int> <char>                <char>       <char> <num>             <char>  <char>   <char>       <Date>             <num>
+#   1:   hbvx-0001 2022-07-07    47      M       White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB   2022-07-06                25
+#   2:   hbvx-0002 2022-09-06    41      M       White/Caucasian Not Hispanic  29.6           HBVnaive       N EngerixB   2022-09-01                NA
+#   3:   hbvx-0003 2022-09-13    39      M       White/Caucasian Not Hispanic  25.4           HBVnaive       N EngerixB   2022-09-12                NA
+#   
+#       HBsAb1.quant HBsAb1.qual HBsAb1date HBcAb.qual  HBcAbdate SmokingStatus PackYear YearsSinceQuit
+#             <num>      <char>     <Date>     <char>     <Date>        <char>    <num>          <int>
+#   1:           NA                   <NA>                  <NA>         Never       NA             NA
+#   2:           NA                   <NA>                  <NA>        Active       10             NA
+#   
+#                   PastHistory                                      CurrentMeds
+#                   <list>                                           <char>
+#   1:       Anxiety,Gastroesophageal reflux disease                clonazepam; fluoxetine; guafacine
+#   2:      Alcohol use,Pancreatitis,Diabetes mellitus              metformin; glyburide
+#   
+#        DateLastVaxBeforeBiopsy Ultrasound   LNBx Heightcm V1weightkg V2weightkg V3weightkg  Notes
+#                       <Date>     <Date> <char>    <num>      <num>      <num>      <num>    <char>
+#   1:              2022-07-06       <NA>           177.8      91.90         NA         NA                                   
+#   2:              2022-09-01       <NA>           184.0     100.10         NA         NA                                   
+#   3:              2023-03-22       <NA>           182.9      85.00         NA       84.3                                   
+#   
+#   
 ```
 
 # --- Save Merged Metadata ---
@@ -178,15 +208,39 @@ fwrite(metadata[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 'PastHi
 ```{r merge-metadata-and-elisa}
 elisa_mergeMeta <- merge(joined.elisa, metadata, by = 'Participant', all.x = TRUE)
 elisa_mergeMeta[, AgeSplit50 := fifelse(Age>50,'>50', '<=50')]
+
+# > elisa_mergeMeta
+# Key: <Participant>
+#      Participant  Visit elisa.HbsAb    make.unique FirstVisit   Age    Sex            Race    Ethnicity   BMI StatusAtEnrollment KnownNR  Product
+#           <char> <char>       <num>         <char>     <Date> <int> <char>          <char>       <char> <num>             <char>  <char>   <char>
+#   1:   hbvx-0001   v1w0    3.206958 HBVX-0001_v1w0 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
+#   2:   hbvx-0001   v1w1    5.195243 HBVX-0001_v1w1 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
+#   
+#   and so on
+  
+# > names(elisa_mergeMeta)
+#  [1] "Participant"             "Visit"                   "elisa.HbsAb"             "make.unique"             "FirstVisit"             
+#  [6] "Age"                     "Sex"                     "Race"                    "Ethnicity"               "BMI"                    
+# [11] "StatusAtEnrollment"      "KnownNR"                 "Product"                 "DateEnrolled"            "YearsSinceLastVax"      
+# [16] "HBsAb1.quant"            "HBsAb1.qual"             "HBsAb1date"              "HBcAb.qual"              "HBcAbdate"              
+# [21] "SmokingStatus"           "PackYear"                "YearsSinceQuit"          "PastHistory"             "CurrentMeds"            
+# [26] "DateLastVaxBeforeBiopsy" "Ultrasound"              "LNBx"                    "Heightcm"                "V1weightkg"             
+# [31] "V2weightkg"              "V3weightkg"              "Notes"                   "ImmunizationHx"          "V1W0.laterality"        
+# [36] "V2W0.laterality"         "V3W0.laterality"         "Study.arm"               "MedsAtEnrollment"        "DaysFromVaxToUltrasound"
+# [41] "AgeSplit50"  
+
+
+```
+
+# --- Save ELISA + Metadata ---
+```{r save-metadata-and-elisa}
 fwrite(elisa_mergeMeta[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 'PastHistory')], "./outs/elisa_mergeMeta.csv")
 saveRDS(elisa_mergeMeta, "./outs/elisa_mergeMeta.RDS")
-elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS")
-
 ```
 
 # --- Make Interesting Plots ---
 ```{r make-interesting-plots}
-
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS")
 medianData <- elisa_mergeMeta[, .(median.elisa = median(elisa.HbsAb, na.rm = TRUE)), by = .(Visit, Study.arm, AgeSplit50)]
 
 ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HbsAb, x = Visit, color=AgeSplit50)) + geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  ct2 

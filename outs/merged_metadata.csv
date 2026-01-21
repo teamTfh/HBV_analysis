@@ -1,102 +1,102 @@
-Participant,FirstVisit,Age,Sex,Race,Ethnicity,BMI,StatusAtEnrollment,KnownNR,Product,DateEnrolled,YearsSinceLastVax,HBsAb1.quant,HBsAb1.qual,HBsAb1date,HBcAb.qual,HBcAbdate,SmokingStatus,PackYear,YearsSinceQuit,DateLastVaxBeforeBiopsy,Ultrasound,LNBx,Heightcm,V1weightkg,V2weightkg,V3weightkg,Notes,V1W0.laterality,V2W0.laterality,V3W0.laterality,Study.arm,DaysFromVaxToBiopsy
-hbvx-0001,2022-07-07,47,M,White/Caucasian,Not Hispanic,29.1,HBVimmune,Y,EngerixB,2022-07-06,25,,"",,"",,Never,,,2022-07-06,,"",177.8,91.9,,,"","","","",HBVimmune-Alum,
-hbvx-0002,2022-09-06,41,M,White/Caucasian,Not Hispanic,29.6,HBVnaive,N,EngerixB,2022-09-01,,,"",,"",,Active,10,,2022-09-01,,"",184,100.1,,,"","","","",HBVnaive-Alum,
-hbvx-0003,2022-09-13,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,2022-09-12,,,"",,"",,Quit,1,10,2023-03-22,,"",182.9,85,,84.3,"","","","",HBVnaive-Alum,
-hbvx-0004,2022-11-17,31,M,Black/AfricanAmerican,Hispanic,38.9,HBVimmune,N,EngerixB,2022-11-12,,154.97,Pos,2021-09-23,"",,Never,,,2022-11-12,,"",185.4,133.6,,,"","","","",HBVimmune-Alum,
-hbvx-0005,2023-01-12,40,F,White/Caucasian,Not Hispanic,33.7,HBVimmune,N,EngerixB,2023-01-11,25,479,Pos,2019-11-25,"",,Quit,5,11,2023-01-11,,"",170.2,97.7,,,HBsAb 1000 on 2/19/2025,"","","",HBVimmune-Alum,
-hbvx-0006,2023-01-12,76,M,White/Caucasian,Not Hispanic,25.5,HBVimmune,Y,EngerixB,2023-01-07,,,"",,"",,Quit,20,23,2023-01-07,,"",177.8,80.5,,,"","","","",HBVimmune-Alum,
-hbvx-0007,2023-01-18,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,2023-01-18,,,"",,"",,Never,,,2023-08-08,,"",167.6,80.6,,82.7,"","","","",HBVnaive-Alum,
-hbvx-0008,2023-01-19,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,2023-01-17,,567.22,Pos,2019-09-29,"",,Quit,,57,2023-02-14,,"",157.5,53.6,,,"","","","",HBVnaive-CpG,
-hbvx-0009,2023-03-02,72,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,2023-03-01,,,Pos,2021-07-20,"",,Quit,110,37,2023-03-01,,"",162.6,63.8,,,"","","","",HBVnaive-Alum,
-hbvx-0010,2023-03-07,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,2023-03-03,,,"",,"",,Never,,,2023-09-08,2023-09-21,N,170.8,70.5,,,"","","","",HBVnaive-Alum,13
-hbvx-0011,2023-03-09,48,M,Multiple/NR,Not Hispanic,22.5,HBVimmune,N,EngerixB,2023-03-12,17,31.7,Pos,2021-08-19,"",,Never,,,2023-03-12,,"",172.7,67,,,"","","","",HBVimmune-Alum,
-hbvx-0012,2023-03-09,72,F,White/Caucasian,Not Hispanic,25.6,HBVimmune,Y,EngerixB,2023-03-13,16,1.54,Neg,2024-08-03,"",,Never,,,2023-03-13,,"",157.5,63.5,,,"","","","",HBVimmune-Alum,
-hbvx-0013,2023-03-14,24,F,Asian,Not Hispanic,22.2,HBVimmune,N,EngerixB,2023-03-14,25,,Pos,2022-03-08,"",,Never,,,2023-03-14,,"",154.9,53.2,,,"","","","",HBVimmune-Alum,
-hbvx-0014,2023-03-30,62,F,White/Caucasian,Not Hispanic,23.6,HBVimmune,N,EngerixB,2023-03-29,8,,"",,"",,Never,,,2023-03-29,,"",165.1,64.2,,,"","","","",HBVimmune-Alum,
-hbvx-0015,2023-05-04,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,2023-05-08,,,"",,"",,Never,,,2023-12-04,2023-12-19,N,182.9,98.2,,96.4,"","","","",HBVnaive-Alum,15
-hbvx-0016,2023-05-09,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,2023-05-09,,,"",,"",,Never,,,2023-06-06,,"",165.1,53,,,"","","","",HBVnaive-CpG,
-hbvx-0017,2023-05-11,31,M,White/Caucasian,Not Hispanic,21.8,HBVimmune,N,EngerixB,2023-05-16,11,9599,Pos,2018-01-13,"",,Never,,,2023-05-16,,"",180.3,71,,,"","","","",HBVimmune-Alum,
-hbvx-0018,2023-05-16,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,2023-05-13,,,"",,"",,Never,,,2023-12-08,,"",154.9,47.8,,46.9,"","","","",HBVnaive-Alum,
-hbvx-0019,2023-05-30,36,M,White/Caucasian,Not Hispanic,37.8,HBVimmune,N,EngerixB,2023-06-04,24,,"",,"",,Never,,,2023-06-04,,"",188,133.4,,,"","","","",HBVimmune-Alum,
-hbvx-0020,2023-06-01,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,2023-06-02,,,"",,"",,Never,,,2024-01-10,2024-01-25,N,182.9,97.5,,101.8,"",LD,LD,LD,HBVnaive-Alum,15
-hbvx-0021,2023-06-08,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,2023-06-10,,,"",,"",,Active,10,,2023-07-29,2023-08-10,N,185.4,92.2,89.4,92.7,"",LD,LD,RD,HBVnaive-Alum,12
-hbvx-0022,2023-07-13,73,F,White/Caucasian,Not Hispanic,24.6,HBVimmune,N,EngerixB,2023-07-16,19,,"",,"",,Never,,,2023-07-16,2023-07-27,Y,154.9,59.1,,,"",LD,"","",HBVimmune-Alum,11
-hbvx-0023,2023-07-13,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,2023-07-16,,,"",,"",,Active,11,,2024-02-03,,"",182.9,96.2,104.9,97.5,"",LD,LD,RD,HBVnaive-Alum,
-hbvx-0024,2023-07-18,52,F,White/Caucasian,Hispanic,35.5,HBVimmune,N,EngerixB,2023-07-18,10,,"",,"",,Active,15,,2023-07-18,2023-07-31,N,160,90.8,,,"",LD,"","",HBVimmune-Alum,13
-hbvx-0025,2023-07-20,51,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,2023-07-19,5,,"",,"",,Never,,,2023-07-19,2023-08-07,N,190.5,106.6,,,"",LD,"","",HBVimmune-Alum,19
-hbvx-0026,2023-07-27,29,F,White/Caucasian,Not Hispanic,23.8,HBVimmune,Y,EngerixB,2023-07-30,2,4164,Pos,2022-03-31,"",,Never,,,2023-07-30,2023-08-11,N,162.6,62.8,,,"",LD,"","",HBVimmune-Alum,12
-hbvx-0027,2023-08-01,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,2023-07-28,,,"",,"",,Quit,5,20,2024-02-02,,"",177.8,74.5,78.4,77.2,"","","","",HBVnaive-Alum,
-hbvx-0028,2023-09-26,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,2023-09-22,,0,Neg,2023-03-25,"",,Quit,30,20,2023-10-27,2023-11-09,N,182.9,80.8,84.9,87.5,"","","","",HBVnaive-Alum,13
-hbvx-0029,2023-09-27,43,F,Black/AfricanAmerican,Not Hispanic,35.8,HBVimmune,N,EngerixB,2023-09-27,,,Pos,2023-06-22,"",,Never,,,2023-09-27,2023-10-13,Y,165.1,97.7,,,"","","","",HBVimmune-Alum,16
-hbvx-0030,2023-10-04,43,F,Multiple/NR,Hispanic,28.6,HBVnaive,N,Heplisav,2023-10-06,,,"",,"",,Never,,,2023-10-06,,"",160.2,73.2,,,"","","","",HBVnaive-CpG,
-hbvx-0031,2023-10-11,58,M,White/Caucasian,Not Hispanic,28.6,HBVnaive,N,Heplisav,2023-10-15,,,"",,"",,Quit,,3,2023-10-15,,"",172.7,85.4,,,"","","","",HBVnaive-CpG,
-hbvx-0032,2023-10-17,35,M,Black/AfricanAmerican,Not Hispanic,18.6,HBVimmune,N,EngerixB,2023-10-16,26,,"",,"",,Active,5,,2023-10-16,2023-11-01,N,193,69.4,,,"","","","",HBVimmune-Alum,16
-hbvx-0033,2023-10-24,37,M,White/Caucasian,Not Hispanic,31.7,HBVimmune,N,EngerixB,2023-10-22,14,496,Pos,2022-09-10,"",,Quit,10,13,2023-10-22,2023-11-05,Y,181,103.9,,,"","","","",HBVimmune-Alum,14
-hbvx-0034,2023-11-01,33,M,Asian,Not Hispanic,23.9,HBVimmune,N,EngerixB,2023-10-30,5,,Pos,2018-07-31,"",,Never,,,2023-10-30,,"",177.8,75.7,,,"","","","",HBVimmune-Alum,
-hbvx-0035,2023-11-07,25,M,Asian,Not Hispanic,19.7,HBVimmune,N,EngerixB,2023-11-10,24,,"",,"",,Never,,,2023-11-10,2023-11-24,N,180.3,64.2,,,"","","","",HBVimmune-Alum,14
-hbvx-0036,2023-11-15,62,M,Black/AfricanAmerican,Not Hispanic,25.3,HBVimmune,N,EngerixB,2023-11-14,1,0,Neg,2022-08-14,"",,Never,,,2023-11-14,2023-12-05,Y,172.7,75.5,,,"","","","",HBVimmune-Alum,21
-hbvx-0037,2023-12-05,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,2023-12-06,,,"",,"",,Never,,,2024-06-27,2024-07-13,N,157.5,54,54.4,53.3,"","","","",HBVnaive-Alum,16
-hbvx-0038,2023-12-05,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,2023-12-03,,,"",,"",,Never,,,2024-09-29,2024-10-13,N,157.5,97.9,96,89.4,"","","","",HBVnaive-Alum,14
-hbvx-0039,2023-12-11,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,2023-12-08,,1000,Pos,2024-02-09,"",,Never,,,2024-09-09,,"",175.2,72.7,72.2,69.6,"","","","",HBVnaive-Alum,
-hbvx-0040,2023-12-13,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,2023-12-18,,,"",,"",,Never,,,2024-07-06,2024-07-21,N,172.7,109.8,105.8,95.3,"","","","",HBVnaive-Alum,15
-hbvx-0041,2024-01-04,50,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,2024-01-09,22,,"",,"",,Never,,,2024-01-09,2024-01-21,Y,188,88.6,,,"","","","",HBVimmune-Alum,12
-hbvx-0042,2024-01-16,23,M,White/Caucasian,Not Hispanic,18.8,HBVimmune,N,EngerixB,0204-01-21,10,,"",,"",,Never,,,2024-01-21,2024-02-04,N,180.3,61.6,,,"","","","",HBVimmune-Alum,14
-hbvx-0043,2024-01-18,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,2024-01-19,,14.7,Pos,2023-10-17,"",,Never,,,2024-09-26,2024-10-15,Y,154.9,92.1,87,84.5,"","","","",HBVnaive-Alum,19
-hbvx-0044,2024-01-23,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,2024-01-19,,,"",,"",,Quit,10,14,2024-11-15,2024-11-30,N,170.2,77.4,75.4,70.6,"","","","",HBVnaive-Alum,15
-hbvx-0045,2024-01-30,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,2024-01-30,,,"",,"",,Never,,,2024-12-03,2024-12-18,N,165.1,79.7,80.1,82.5,"","","","",HBVnaive-Alum,15
-hbvx-0046,2024-01-31,66,F,White/Caucasian,Not Hispanic,26.4,HBVimmune,N,EngerixB,2024-01-26,2,2160,Pos,2024-07-20,"",,Never,,,2024-01-26,2024-02-08,N,162.6,69.7,,,"","","","",HBVimmune-Alum,13
-hbvx-0047,2024-03-12,40,F,White/Caucasian,Not Hispanic,21.1,HBVimmune,Y,EngerixB,2024-03-09,8,,"",,"",,Never,,,2024-03-09,2024-03-26,N,160,54,,,"","","","",HBVimmune-Alum,17
-hbvx-0048,2024-03-13,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,2024-03-16,,,"",,"",,Never,,,2024-05-03,2024-05-17,N,160,74.3,74.7,,"","","","",HBVnaive-CpG,14
-hbvx-0049,2024-03-14,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,2024-03-15,,,"",,"",,Never,,,2024-10-10,,"",177.8,80.2,79.2,79.8,"","","","",HBVnaive-Alum,
-hbvx-0050,2024-03-19,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,2024-03-18,,,"",,"",,Never,,,2024-11-19,2024-12-02,N,160,89.2,91.4,94.1,"","","","",HBVnaive-Alum,13
-hbvx-0051,2024-03-26,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,2024-03-31,,,"",,"",,Never,,,2024-11-19,,"",172.7,66.4,66.2,66.2,"","","","",HBVnaive-Alum,
-hbvx-0052,2024-04-03,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,2024-03-29,,,"",,"",,Never,,,2024-06-13,,"",162.6,55.4,54.7,,"","","","",HBVnaive-CpG,
-hbvx-0053,2024-04-23,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,2024-04-24,,,"",,"",,Never,,,2024-11-27,2024-12-12,N,175.3,73.9,72.7,68.3,"","","","",HBVnaive-Alum,15
-hbvx-0054,2024-05-07,62,M,White/Caucasian,Not Hispanic,28.8,HBVimmune,N,EngerixB,2024-05-06,,96,Pos,2020-11-03,"",,Quit,0.5,28,2024-05-06,,"",172.7,86,,,"","","","",HBVimmune-Alum,
-hbvx-0055,2024-05-15,61,M,Black/AfricanAmerican,Not Hispanic,37.5,HBVimmune,N,EngerixB,2024-05-13,17,,"",,"",,Never,,,2024-05-13,2024-05-26,N,165.1,102.2,,,"","","","",HBVimmune-Alum,13
-hbvx-0056,2024-06-04,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,2024-06-06,,,Pos,2025-02-26,"",,Quit,15,19,2025-01-16,2025-01-31,N,180.3,81.3,81.6,77.1,? resolved HBV,"","","",HBVnaive-Alum,15
-hbvx-0057,2024-06-04,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,2024-06-01,,0,Neg,2024-05-31,"",,Quit,,15,2025-01-12,2025-01-27,N,188,104.2,102.4,99.9,"","","","",HBVnaive-Alum,15
-hbvx-0058,2024-06-05,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,2024-06-10,,3.2,Neg,2021-04-25,"",,Never,,,2025-03-02,2025-03-23,Y,175.3,88.3,87,86.7,"","","","",HBVnaive-Alum,21
-hbvx-0059,2024-09-11,26,M,Multiple/NR,Hispanic,27.6,HBVimmune,N,EngerixB,2024-09-06,8,,"",,"",,Never,,,2024-09-06,2024-09-20,N,180.3,89.9,,,"","","","",HBVimmune-Alum,14
-hbvx-0060,2024-09-24,65,F,White/Caucasian,Not Hispanic,18.7,HBVimmune,N,EngerixB,2024-09-20,4,,"",,"",,Quit,20,14,2024-09-20,2024-10-06,N,177.8,59,,,"","","","",HBVimmune-Alum,16
-hbvx-0061,2024-09-26,25,F,White/Caucasian,Not Hispanic,22,HBVimmune,N,EngerixB,2024-09-30,6,,"",,"",,Never,,,2024-09-30,2024-10-15,N,165.1,59.9,,,"","","","",HBVimmune-Alum,15
-hbvx-0062,2024-10-02,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,2024-09-27,,,"",,"",,Never,,,2025-05-01,2025-05-15,N,,,,,"","","","",HBVnaive-Alum,14
-hbvx-0063,2024-12-10,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,2024-12-09,,,"",,"",,Never,,,2025-06-24,2025-07-07,Y,165.1,58.1,58.1,55.3,"","","","",HBVnaive-Alum,13
-hbvx-0064,2024-12-10,36,F,Black/AfricanAmerican,Not Hispanic,20.4,HBVnaive,N,Heplisav,2024-12-13,,,"",,"",,Active,2,,2024-12-13,,"",160,52.2,,,"","","","",HBVnaive-CpG,
-hbvx-0065,2025-01-15,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,2025-01-13,,,"",,"",,Never,,,2025-09-07,2025-09-20,N,165.1,69.4,68,,"","","","",HBVnaive-Alum,13
-hbvx-0066,2025-01-29,39,F,Black/AfricanAmerican,Hispanic,19.6,HBVimmune,N,EngerixB,2025-01-24,,11.1,Pos,2024-10-27,"",,Quit,5,2,2025-01-24,2025-02-06,N,162.6,51.9,,,"","","","",HBVimmune-Alum,13
-hbvx-0067,2025-01-30,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,2025-01-28,,,"",,"",,Active,28.6,,2025-09-28,,"",165.1,62.1,62.1,,"","","","",HBVnaive-Alum,
-hbvx-0068,2025-02-11,74,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,2025-02-16,,40.52,Pos,2025-01-04,"",,Quit,2.5,22,2025-02-16,2025-03-05,N,175.3,77.1,,,"Core negative, 2024","","","",HBVimmune-Alum,17
-hbvx-0069,2025-02-12,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,2025-02-11,,,"",,"",,Quit,10,2,2025-03-18,2025-04-01,Y,167.6,77.1,77.1,,"","","","",HBVnaive-CpG,14
-hbvx-0070,2025-02-18,74,F,White/Caucasian,Not Hispanic,33.1,HBVimmune,N,EngerixB,2025-02-15,20,2.7,Neg,2015-07-12,"",,Quit,2,43,2025-02-15,2025-03-01,N,154.9,79.4,,,"Core negative, 2015","","","",HBVimmune-Alum,14
-hbvx-0071,2025-02-19,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,2025-02-18,,,"",,"",,Quit,5,45,2025-09-23,2025-10-07,N,152.4,52.2,,,"","","","",HBVnaive-Alum,14
-hbvx-0072,2025-03-05,58,F,Black/AfricanAmerican,Not Hispanic,24.6,HBVimmune,N,EngerixB,2025-03-08,,,Pos,2024-03-24,"",,Active,20,,2025-03-08,,"",170.2,71.2,,,Core positive,"","","",HBVimmune-Alum,
-hbvx-0073,2025-03-06,31,F,White/Caucasian,Not Hispanic,25.2,HBVimmune,N,EngerixB,2025-03-05,18,,"",,"",,Never,,,2025-03-05,2025-03-19,N,,70.8,,,"","","","",HBVimmune-Alum,14
-hbvx-0074,2025-03-11,19,F,White/Caucasian,Not Hispanic,20.8,HBVimmune,N,EngerixB,2025-03-09,18,,"",,"",,Never,,,2025-03-09,2025-03-24,N,162.6,54.9,,,"","","","",HBVimmune-Alum,15
-hbvx-0075,2025-03-18,82,M,White/Caucasian,Not Hispanic,29.4,HBVimmune,N,EngerixB,2025-03-13,8,,"",,"",,Never,,,2025-03-13,,"",177.8,93,,,"","","","",HBVimmune-Alum,
-hbvx-0076,2025-03-19,58,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,2025-03-24,,,Pos,2018-08-25,"",,Never,,,2025-03-24,2025-04-08,Y,180.3,95.7,,,"Core negative, 2018;  CD4 count 409 (2022); ","","","",HBVimmune-Alum,15
-hbvx-0077,2025-03-19,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,2025-03-14,,,"",,"",,Never,,,2025-09-25,2025-10-08,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,"","","",HBVnaive-Alum,13
-hbvx-0078,2025-03-20,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,2025-03-19,,,"",,"",,Never,,,2025-09-23,,"",162.6,46.7,,,"","","","",HBVnaive-Alum,
-hbvx-0079,2025-04-02,31,F,Black/AfricanAmerican,Not Hispanic,25.5,HBVimmune,N,EngerixB,2025-03-28,,,Pos,2025-03-21,"",,Never,,,2025-03-28,,"",,67.4,,,"","","","",HBVimmune-Alum,
-hbvx-0080,2025-04-08,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,2025-04-07,,,"",,"",,Never,,,2025-05-19,,"",160,61.2,,,"","","","",HBVnaive-Alum,
-hbvx-0081,2025-04-10,56,M,White/Caucasian,Not Hispanic,26.3,HBVimmune,N,EngerixB,2025-04-09,0.1,,"",,"",,Never,,,2025-04-09,2025-04-22,N,177.8,83.1,,,"","","","",HBVimmune-Alum,13
-hbvx-0082,2025-04-15,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,2025-04-13,,,"",,"",,Never,,,2025-11-03,,"",175.3,77.1,,,"","","","",HBVnaive-Alum,
-hbvx-0083,2025-05-06,56,M,Black/AfricanAmerican,Not Hispanic,19.9,HBVimmune,N,EngerixB,2025-05-10,30,,"",,"",,Active,15,,2025-05-10,2025-05-16,N,188,64.5,,,"",RD,"","",HBVimmune-Alum,6
-hbvx-0084,2025-05-13,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,2025-05-09,,,"",,"",,Quit	,15,3,2025-06-14,,"",180.3,98.7,,,"","","","",HBVnaive-Alum,
-hbvx-0085,2025-05-20,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,2025-05-25,,,"",,"",,Quit,9,53,2025-06-29,,"",169.5,70.4,70.3,,"",LD,LD,"",HBVnaive-Alum,
-hbvx-0086,2025-05-27,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,2025-05-29,,,"",,"",,Never,,,2025-07-11,,"",157.5,77.7,,,"","","","",HBVnaive-Alum,
-hbvx-0087,2025-05-28,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,2025-05-27,,,"",,"",,Active,12.5,,2025-07-08,2025-07-21,N,165.1,102.1,,,"","","","",HBVnaive-CpG,13
-hbvx-0088,2025-06-03,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,2025-06-08,,,"",,"",,Quit,8,4,2025-07-21,,"",190.5,140.6,,,"","","","",HBVnaive-Alum,
-hbvx-0089,2025-06-05,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,2025-06-09,,,"",,"",,Never,,,2025-07-12,,"",162.6,61.2,,,"","","","",HBVnaive-Alum,
-hbvx-0090,2025-06-10,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,2025-06-05,,,"",,"",,Active,10,,2025-07-11,2025-07-24,N,177.8,170.9,167.8,,"",LD,LD,"",HBVnaive-CpG,13
-hbvx-0091,2025-07-10,41,F,White/Caucasian,Not Hispanic,22.6,HBVimmune,N,EngerixB,2025-07-12,23,62.3,Pos,2025-02-21,"",,Never,,,2025-07-12,,"",167.6,63.5,,,"",RD,"","",HBVimmune-Alum,
-hbvx-0092,2025-07-30,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,2025-07-29,,0,Neg,2024-07-24,Neg,2024-07-24,Never,,,2025-09-08,,"",185.4,79.3,80.2,,"",LD,LD,"",HBVnaive-Alum,
-hbvx-0093,2025-07-31,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,2025-08-03,,,"",,"",,Active,25.4,,2025-09-13,,"",172.7,82.5,,,"",LD,LD,"",HBVnaive-Alum,
-hbvx-0094,2025-08-05,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,2025-08-08,,0,Neg,2025-07-24,"",,Never,,,2025-09-19,2025-10-05,N,170.2,100.7,,,"","","","",HBVnaive-CpG,16
-hbvx-0095,2025-09-10,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,2025-09-09,,,"",,"",,Quit,19,1,2025-10-20,2025-11-09,N,180.3,67.5,,,"","","","",HBVnaive-CpG,20
-hbvx-0096,2025-09-23,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,2025-09-26,,0,Neg,2024-08-21,"",,Never,,,2025-10-30,,"",167.6,50.3,,,"",LD,"","",HBVnaive-Alum,
-hbvx-0097,2025-10-08,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,2025-10-04,,,"",,"",,Active,20,,2025-10-04,,"",177.8,82.55,,,"",LD,"","",HBVnaive-CpG,
-hbvx-0098,2025-10-09,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,2025-10-08,,,"",,"",,"",,,2025-10-08,,"",160,56,,,Parents declined hbv vax as infant,LD,"","",HBVnaive-Alum,
-hbvx-0099,2025-10-21,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,2025-10-18,,0,Neg,2023-03-12,Neg,2023-03-12,Active,13,,2025-10-18,,"",182.9,109.5,,,"",LD,"","",HBVnaive-Alum,
-hbvx-0100,2025-10-30,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,2025-11-03,,,"",,"",,Active,26,,2025-11-03,,"",157.5,48,,,"",LD,"","",HBVnaive-Alum,
-hbvx-0101,2025-10-30,74,F,White/Caucasian,Not Hispanic,26.2,HBVimmune,N,EngerixB,2025-11-03,,16.31,Pos,2024-08-05,Neg,2024-08-05,"",,,2025-11-03,2025-11-14,N,188,92.7,,,Unknown date of HBV vaccination,RD,"","",HBVimmune-Alum,11
+Participant,FirstVisit,Age,Sex,Race,Ethnicity,BMI,StatusAtEnrollment,KnownNR,Product,DateEnrolled,YearsSinceLastVax,HBsAb1.quant,HBsAb1.qual,HBsAb1date,HBcAb.qual,HBcAbdate,SmokingStatus,PackYear,YearsSinceQuit,CurrentMeds,DateLastVaxBeforeBiopsy,Ultrasound,LNBx,Heightcm,V1weightkg,V2weightkg,V3weightkg,Notes,V1W0.laterality,V2W0.laterality,V3W0.laterality,Study.arm,DaysFromVaxToUltrasound
+hbvx-0001,2022-07-07,47,M,White/Caucasian,Not Hispanic,29.1,HBVimmune,Y,EngerixB,2022-07-06,25,,"",,"",,Never,,,clonazepam; fluoxetine; guafacine,2022-07-06,,"",177.8,91.9,,,"","","","",HBVimmune-Alum,
+hbvx-0002,2022-09-06,41,M,White/Caucasian,Not Hispanic,29.6,HBVnaive,N,EngerixB,2022-09-01,,,"",,"",,Active,10,,metformin; glyburide,2022-09-01,,"",184,100.1,,,"","","","",HBVnaive-Alum,
+hbvx-0003,2022-09-13,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,2022-09-12,,,"",,"",,Quit,1,10,pantoprazole; tizanidine,2023-03-22,,"",182.9,85,,84.3,"","","","",HBVnaive-Alum,
+hbvx-0004,2022-11-17,31,M,Black/AfricanAmerican,Hispanic,38.9,HBVimmune,N,EngerixB,2022-11-12,,154.97,Pos,2021-09-23,"",,Never,,,risperidone; divalproex; sertraline,2022-11-12,,"",185.4,133.6,,,"","","","",HBVimmune-Alum,
+hbvx-0005,2023-01-12,40,F,White/Caucasian,Not Hispanic,33.7,HBVimmune,N,EngerixB,2023-01-11,25,479,Pos,2019-11-25,"",,Quit,5,11,omeprazole; cholecalciferol; polyethylene glycol,2023-01-11,,"",170.2,97.7,,,HBsAb 1000 on 2/19/2025,"","","",HBVimmune-Alum,
+hbvx-0006,2023-01-12,76,M,White/Caucasian,Not Hispanic,25.5,HBVimmune,Y,EngerixB,2023-01-07,,,"",,"",,Quit,20,23,rosuvastatin;finasteride;sitagliptin;tamsulosin,2023-01-07,,"",177.8,80.5,,,"","","","",HBVimmune-Alum,
+hbvx-0007,2023-01-18,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,2023-01-18,,,"",,"",,Never,,,bupropion;cholecalciferol;losartan;amlodipine,2023-08-08,,"",167.6,80.6,,82.7,"","","","",HBVnaive-Alum,
+hbvx-0008,2023-01-19,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,2023-01-17,,567.22,Pos,2019-09-29,"",,Quit,,57,olmesartan;hyoscyamine;mirabegron,2023-02-14,,"",157.5,53.6,,,"","","","",HBVnaive-CpG,
+hbvx-0009,2023-03-02,72,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,2023-03-01,,,Pos,2021-07-20,"",,Quit,110,37,denosumab;escitalopram;ondansetron;fexofenadine,2023-03-01,,"",162.6,63.8,,,"","","","",HBVnaive-Alum,
+hbvx-0010,2023-03-07,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,2023-03-03,,,"",,"",,Never,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,2023-09-08,2023-09-21,N,170.8,70.5,,,"","","","",HBVnaive-Alum,13
+hbvx-0011,2023-03-09,48,M,Multiple/NR,Not Hispanic,22.5,HBVimmune,N,EngerixB,2023-03-12,17,31.7,Pos,2021-08-19,"",,Never,,,truvada,2023-03-12,,"",172.7,67,,,"","","","",HBVimmune-Alum,
+hbvx-0012,2023-03-09,72,F,White/Caucasian,Not Hispanic,25.6,HBVimmune,Y,EngerixB,2023-03-13,16,1.54,Neg,2024-08-03,"",,Never,,,solifenacin;cholecalciferol,2023-03-13,,"",157.5,63.5,,,"","","","",HBVimmune-Alum,
+hbvx-0013,2023-03-14,24,F,Asian,Not Hispanic,22.2,HBVimmune,N,EngerixB,2023-03-14,25,,Pos,2022-03-08,"",,Never,,,"",2023-03-14,,"",154.9,53.2,,,"","","","",HBVimmune-Alum,
+hbvx-0014,2023-03-30,62,F,White/Caucasian,Not Hispanic,23.6,HBVimmune,N,EngerixB,2023-03-29,8,,"",,"",,Never,,,atorvastatin,2023-03-29,,"",165.1,64.2,,,"","","","",HBVimmune-Alum,
+hbvx-0015,2023-05-04,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,2023-05-08,,,"",,"",,Never,,,atorvastatin;metformin;trazodone;venlafaxine,2023-12-04,2023-12-19,N,182.9,98.2,,96.4,"","","","",HBVnaive-Alum,15
+hbvx-0016,2023-05-09,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,2023-05-09,,,"",,"",,Never,,,"",2023-06-06,,"",165.1,53,,,"","","","",HBVnaive-CpG,
+hbvx-0017,2023-05-11,31,M,White/Caucasian,Not Hispanic,21.8,HBVimmune,N,EngerixB,2023-05-16,11,9599,Pos,2018-01-13,"",,Never,,,sildenafil,2023-05-16,,"",180.3,71,,,"","","","",HBVimmune-Alum,
+hbvx-0018,2023-05-16,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,2023-05-13,,,"",,"",,Never,,,"",2023-12-08,,"",154.9,47.8,,46.9,"","","","",HBVnaive-Alum,
+hbvx-0019,2023-05-30,36,M,White/Caucasian,Not Hispanic,37.8,HBVimmune,N,EngerixB,2023-06-04,24,,"",,"",,Never,,,cetirizine,2023-06-04,,"",188,133.4,,,"","","","",HBVimmune-Alum,
+hbvx-0020,2023-06-01,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,2023-06-02,,,"",,"",,Never,,,testosterone,2024-01-10,2024-01-25,N,182.9,97.5,,101.8,"",LD,LD,LD,HBVnaive-Alum,15
+hbvx-0021,2023-06-08,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,2023-06-10,,,"",,"",,Active,10,,aspirin;atorvastatin,2023-07-29,2023-08-10,N,185.4,92.2,89.4,92.7,"",LD,LD,RD,HBVnaive-Alum,12
+hbvx-0022,2023-07-13,73,F,White/Caucasian,Not Hispanic,24.6,HBVimmune,N,EngerixB,2023-07-16,19,,"",,"",,Never,,,minoxidil;atorvastatin;amlodipine;metformin,2023-07-16,2023-07-27,Y,154.9,59.1,,,"",LD,"","",HBVimmune-Alum,11
+hbvx-0023,2023-07-13,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,2023-07-16,,,"",,"",,Active,11,,"",2024-02-03,,"",182.9,96.2,104.9,97.5,"",LD,LD,RD,HBVnaive-Alum,
+hbvx-0024,2023-07-18,52,F,White/Caucasian,Hispanic,35.5,HBVimmune,N,EngerixB,2023-07-18,10,,"",,"",,Active,15,,lisinopril;omeprazole;hydrocodone,2023-07-18,2023-07-31,N,160,90.8,,,"",LD,"","",HBVimmune-Alum,13
+hbvx-0025,2023-07-20,51,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,2023-07-19,5,,"",,"",,Never,,,"",2023-07-19,2023-08-07,N,190.5,106.6,,,"",LD,"","",HBVimmune-Alum,19
+hbvx-0026,2023-07-27,29,F,White/Caucasian,Not Hispanic,23.8,HBVimmune,Y,EngerixB,2023-07-30,2,4164,Pos,2022-03-31,"",,Never,,,levonorgestrel;albuterol,2023-07-30,2023-08-11,N,162.6,62.8,,,"",LD,"","",HBVimmune-Alum,12
+hbvx-0027,2023-08-01,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,2023-07-28,,,"",,"",,Quit,5,20,"",2024-02-02,,"",177.8,74.5,78.4,77.2,"","","","",HBVnaive-Alum,
+hbvx-0028,2023-09-26,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,2023-09-22,,0,Neg,2023-03-25,"",,Quit,30,20,"",2023-10-27,2023-11-09,N,182.9,80.8,84.9,87.5,"","","","",HBVnaive-Alum,13
+hbvx-0029,2023-09-27,43,F,Black/AfricanAmerican,Not Hispanic,35.8,HBVimmune,N,EngerixB,2023-09-27,,,Pos,2023-06-22,"",,Never,,,lisinopril,2023-09-27,2023-10-13,Y,165.1,97.7,,,"","","","",HBVimmune-Alum,16
+hbvx-0030,2023-10-04,43,F,Multiple/NR,Hispanic,28.6,HBVnaive,N,Heplisav,2023-10-06,,,"",,"",,Never,,,"",2023-10-06,,"",160.2,73.2,,,"","","","",HBVnaive-CpG,
+hbvx-0031,2023-10-11,58,M,White/Caucasian,Not Hispanic,28.6,HBVnaive,N,Heplisav,2023-10-15,,,"",,"",,Quit,,3,"",2023-10-15,,"",172.7,85.4,,,"","","","",HBVnaive-CpG,
+hbvx-0032,2023-10-17,35,M,Black/AfricanAmerican,Not Hispanic,18.6,HBVimmune,N,EngerixB,2023-10-16,26,,"",,"",,Active,5,,"",2023-10-16,2023-11-01,N,193,69.4,,,"","","","",HBVimmune-Alum,16
+hbvx-0033,2023-10-24,37,M,White/Caucasian,Not Hispanic,31.7,HBVimmune,N,EngerixB,2023-10-22,14,496,Pos,2022-09-10,"",,Quit,10,13,truvada;valacyclovir,2023-10-22,2023-11-05,Y,181,103.9,,,"","","","",HBVimmune-Alum,14
+hbvx-0034,2023-11-01,33,M,Asian,Not Hispanic,23.9,HBVimmune,N,EngerixB,2023-10-30,5,,Pos,2018-07-31,"",,Never,,,truvada;levothyroxine;escitalopram;levocetirizine,2023-10-30,,"",177.8,75.7,,,"","","","",HBVimmune-Alum,
+hbvx-0035,2023-11-07,25,M,Asian,Not Hispanic,19.7,HBVimmune,N,EngerixB,2023-11-10,24,,"",,"",,Never,,,cholecalciferol,2023-11-10,2023-11-24,N,180.3,64.2,,,"","","","",HBVimmune-Alum,14
+hbvx-0036,2023-11-15,62,M,Black/AfricanAmerican,Not Hispanic,25.3,HBVimmune,N,EngerixB,2023-11-14,1,0,Neg,2022-08-14,"",,Never,,,rosuvastatin;loratadine;tamsulosin,2023-11-14,2023-12-05,Y,172.7,75.5,,,"","","","",HBVimmune-Alum,21
+hbvx-0037,2023-12-05,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,2023-12-06,,,"",,"",,Never,,,cetirizine,2024-06-27,2024-07-13,N,157.5,54,54.4,53.3,"","","","",HBVnaive-Alum,16
+hbvx-0038,2023-12-05,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,2023-12-03,,,"",,"",,Never,,,cholecalciferol;loratadine,2024-09-29,2024-10-13,N,157.5,97.9,96,89.4,"","","","",HBVnaive-Alum,14
+hbvx-0039,2023-12-11,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,2023-12-08,,1000,Pos,2024-02-09,"",,Never,,,diclofenac;glycopyrrolate,2024-09-09,,"",175.2,72.7,72.2,69.6,"","","","",HBVnaive-Alum,
+hbvx-0040,2023-12-13,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,2023-12-18,,,"",,"",,Never,,,"",2024-07-06,2024-07-21,N,172.7,109.8,105.8,95.3,"","","","",HBVnaive-Alum,15
+hbvx-0041,2024-01-04,50,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,2024-01-09,22,,"",,"",,Never,,,gabapentinproxen,2024-01-09,2024-01-21,Y,188,88.6,,,"","","","",HBVimmune-Alum,12
+hbvx-0042,2024-01-16,23,M,White/Caucasian,Not Hispanic,18.8,HBVimmune,N,EngerixB,0204-01-21,10,,"",,"",,Never,,,"",2024-01-21,2024-02-04,N,180.3,61.6,,,"","","","",HBVimmune-Alum,14
+hbvx-0043,2024-01-18,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,2024-01-19,,14.7,Pos,2023-10-17,"",,Never,,,bupropion;liraglutide;famotidine,2024-09-26,2024-10-15,Y,154.9,92.1,87,84.5,"","","","",HBVnaive-Alum,19
+hbvx-0044,2024-01-23,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,2024-01-19,,,"",,"",,Quit,10,14,"",2024-11-15,2024-11-30,N,170.2,77.4,75.4,70.6,"","","","",HBVnaive-Alum,15
+hbvx-0045,2024-01-30,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,2024-01-30,,,"",,"",,Never,,,"",2024-12-03,2024-12-18,N,165.1,79.7,80.1,82.5,"","","","",HBVnaive-Alum,15
+hbvx-0046,2024-01-31,66,F,White/Caucasian,Not Hispanic,26.4,HBVimmune,N,EngerixB,2024-01-26,2,2160,Pos,2024-07-20,"",,Never,,,atorvastatin;ezetimibe,2024-01-26,2024-02-08,N,162.6,69.7,,,"","","","",HBVimmune-Alum,13
+hbvx-0047,2024-03-12,40,F,White/Caucasian,Not Hispanic,21.1,HBVimmune,Y,EngerixB,2024-03-09,8,,"",,"",,Never,,,alprazolam;hydroxyzine;ondansetron,2024-03-09,2024-03-26,N,160,54,,,"","","","",HBVimmune-Alum,17
+hbvx-0048,2024-03-13,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,2024-03-16,,,"",,"",,Never,,,rosuvastatin;meclizine,2024-05-03,2024-05-17,N,160,74.3,74.7,,"","","","",HBVnaive-CpG,14
+hbvx-0049,2024-03-14,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,2024-03-15,,,"",,"",,Never,,,escitalopram,2024-10-10,,"",177.8,80.2,79.2,79.8,"","","","",HBVnaive-Alum,
+hbvx-0050,2024-03-19,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,2024-03-18,,,"",,"",,Never,,,cetirizine;venlafaxine;risperidone;buspirone,2024-11-19,2024-12-02,N,160,89.2,91.4,94.1,"","","","",HBVnaive-Alum,13
+hbvx-0051,2024-03-26,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,2024-03-31,,,"",,"",,Never,,,"",2024-11-19,,"",172.7,66.4,66.2,66.2,"","","","",HBVnaive-Alum,
+hbvx-0052,2024-04-03,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,2024-03-29,,,"",,"",,Never,,,"",2024-06-13,,"",162.6,55.4,54.7,,"","","","",HBVnaive-CpG,
+hbvx-0053,2024-04-23,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,2024-04-24,,,"",,"",,Never,,,bupropion;quetiapine;acyclovir;tramadol,2024-11-27,2024-12-12,N,175.3,73.9,72.7,68.3,"","","","",HBVnaive-Alum,15
+hbvx-0054,2024-05-07,62,M,White/Caucasian,Not Hispanic,28.8,HBVimmune,N,EngerixB,2024-05-06,,96,Pos,2020-11-03,"",,Quit,0.5,28,bupropion;tirzepatide;atorvastatin;descovy,2024-05-06,,"",172.7,86,,,"","","","",HBVimmune-Alum,
+hbvx-0055,2024-05-15,61,M,Black/AfricanAmerican,Not Hispanic,37.5,HBVimmune,N,EngerixB,2024-05-13,17,,"",,"",,Never,,,atorvastatin;lisinopril,2024-05-13,2024-05-26,N,165.1,102.2,,,"","","","",HBVimmune-Alum,13
+hbvx-0056,2024-06-04,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,2024-06-06,,,Pos,2025-02-26,"",,Quit,15,19,etravirine;darunavir;atorvastatin;bupropion,2025-01-16,2025-01-31,N,180.3,81.3,81.6,77.1,? resolved HBV,"","","",HBVnaive-Alum,15
+hbvx-0057,2024-06-04,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,2024-06-01,,0,Neg,2024-05-31,"",,Quit,,15,atorvastatin;gabapentin,2025-01-12,2025-01-27,N,188,104.2,102.4,99.9,"","","","",HBVnaive-Alum,15
+hbvx-0058,2024-06-05,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,2024-06-10,,3.2,Neg,2021-04-25,"",,Never,,,"",2025-03-02,2025-03-23,Y,175.3,88.3,87,86.7,"","","","",HBVnaive-Alum,21
+hbvx-0059,2024-09-11,26,M,Multiple/NR,Hispanic,27.6,HBVimmune,N,EngerixB,2024-09-06,8,,"",,"",,Never,,,"",2024-09-06,2024-09-20,N,180.3,89.9,,,"","","","",HBVimmune-Alum,14
+hbvx-0060,2024-09-24,65,F,White/Caucasian,Not Hispanic,18.7,HBVimmune,N,EngerixB,2024-09-20,4,,"",,"",,Quit,20,14,donepezil;losartan;mesalamine;bupropion,2024-09-20,2024-10-06,N,177.8,59,,,"","","","",HBVimmune-Alum,16
+hbvx-0061,2024-09-26,25,F,White/Caucasian,Not Hispanic,22,HBVimmune,N,EngerixB,2024-09-30,6,,"",,"",,Never,,,sertraline;propanolol;trazodone;spironolactone,2024-09-30,2024-10-15,N,165.1,59.9,,,"","","","",HBVimmune-Alum,15
+hbvx-0062,2024-10-02,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,2024-09-27,,,"",,"",,Never,,,metformin;methylphenidate;;,2025-05-01,2025-05-15,N,,,,,"","","","",HBVnaive-Alum,14
+hbvx-0063,2024-12-10,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,2024-12-09,,,"",,"",,Never,,,loratadine;amlodipine;losartan;hydrochlorothiazide,2025-06-24,2025-07-07,Y,165.1,58.1,58.1,55.3,"","","","",HBVnaive-Alum,13
+hbvx-0064,2024-12-10,36,F,Black/AfricanAmerican,Not Hispanic,20.4,HBVnaive,N,Heplisav,2024-12-13,,,"",,"",,Active,2,,"",2024-12-13,,"",160,52.2,,,"","","","",HBVnaive-CpG,
+hbvx-0065,2025-01-15,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,2025-01-13,,,"",,"",,Never,,,estradiol;cholecalciferol,2025-09-07,2025-09-20,N,165.1,69.4,68,,"","","","",HBVnaive-Alum,13
+hbvx-0066,2025-01-29,39,F,Black/AfricanAmerican,Hispanic,19.6,HBVimmune,N,EngerixB,2025-01-24,,11.1,Pos,2024-10-27,"",,Quit,5,2,"",2025-01-24,2025-02-06,N,162.6,51.9,,,"","","","",HBVimmune-Alum,13
+hbvx-0067,2025-01-30,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,2025-01-28,,,"",,"",,Active,28.6,,aspirin;ramelteon,2025-09-28,,"",165.1,62.1,62.1,,"","","","",HBVnaive-Alum,
+hbvx-0068,2025-02-11,74,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,2025-02-16,,40.52,Pos,2025-01-04,"",,Quit,2.5,22,chlorthalidone;rosuvastatin,2025-02-16,2025-03-05,N,175.3,77.1,,,"Core negative, 2024","","","",HBVimmune-Alum,17
+hbvx-0069,2025-02-12,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,2025-02-11,,,"",,"",,Quit,10,2,"",2025-03-18,2025-04-01,Y,167.6,77.1,77.1,,"","","","",HBVnaive-CpG,14
+hbvx-0070,2025-02-18,74,F,White/Caucasian,Not Hispanic,33.1,HBVimmune,N,EngerixB,2025-02-15,20,2.7,Neg,2015-07-12,"",,Quit,2,43,levothyroxine;ramipril;hydrochlorothiazide;atorvastatin,2025-02-15,2025-03-01,N,154.9,79.4,,,"Core negative, 2015","","","",HBVimmune-Alum,14
+hbvx-0071,2025-02-19,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,2025-02-18,,,"",,"",,Quit,5,45,"",2025-09-23,2025-10-07,N,152.4,52.2,,,"","","","",HBVnaive-Alum,14
+hbvx-0072,2025-03-05,58,F,Black/AfricanAmerican,Not Hispanic,24.6,HBVimmune,N,EngerixB,2025-03-08,,,Pos,2024-03-24,"",,Active,20,,lisinopril;bupropion;budesonide-formoterol;quetiapine,2025-03-08,,"",170.2,71.2,,,Core positive,"","","",HBVimmune-Alum,
+hbvx-0073,2025-03-06,31,F,White/Caucasian,Not Hispanic,25.2,HBVimmune,N,EngerixB,2025-03-05,18,,"",,"",,Never,,,escitalopram,2025-03-05,2025-03-19,N,,70.8,,,"","","","",HBVimmune-Alum,14
+hbvx-0074,2025-03-11,19,F,White/Caucasian,Not Hispanic,20.8,HBVimmune,N,EngerixB,2025-03-09,18,,"",,"",,Never,,,methylphenidate;sertraline,2025-03-09,2025-03-24,N,162.6,54.9,,,"","","","",HBVimmune-Alum,15
+hbvx-0075,2025-03-18,82,M,White/Caucasian,Not Hispanic,29.4,HBVimmune,N,EngerixB,2025-03-13,8,,"",,"",,Never,,,aspirin;atorvastatin;valsartan;semaglutide,2025-03-13,,"",177.8,93,,,"","","","",HBVimmune-Alum,
+hbvx-0076,2025-03-19,58,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,2025-03-24,,,Pos,2018-08-25,"",,Never,,,metformin;empaglifozin;biktarvy;atorvastatin,2025-03-24,2025-04-08,Y,180.3,95.7,,,"Core negative, 2018;  CD4 count 409 (2022); ","","","",HBVimmune-Alum,15
+hbvx-0077,2025-03-19,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,2025-03-14,,,"",,"",,Never,,,amlodipine,2025-09-25,2025-10-08,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,"","","",HBVnaive-Alum,13
+hbvx-0078,2025-03-20,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,2025-03-19,,,"",,"",,Never,,,aspirin;atorvastatin;gabapentin;valsartan,2025-09-23,,"",162.6,46.7,,,"","","","",HBVnaive-Alum,
+hbvx-0079,2025-04-02,31,F,Black/AfricanAmerican,Not Hispanic,25.5,HBVimmune,N,EngerixB,2025-03-28,,,Pos,2025-03-21,"",,Never,,,medroxyprogesterone,2025-03-28,,"",,67.4,,,"","","","",HBVimmune-Alum,
+hbvx-0080,2025-04-08,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,2025-04-07,,,"",,"",,Never,,,paroxetine,2025-05-19,,"",160,61.2,,,"","","","",HBVnaive-Alum,
+hbvx-0081,2025-04-10,56,M,White/Caucasian,Not Hispanic,26.3,HBVimmune,N,EngerixB,2025-04-09,0.1,,"",,"",,Never,,,"",2025-04-09,2025-04-22,N,177.8,83.1,,,"","","","",HBVimmune-Alum,13
+hbvx-0082,2025-04-15,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,2025-04-13,,,"",,"",,Never,,,semaglutide;atorvastatin;finasteride;lisinopril,2025-11-03,,"",175.3,77.1,,,"","","","",HBVnaive-Alum,
+hbvx-0083,2025-05-06,56,M,Black/AfricanAmerican,Not Hispanic,19.9,HBVimmune,N,EngerixB,2025-05-10,30,,"",,"",,Active,15,,"",2025-05-10,2025-05-16,N,188,64.5,,,"",RD,"","",HBVimmune-Alum,6
+hbvx-0084,2025-05-13,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,2025-05-09,,,"",,"",,Quit	,15,3,bupropion;truvada;acyclovir,2025-06-14,,"",180.3,98.7,,,"","","","",HBVnaive-Alum,
+hbvx-0085,2025-05-20,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,2025-05-25,,,"",,"",,Quit,9,53,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,2025-06-29,,"",169.5,70.4,70.3,,"",LD,LD,"",HBVnaive-Alum,
+hbvx-0086,2025-05-27,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,2025-05-29,,,"",,"",,Never,,,duloxetine;buspirone;pyridostigmine;eplontersen,2025-07-11,,"",157.5,77.7,,,"","","","",HBVnaive-Alum,
+hbvx-0087,2025-05-28,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,2025-05-27,,,"",,"",,Active,12.5,,semaglutide;gabapentin;metformin;sertraline,2025-07-08,2025-07-21,N,165.1,102.1,,,"","","","",HBVnaive-CpG,13
+hbvx-0088,2025-06-03,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,2025-06-08,,,"",,"",,Quit,8,4,metformin,2025-07-21,,"",190.5,140.6,,,"","","","",HBVnaive-Alum,
+hbvx-0089,2025-06-05,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,2025-06-09,,,"",,"",,Never,,,"",2025-07-12,,"",162.6,61.2,,,"","","","",HBVnaive-Alum,
+hbvx-0090,2025-06-10,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,2025-06-05,,,"",,"",,Active,10,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,2025-07-11,2025-07-24,N,177.8,170.9,167.8,,"",LD,LD,"",HBVnaive-CpG,13
+hbvx-0091,2025-07-10,41,F,White/Caucasian,Not Hispanic,22.6,HBVimmune,N,EngerixB,2025-07-12,23,62.3,Pos,2025-02-21,"",,Never,,,levothyroxine;cyanocobalamin;cholecalciferol;norethindrone-ethinyl estradiol,2025-07-12,,"",167.6,63.5,,,"",RD,"","",HBVimmune-Alum,
+hbvx-0092,2025-07-30,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,2025-07-29,,0,Neg,2024-07-24,Neg,2024-07-24,Never,,,aspirin;atorvastatin;famotidine;losartan,2025-09-08,,"",185.4,79.3,80.2,,"",LD,LD,"",HBVnaive-Alum,
+hbvx-0093,2025-07-31,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,2025-08-03,,,"",,"",,Active,25.4,,"",2025-09-13,,"",172.7,82.5,,,"",LD,LD,"",HBVnaive-Alum,
+hbvx-0094,2025-08-05,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,2025-08-08,,0,Neg,2025-07-24,"",,Never,,,fluticasone,2025-09-19,2025-10-05,N,170.2,100.7,,,"","","","",HBVnaive-CpG,16
+hbvx-0095,2025-09-10,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,2025-09-09,,,"",,"",,Quit,19,1,"",2025-10-20,2025-11-09,N,180.3,67.5,,,"","","","",HBVnaive-CpG,20
+hbvx-0096,2025-09-23,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,2025-09-26,,0,Neg,2024-08-21,"",,Never,,,alendronate,2025-10-30,,"",167.6,50.3,,,"",LD,"","",HBVnaive-Alum,
+hbvx-0097,2025-10-08,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,2025-10-04,,,"",,"",,Active,20,,"",2025-10-04,,"",177.8,82.55,,,"",LD,"","",HBVnaive-CpG,
+hbvx-0098,2025-10-09,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,2025-10-08,,,"",,"",,"",,,"",2025-10-08,,"",160,56,,,Parents declined hbv vax as infant,LD,"","",HBVnaive-Alum,
+hbvx-0099,2025-10-21,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,2025-10-18,,0,Neg,2023-03-12,Neg,2023-03-12,Active,13,,lisinopril,2025-10-18,,"",182.9,109.5,,,"",LD,"","",HBVnaive-Alum,
+hbvx-0100,2025-10-30,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,2025-11-03,,,"",,"",,Active,26,,"",2025-11-03,,"",157.5,48,,,"",LD,"","",HBVnaive-Alum,
+hbvx-0101,2025-10-30,74,F,White/Caucasian,Not Hispanic,26.2,HBVimmune,N,EngerixB,2025-11-03,,16.31,Pos,2024-08-05,Neg,2024-08-05,"",,,aspirin;losartan;atorvastatin,2025-11-03,2025-11-14,N,188,92.7,,,Unknown date of HBV vaccination,RD,"","",HBVimmune-Alum,11
