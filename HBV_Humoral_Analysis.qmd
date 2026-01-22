@@ -98,7 +98,9 @@ names(b0) <-c('Participant', 'elisa.HbsAb', 'Visit')
 
 joined.elisa <- rbind(joined.elisa, b0)
 
-part_merge$make.unique <- paste0(part_merge$subject,'_',part_merge$timepoint)
+
+# clean up data table 
+part_merge$make.unique <- paste0(part_merge$subject,'_',part_merge$timepoint)  # column for finding duplicates
 part_merge <- as.data.table(part_merge)
 part_merge <- part_merge[!note %like% '1000x_dilution']
 
@@ -117,21 +119,33 @@ part_merge[, Participant := paste0("hbvx-", Participant)]
 joined.elisa <- rbind(joined.elisa, part_merge)
 
 joined.elisa[, Visit := tolower(Visit)]
-joined.elisa[, make.unique := paste0(Participant, "_", Visit)]  # search for duplicates 
-dupl <- joined.elisa[duplicated(make.unique), make.unique]
-joined.elisa[make.unique %in% dupl][order(Participant, Visit)]
-# will take mean of duplicates
-joined.elisa <- joined.elisa[, .SD[which.max(elisa.HbsAb)], by = .(Participant, Visit)]
 joined.elisa[, Participant := tolower(Participant)]
-rm(part_merge, b0)
+joined.elisa[, make.unique := paste0(Participant, "_", Visit)]  # search for duplicates 
+joined.elisa[duplicated(make.unique), make.unique]  # 122 duplicate entries found 
 
-# > joined.elisa
-#      Participant  Visit elisa.HbsAb    make.unique
-#           <char> <char>       <num>         <char>
-#   1:   hbvx-0003   v3w0  299.523102 hbvx-0003_v3w0
-#   2:   hbvx-0003   v3w1  387.150433 hbvx-0003_v3w1
-#   3:   hbvx-0014   v1w0    5.562096 hbvx-0014_v1w0
-# 
+reconciled.joined.elisa <- joined.elisa[, .(
+  # 1. Apply logic for mIU
+  elisa.HbsAb = if (.N == 1) {
+    elisa.HbsAb # If not a duplicate, keep value
+  } else if (any(elisa.HbsAb < 10)) {
+    max(elisa.HbsAb) # If one is < 10, keep the larger value  (low value could represent assay failure)
+  } else {
+    mean(elisa.HbsAb) # If both (all) are > 10, find the average
+  },
+
+  # 2. Keep the first entry for other descriptive columns
+  Participant = Participant[1], Visit  = Visit [1] ),
+  by = make.unique]
+rm(part_merge, b0, joined.elisa)
+saveRDS(reconciled.joined.elisa, "./outs/reconciled_joined_elisa.RDS")
+
+# > reconciled.joined.elisa
+#         make.unique elisa.HbsAb Participant  Visit
+#              <char>       <num>      <char> <char>
+#   1: hbvx-0003_v3w0  290.266822   hbvx-0003   v3w0
+#   2: hbvx-0003_v3w1  345.778788   hbvx-0003   v3w1
+#   3: hbvx-0014_v1w0    5.562096   hbvx-0014   v1w0
+#   4: hbvx-0015_v3w3  288.583638   hbvx-0015   v3w3
 
 ```
 
@@ -206,7 +220,7 @@ fwrite(metadata[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 'PastHi
 
 # --- Merge ELISA Data with Metadata ---
 ```{r merge-metadata-and-elisa}
-elisa_mergeMeta <- merge(joined.elisa, metadata, by = 'Participant', all.x = TRUE)
+elisa_mergeMeta <- merge(reconciled.joined.elisa, metadata, by = 'Participant', all.x = TRUE)
 elisa_mergeMeta[, AgeSplit50 := fifelse(Age>50,'>50', '<=50')]
 
 # > elisa_mergeMeta
