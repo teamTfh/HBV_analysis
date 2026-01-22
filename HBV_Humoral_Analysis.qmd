@@ -137,7 +137,6 @@ reconciled.joined.elisa <- joined.elisa[, .(
   Participant = Participant[1], Visit  = Visit [1] ),
   by = make.unique]
 rm(part_merge, b0, joined.elisa)
-saveRDS(reconciled.joined.elisa, "./outs/reconciled_joined_elisa.RDS")
 
 # > reconciled.joined.elisa
 #         make.unique elisa.HbsAb Participant  Visit
@@ -215,6 +214,7 @@ rm(addtl.metadata, redcap.baseline.demog, dupl)
 
 # --- Save Merged Metadata ---
 ```{r write-metadata}
+saveRDS(reconciled.joined.elisa, "./outs/reconciled_joined_elisa.RDS")
 fwrite(metadata[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 'PastHistory')], "./outs/merged_metadata.csv")
 ```
 
@@ -225,10 +225,11 @@ elisa_mergeMeta[, AgeSplit50 := fifelse(Age>50,'>50', '<=50')]
 
 # > elisa_mergeMeta
 # Key: <Participant>
-#      Participant  Visit elisa.HbsAb    make.unique FirstVisit   Age    Sex            Race    Ethnicity   BMI StatusAtEnrollment KnownNR  Product
-#           <char> <char>       <num>         <char>     <Date> <int> <char>          <char>       <char> <num>             <char>  <char>   <char>
-#   1:   hbvx-0001   v1w0    3.206958 HBVX-0001_v1w0 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
-#   2:   hbvx-0001   v1w1    5.195243 HBVX-0001_v1w1 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
+#      Participant    make.unique elisa.HbsAb  Visit FirstVisit   Age    Sex            Race    Ethnicity   BMI StatusAtEnrollment KnownNR  Product
+#           <char>         <char>       <num> <char>     <Date> <int> <char>          <char>       <char> <num>             <char>  <char>   <char>
+#   1:   hbvx-0001 hbvx-0001_v1w0    3.206958   v1w0 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
+#   2:   hbvx-0001 hbvx-0001_v1w1    5.195243   v1w1 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
+#   3:   hbvx-0001 hbvx-0001_v1w4  113.052864   v1w4 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
 #   
 #   and so on
   
