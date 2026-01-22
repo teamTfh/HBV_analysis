@@ -278,6 +278,7 @@ df_mean <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum',
                            by = .(Visit, AgeSplit50)]
 
 # Plot the arithmetic mean with confidence intervals.
+
   
 
 # ggplot(df_mean, aes(x=timepoint, y=mean, color = age_group, group = age_group)) + geom_line(aes(x=timepoint, y=mean, color=age_group)) + geom_ribbon(aes(ymin=CI_lower,ymax=CI_upper,fill=age_group),color="grey70",alpha=0.4) +ct2 + ylab("elisa")+ scale_y_log10(labels = scales::label_number())
