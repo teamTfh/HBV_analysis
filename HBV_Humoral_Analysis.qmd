@@ -43,6 +43,7 @@ library(data.table)
 library(emmeans)      # Estimated marginal means
 library(lme4)         # Linear mixed-effects models
 library(lmerTest)     # Tests for lme4 models
+library(viridis)
 
 # --- Custom Theme ---
 # A custom ggplot theme is defined for consistent plot styling.
@@ -69,8 +70,11 @@ b3 <- read_csv("./data/20241112_hbv_elisa_batch3_riddhimaa.csv")
 b4 <- read_csv("./data/20250402_hbv_elisa_batch4_riddhimaa.csv")
 b5 <- read_csv("./data/20250620_hbv_elisa_batch5_riddhimaa.csv")
 
+b6 <- read_xlsx("./data/20251212_hbv_elisa_hmc.xlsx")
+b7 <- read_xlsx("./data/20260122_elisa_hmc.xlsx")
+
 b2$ABS <- b2$notes <- NULL;  b3$ABS <- b3$notes <- NULL;   b4$ABS <- b4$notes <- NULL
-names(b2) <- names(b3) <- names(b4) <- c("SAMPLE", "elisa.HbsAb")
+names(b2) <- names(b3) <- names(b4) <- c("SAMPLE", "elisa.HBsAb")
 joined.elisa <- merge(b3, b4, all = TRUE)
 joined.elisa <- as.data.table(joined.elisa)
 joined.elisa <- joined.elisa[!SAMPLE %like% '84']
@@ -84,16 +88,26 @@ joined.elisa$SAMPLE <- NULL
 
 b5 <- as.data.table(b5)
 b5$C <- b5$E <- b5$F <- NULL
-names(b5) <- c('Participant', 'Visit', 'elisa.HbsAb')
+names(b5) <- c('Participant', 'Visit', 'elisa.HBsAb')
 b5 <- b5[!is.na(Participant)]
 b5 <- b5[, Participant := tolower(substr(Participant, 5, 13))]
 
-joined.elisa <- rbind(joined.elisa, b5)
-rm(b2, b3, b4, b5)
+setDT(b6) 
+b6[, c('Participant', 'Visit') := tstrsplit(subject_timepoint, "_", fill = NA)]
+b6[, Participant:= paste0("hbvx-", Participant)]
+b6$subject_timepoint <- NULL
+
+setDT(b7)
+b7[, c('Participant', 'Visit') := tstrsplit(subject_timepoint, "_", fill = NA)]
+b7[, Participant:= paste0("hbvx-", Participant)]
+b7$subject_timepoint <- NULL
+
+joined.elisa <- rbind(joined.elisa, b5,b6,b7)
+rm(b2, b3, b4, b5, b6)
 
 b0$Visit <- paste0("v", substr(b0$`Event Name`, 7, 7), "w", substr(b0$`Event Name`, 16, 16))
 b0$`Event Name` <- b0$`ELISA Value Issue` <-  NULL
-names(b0) <-c('Participant', 'elisa.HbsAb', 'Visit')
+names(b0) <-c('Participant', 'elisa.HBsAb', 'Visit')
 # b0$Part.Visit <- c(paste0(b0$Participant, "_", b0$Visit))
 
 joined.elisa <- rbind(joined.elisa, b0)
@@ -105,13 +119,13 @@ part_merge <- as.data.table(part_merge)
 part_merge <- part_merge[!note %like% '1000x_dilution']
 
 part_merge$note <- part_merge$experiment <- part_merge$collected_by <- NULL  # remove 
-names(part_merge) <- c('Participant', 'Visit', 'elisa.HbsAb','make.unique')
-part_merge[, `:=` (mIU.ave = mean(elisa.HbsAb, na.rm=T), mIU.n = .N), by=make.unique]
-part_merge[, discrepancy := abs(elisa.HbsAb - mIU.ave)]
-discrep.values <- part_merge[mIU.n>1, .(Participant, Visit, elisa.HbsAb, mIU.ave, discrepancy)]
+names(part_merge) <- c('Participant', 'Visit', 'elisa.HBsAb','make.unique')
+part_merge[, `:=` (mIU.ave = mean(elisa.HBsAb, na.rm=T), mIU.n = .N), by=make.unique]
+part_merge[, discrepancy := abs(elisa.HBsAb - mIU.ave)]
+discrep.values <- part_merge[mIU.n>1, .(Participant, Visit, elisa.HBsAb, mIU.ave, discrepancy)]
 discrep.values[order(-discrepancy)][1:10] 
 # all of the values that are discordant look aberrantly low, so will favor taking simple max of any replicates values
-part_merge <- part_merge[, .SD[which.max(elisa.HbsAb)], by = .(Participant, Visit)]
+part_merge <- part_merge[, .SD[which.max(elisa.HBsAb)], by = .(Participant, Visit)]
 rm(discrep.values)
 part_merge$mIU.ave <- part_merge$mIU.n <- part_merge$discrepancy <- part_merge$make.unique <- NULL
 part_merge <- part_merge[!Participant == '0']
@@ -125,12 +139,12 @@ joined.elisa[duplicated(make.unique), make.unique]  # 122 duplicate entries foun
 
 reconciled.joined.elisa <- joined.elisa[, .(
   # 1. Apply logic for mIU
-  elisa.HbsAb = if (.N == 1) {
-    elisa.HbsAb # If not a duplicate, keep value
-  } else if (any(elisa.HbsAb < 10)) {
-    max(elisa.HbsAb) # If one is < 10, keep the larger value  (low value could represent assay failure)
+  elisa.HBsAb = if (.N == 1) {
+    elisa.HBsAb # If not a duplicate, keep value
+  } else if (any(elisa.HBsAb < 10)) {
+    max(elisa.HBsAb) # If one is < 10, keep the larger value  (low value could represent assay failure)
   } else {
-    mean(elisa.HbsAb) # If both (all) are > 10, find the average
+    mean(elisa.HBsAb) # If both (all) are > 10, find the average
   },
 
   # 2. Keep the first entry for other descriptive columns
@@ -139,7 +153,7 @@ reconciled.joined.elisa <- joined.elisa[, .(
 rm(part_merge, b0, joined.elisa)
 
 # > reconciled.joined.elisa
-#         make.unique elisa.HbsAb Participant  Visit
+#         make.unique elisa.HBsAb Participant  Visit
 #              <char>       <num>      <char> <char>
 #   1: hbvx-0003_v3w0  290.266822   hbvx-0003   v3w0
 #   2: hbvx-0003_v3w1  345.778788   hbvx-0003   v3w1
@@ -150,10 +164,9 @@ rm(part_merge, b0, joined.elisa)
 
 # --- Load and Manage Metadata ---
 ```{r manage-metadata, results='hide'}
-
 redcap.baseline.demog <- fread("./data/HepatitisBVaccineStu-Demographics.csv")
 addtl.metadata <- fread("./data/HBV metadata - DatesOffset.csv")
-
+glimpse(redcap.baseline.demog)
 names(redcap.baseline.demog) <- c("Participant", 'Event', 'FirstVisit', 'Age', 'Sex', 'Race', 'Ethnicity','Comments','Demog.complete','BMI','Randomization')
 redcap.baseline.demog[, Race := as.character(Race)]
 redcap.baseline.demog <- redcap.baseline.demog[, c('Demog.complete', 'Event', 'Comments','Randomization') := NULL]
@@ -183,7 +196,9 @@ addtl.metadata[, ImmunizationHx := strsplit(ImmunizationHx, split = ' ___')]
 
 metadata <- merge(redcap.baseline.demog, addtl.metadata, by = 'Participant', all = TRUE)
 metadata[, DaysFromVaxToUltrasound := as.numeric(Ultrasound - DateLastVaxBeforeBiopsy)]
-rm(addtl.metadata, redcap.baseline.demog, dupl)
+rm(addtl.metadata, redcap.baseline.demog
+   #, dupl
+   )
 
 # > metadata
 # Key: <Participant>
@@ -214,6 +229,12 @@ rm(addtl.metadata, redcap.baseline.demog, dupl)
 
 # --- Save Merged Metadata ---
 ```{r write-metadata}
+#set negative elisa values to 0.01
+colnames(reconciled.joined.elisa)
+reconciled.joined.elisa[elisa.HBsAb < 0, elisa.HBsAb := 0.1]
+#change v3w3 --> v3w4
+reconciled.joined.elisa[Visit == 'v3w3', Visit := 'v3w4']
+table(reconciled.joined.elisa$Visit)
 saveRDS(reconciled.joined.elisa, "./outs/reconciled_joined_elisa.RDS")
 fwrite(metadata[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 'PastHistory')], "./outs/merged_metadata.csv")
 ```
@@ -222,10 +243,9 @@ fwrite(metadata[,.SD, .SDcols = !c('MedsAtEnrollment', 'ImmunizationHx', 'PastHi
 ```{r merge-metadata-and-elisa}
 elisa_mergeMeta <- merge(reconciled.joined.elisa, metadata, by = 'Participant', all.x = TRUE)
 elisa_mergeMeta[, AgeSplit50 := fifelse(Age>50,'>50', '<=50')]
-
 # > elisa_mergeMeta
 # Key: <Participant>
-#      Participant    make.unique elisa.HbsAb  Visit FirstVisit   Age    Sex            Race    Ethnicity   BMI StatusAtEnrollment KnownNR  Product
+#      Participant    make.unique elisa.HBsAb  Visit FirstVisit   Age    Sex            Race    Ethnicity   BMI StatusAtEnrollment KnownNR  Product
 #           <char>         <char>       <num> <char>     <Date> <int> <char>          <char>       <char> <num>             <char>  <char>   <char>
 #   1:   hbvx-0001 hbvx-0001_v1w0    3.206958   v1w0 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
 #   2:   hbvx-0001 hbvx-0001_v1w1    5.195243   v1w1 2022-07-07    47      M White/Caucasian Not Hispanic  29.1          HBVimmune       Y EngerixB
@@ -234,7 +254,7 @@ elisa_mergeMeta[, AgeSplit50 := fifelse(Age>50,'>50', '<=50')]
 #   and so on
   
 # > names(elisa_mergeMeta)
-#  [1] "Participant"             "Visit"                   "elisa.HbsAb"             "make.unique"             "FirstVisit"             
+#  [1] "Participant"             "Visit"                   "elisa.HBsAb"             "make.unique"             "FirstVisit"             
 #  [6] "Age"                     "Sex"                     "Race"                    "Ethnicity"               "BMI"                    
 # [11] "StatusAtEnrollment"      "KnownNR"                 "Product"                 "DateEnrolled"            "YearsSinceLastVax"      
 # [16] "HBsAb1.quant"            "HBsAb1.qual"             "HBsAb1date"              "HBcAb.qual"              "HBcAbdate"              
@@ -255,17 +275,17 @@ saveRDS(elisa_mergeMeta, "./outs/elisa_mergeMeta.RDS")
 
 # --- Break down of antibody by age ---
 ```{r make-interesting-plots}
-elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS")
-medianData <- elisa_mergeMeta[, .(median.elisa = median(elisa.HbsAb, na.rm = TRUE)), by = .(Visit, Study.arm, AgeSplit50)]
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS") #this is final merged dataset with meta
+medianData <- elisa_mergeMeta[, .(median.elisa = median(elisa.HBsAb, na.rm = TRUE)), by = .(Visit, Study.arm, AgeSplit50)]
 
-ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HbsAb, x = Visit, color=AgeSplit50)) + 
+ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HBsAb, x = Visit, color=AgeSplit50)) + 
   geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
   geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ 
   scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  
   ct2 
 
 elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'] %>%
-  ggplot(aes(x = Visit, y = elisa.HbsAb, color=AgeSplit50)) + 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, color=AgeSplit50)) + 
   geom_boxplot(position=position_dodge(width=0.8), alpha=0.5) + 
   geom_line(aes(group=Participant, color=AgeSplit50), alpha=0.2, position=position_dodge(width=0.8)) +
   geom_beeswarm(aes(color=AgeSplit50), size=2, dodge.width = 0.8, alpha=0.8) + 
@@ -274,7 +294,7 @@ elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'] %>%
 
 # Calculate arithmetic mean and confidence intervals.
 df_mean <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum', 
-                           .(mean = mean(elisa.HbsAb, na.rm = TRUE), sd = sd(elisa.HbsAb, na.rm = TRUE),  n = .N), 
+                           .(mean = mean(elisa.HBsAb, na.rm = TRUE), sd = sd(elisa.HBsAb, na.rm = TRUE),  n = .N), 
                            by = .(Visit, AgeSplit50)]
 
 # Plot the arithmetic mean with confidence intervals.
@@ -282,12 +302,61 @@ df_mean <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum',
   
 
 # ggplot(df_mean, aes(x=timepoint, y=mean, color = age_group, group = age_group)) + geom_line(aes(x=timepoint, y=mean, color=age_group)) + geom_ribbon(aes(ymin=CI_lower,ymax=CI_upper,fill=age_group),color="grey70",alpha=0.4) +ct2 + ylab("elisa")+ scale_y_log10(labels = scales::label_number())
-
-
-
+colnames(elisa_mergeMeta)
+table(elisa_mergeMeta$LNBx)
+elisa_mergeMeta[LNBx == 'Y'] %>%
+#  filter(subject %in% c("0022", "0029", "0033", "0036", "0041", "0043", "0058", "0069", "0076", "0063")) %>%
+  ggplot(aes(x = Visit, y = elisa.HBsAb)) +
+  geom_point(aes(color = Participant)) + geom_line(aes(group = Participant)) + ct2
 ```
 
+# Vis Progress + filter future need to run
+```{r filtering}
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS") #this is final merged dataset with meta
+table(elisa_mergeMeta$Visit)
+#str(elisa_mergeMeta)
+metadata <- read_csv("./outs/merged_metadata.csv")
+setDT(metadata)
+colnames(metadata)
+metadata[,Age]
 
+alum  <- metadata[StatusAtEnrollment == "HBVnaive" & Product == "EngerixB"]
+cpg   <- metadata[StatusAtEnrollment == "HBVnaive" & Product == "Heplisav"]
+boost <- metadata[StatusAtEnrollment == "HBVimmune"]
+
+alum_timepoints <- c("v1w0", "v1w1", "v2w0", "v2w1", "v2w4", "v3w0", "v3w1", "v3w4")
+cpg_timepoints <- c("v1w0", "v1w1", "v2w0", "v2w1", "v2w4")
+boost_timepoints <- c("v1w0", "v1w1", "v1w4")
+
+alum[,alum_timepoints] <- NA
+glimpse(alum)
+cpg[,cpg_timepoints] <- NA
+boost[,boost_timepoints] <- NA
+
+alum
+alum_long <- melt(alum, measure.vars = alum_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), group = "alum")]
+cpg_long <- melt(cpg, measure.vars = cpg_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), group = "cpg")]
+boost_long <- melt(boost, measure.vars = boost_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), group = "boost")]
+
+merged <- rbindlist(mget(ls(pattern = "_long$")), fill = TRUE)
+
+elisa_mergeMeta$make.unique
+merged[elisa_mergeMeta, on = .(Participant_Visit = make.unique), elisa.HBsAb := i.elisa.HBsAb]
+
+merged[group == "alum"] %>%
+  ggplot(aes(x = Visit, y = Participant, fill = elisa.HBsAb)) +
+  geom_tile() +ct2 + scale_fill_viridis_c()
+
+merged[group == "cpg"] %>%
+  ggplot(aes(x = Visit, y = Participant, fill = elisa.HBsAb)) +
+  geom_tile() +ct2 + scale_fill_viridis_c()
+
+merged[group == "boost"] %>%
+  ggplot(aes(x = Visit, y = Participant, fill = elisa.HBsAb)) +
+  geom_tile() +ct2 + scale_fill_viridis_c()
+```
+
+# old processing here onward.... can delete?
 ```{r load-and-merge-data, eval=FALSE}
 # Data from multiple batches are loaded from different files.
 b0 <- read_xlsx("./data/elisa_output.xlsx")
@@ -417,7 +486,7 @@ df <- df %>% filter(!timepoint %in% c("16", "17", "18")) %>%   filter(!subject %
 
 # Block 2: Handle Duplicates and Add Metadata
 
-```{r handle_duplicates}
+```{r handle_duplicates, eval = FALSE}
 # This section deals with cases where there are multiple measurements for the same subject at the same timepoint.
 df
 df <- df %>% filter(!is.na(elisa))
@@ -489,7 +558,7 @@ rm(list = setdiff(ls(), c("df.clean", "ct2")))
 
 # --- Add Metadata ---
 
-```{r adding-metadata}
+```{r adding-metadata, eval = FALSE}
 # Metadata, such as participant demographics and vaccination status, is added to the main dataframe.
 
 meta <- fread("./data/20251102 HBV metadata.csv")
@@ -544,7 +613,7 @@ saveRDS(df, "./outs/20250828_hbv_merged_elisa_final_with_meta.rds")
 
 # --- Organize and Derive New Variables ---
 
-```{r organize-new-variables}
+```{r organize-new-variables, eval=FALSE}
 # This section creates new variables for analysis and visualization.
 table(df$Cohort)
 
@@ -570,7 +639,7 @@ ggplot(unique(df, by='subject'), aes(y = Age.at.time.of.Consent, x=Cohort)) +
 
 
 # --- T tetramer plots ---
-```{r t-tetramer}
+```{r t-tetramer, eval = FALSE}
 df <- fread("./data/All CD4 tTets.csv")
 names(df) <- c("DRB0101", "DRB0701", "SpecimenID", "visit")
 df <- melt(df, id.vars = c("SpecimenID", "visit"), measure.vars = c("DRB0101", "DRB0701"), variable.name = "Marker", value.name = "Frequency")
@@ -578,12 +647,8 @@ ggplot(df, aes(x = visit, y = Frequency, group = SpecimenID, color = SpecimenID)
 
 ```
 
-
-
-
-
 # --- Exploratory Analysis ---
-```{r exploratory-analysis}
+```{r exploratory-analysis, eval=FALSE}
 
 
 # Check for missing age data for a specific subject.
