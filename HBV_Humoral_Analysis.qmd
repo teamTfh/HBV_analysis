@@ -9,6 +9,8 @@ output:
     toc_collapsed: true
     toc_depth: 3
     number_sections: true
+editor_options: 
+  chunk_output_type: console
 ---
 
 This document details the process of cleaning, preparing, and analyzing humoral data related to HBV vaccination. The analysis involves several steps, including data import, merging of different batches, handling of duplicates, and integration of metadata. The primary goal is to explore the antibody responses over time, particularly in different age groups and vaccine types.
@@ -44,6 +46,8 @@ library(emmeans)      # Estimated marginal means
 library(lme4)         # Linear mixed-effects models
 library(lmerTest)     # Tests for lme4 models
 library(viridis)
+library(ComplexHeatmap)
+
 
 # --- Custom Theme ---
 # A custom ggplot theme is defined for consistent plot styling.
@@ -303,6 +307,7 @@ df_mean <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum',
 
 # ggplot(df_mean, aes(x=timepoint, y=mean, color = age_group, group = age_group)) + geom_line(aes(x=timepoint, y=mean, color=age_group)) + geom_ribbon(aes(ymin=CI_lower,ymax=CI_upper,fill=age_group),color="grey70",alpha=0.4) +ct2 + ylab("elisa")+ scale_y_log10(labels = scales::label_number())
 colnames(elisa_mergeMeta)
+table(elisa_mergeMeta[,Study.arm])
 table(elisa_mergeMeta$LNBx)
 elisa_mergeMeta[LNBx == 'Y'] %>%
 #  filter(subject %in% c("0022", "0029", "0033", "0036", "0041", "0043", "0058", "0069", "0076", "0063")) %>%
@@ -310,7 +315,7 @@ elisa_mergeMeta[LNBx == 'Y'] %>%
   geom_point(aes(color = Participant)) + geom_line(aes(group = Participant)) + ct2
 ```
 
-# Vis Progress + filter future need to run
+# Vis progress and exploration
 ```{r filtering}
 elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS") #this is final merged dataset with meta
 table(elisa_mergeMeta$Visit)
@@ -333,27 +338,138 @@ glimpse(alum)
 cpg[,cpg_timepoints] <- NA
 boost[,boost_timepoints] <- NA
 
+
 alum
-alum_long <- melt(alum, measure.vars = alum_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), group = "alum")]
-cpg_long <- melt(cpg, measure.vars = cpg_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), group = "cpg")]
-boost_long <- melt(boost, measure.vars = boost_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), group = "boost")]
+alum_long <- melt(alum, measure.vars = alum_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), Study.arm ='HBVnaive-Alum')]
+cpg_long <- melt(cpg, measure.vars = cpg_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), Study.arm = "HBVnaive-CpG")]
+boost_long <- melt(boost, measure.vars = boost_timepoints, variable.name = "Visit")[, `:=`(Participant_Visit = paste(Participant, Visit, sep = "_"), Study.arm = 'HBVimmune-Alum')]
 
 merged <- rbindlist(mget(ls(pattern = "_long$")), fill = TRUE)
 
 elisa_mergeMeta$make.unique
 merged[elisa_mergeMeta, on = .(Participant_Visit = make.unique), elisa.HBsAb := i.elisa.HBsAb]
 
-merged[group == "alum"] %>%
+merged[Study.arm == "HBVnaive-Alum"] %>%
   ggplot(aes(x = Visit, y = Participant, fill = elisa.HBsAb)) +
   geom_tile() +ct2 + scale_fill_viridis_c()
 
-merged[group == "cpg"] %>%
+merged[Study.arm == "HBVnaive-CpG"] %>%
   ggplot(aes(x = Visit, y = Participant, fill = elisa.HBsAb)) +
   geom_tile() +ct2 + scale_fill_viridis_c()
 
-merged[group == "boost"] %>%
+merged[Study.arm == "HBVimmune-Alum"] %>%
   ggplot(aes(x = Visit, y = Participant, fill = elisa.HBsAb)) +
   geom_tile() +ct2 + scale_fill_viridis_c()
+
+
+#hm of naive alum
+heatmap_matrix <- merged %>%
+  filter(Study.arm == "HBVnaive-Alum") %>%
+  select(Participant, Visit, elisa.HBsAb) %>%
+  # Handle potential duplicates by taking the mean if necessary
+  pivot_wider(names_from = Visit, values_from = elisa.HBsAb) %>%
+  # Convert to a matrix and set row names to Participant IDs
+  tibble::column_to_rownames("Participant") %>%
+  as.matrix()
+
+heatmap_matrix <- na.omit(heatmap_matrix)  
+heatmap_matrix_log <- log10(heatmap_matrix + 1)
+
+Heatmap(heatmap_matrix_log, 
+        name = "log10(HBsAb)", 
+        col = viridis::viridis(100),
+        cluster_rows = TRUE,    # This creates the hierarchical clustering for Participants
+        cluster_columns = FALSE, # Usually, you want to keep Visits in chronological order
+        show_row_names = T,  # Turn off if you have many participants
+        row_title = "Participants",
+        column_title = "Visit")
+# #extract cluster info
+# ht <- Heatmap(heatmap_matrix_log, 
+#               name = "log10(HBsAb)", 
+#               col = viridis::viridis(100),
+#               cluster_rows = TRUE, 
+#               cluster_columns = FALSE)
+# ht_obj <- draw(ht)
+# row_indices <- row_order(ht_obj)
+# row_dend <- row_dend(ht_obj)
+# clusters <- cutree(as.hclust(row_dend), k = 3)
+# cluster_df <- data.frame(
+#   Participant = rownames(heatmap_matrix_log),
+#   Cluster = clusters
+# )
+# 
+# setDT(cluster_df)
+# merged <- merge(merged, cluster_df, by = "Participant", all.x = TRUE)
+# merged[, Cluster := as.factor(Cluster)]
+
+clus1 <- c("hbvx-0078", "hbvx-0051", "hbvx-0056", "hbvx-0084", "hbvx-0045", "hbvx-0039", "hbvx-0038", "hbvx-0057", "hbvx-0020", "hbvx-0051", "hbvx-0020", "hbvx-0063")
+clus2 <- c("hbvx-0043","hbvx-0067","hbvx-0003","hbvx-0037","hbvx-0018","hbvx-0058","hbvx-0023","hbvx-0044")
+clus3 <- c("hbvx-0010","hbvx-0015","hbvx-0050","hbvx-0065","hbvx-0071","hbvx-0040","hbvx-0028","hbvx-0077","hbvx-0021","hbvx-0053","hbvx-0027","hbvx-0082")
+
+merged[, Cluster := NA_character_]
+merged[Participant %in% clus1, Cluster := "1"]
+merged[Participant %in% clus2, Cluster := "2"]
+merged[Participant %in% clus3, Cluster := "3"]
+merged[, Cluster := factor(Cluster, levels = c("1", "2", "3"))]
+merged[,Cluster]
+
+merged[Study.arm == "HBVnaive-Alum" & !is.na(Cluster), unique(.SD, by = "Participant")] %>%
+  ggplot(aes(x = Cluster, y = Age)) + 
+  geom_boxplot() +
+  geom_quasirandom() + 
+  ct2 #+
+  #stat_compare_means(method = "anova")
+
+stats_table <- merged[Study.arm == "HBVnaive-Alum" & !is.na(Cluster), unique(.SD, by = "Participant")] %>%
+  wilcox_test(Age ~ Cluster, p.adjust.method = "holm") %>%
+  add_significance()
+print(stats_table)
+
+
+elisa_mergeMeta[Study.arm == 'HBVimmune-Alum'] %>%
+  ggplot(aes(y = elisa.HBsAb, x = Age)) + 
+  geom_point(size = 2, alpha = 0.6) +
+  geom_smooth(method = "lm", color = "black", se = TRUE, fill = "lightgrey") +
+  stat_cor(method = "spearman", label.x.npc = "left", label.y.npc = "bottom") + 
+  scale_y_log10() +  
+  ct2 + 
+  facet_wrap(~Visit, ncol = 4)
+
+elisa_mergeMeta[Study.arm == 'HBVimmune-Alum']%>%
+  ggplot(aes(y = elisa.HBsAb, x = Age, color=AgeSplit50)) + 
+  #geom_line(aes(group=Participant), alpha=0.2) + 
+  geom_point(size=2,alpha=0.6)  + 
+  # geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ 
+  scale_color_manual(values = c("#E66100","#5D3A9B"))+ 
+  scale_y_log10() +  
+  ct2 + facet_wrap(~Visit)
+
+
+ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HBsAb, x = Visit, color=AgeSplit50)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
+  geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ 
+  scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  
+  ct2 
+
+# Run Wilcoxon test for each timepoint
+stat.test <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'] %>%
+  drop_na(elisa.HBsAb) %>%
+  group_by(Visit) %>%
+  wilcox_test(elisa.HBsAb ~ AgeSplit50) %>%
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "Visit", dodge = 0.8)
+stat.test <- stat.test %>% filter(!p.adj.signif == "ns")
+stat.test <- stat.test %>%
+  mutate(y.position = c(2.8, 3, 3, 3, 3)[seq_len(n())])  # example
+
+ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HBsAb, x = Visit, color=AgeSplit50)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
+  geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=3)+ 
+  scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  
+  ct2 +
+  stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = TRUE)
+
 ```
 
 # --- T tetramer plots ---
@@ -362,7 +478,6 @@ df <- fread("./data/All CD4 tTets.csv")
 names(df) <- c("DRB0101", "DRB0701", "SpecimenID", "visit")
 df <- melt(df, id.vars = c("SpecimenID", "visit"), measure.vars = c("DRB0101", "DRB0701"), variable.name = "Marker", value.name = "Frequency")
 ggplot(df, aes(x = visit, y = Frequency, group = SpecimenID, color = SpecimenID)) +  geom_line(alpha = 0.7, size = 0.8) +  geom_point(size = 2) +  facet_wrap(~ Marker, scales = "free_y") + theme_minimal() +    labs(title = "Frequency of Parent by Visit", subtitle = "Connected by SpecimenID", y = "Frequency", x = "Visit Timepoint") +   theme(axis.text.x =element_text(angle = 45, hjust = 1)) + scale_y_log10()
-
 ```
 
 # --- Exploratory Analysis ---
