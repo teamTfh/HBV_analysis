@@ -47,6 +47,7 @@ library(lme4)         # Linear mixed-effects models
 library(lmerTest)     # Tests for lme4 models
 library(viridis)
 library(ComplexHeatmap)
+library(stringr)
 
 
 # --- Custom Theme ---
@@ -469,8 +470,97 @@ ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HBsAb, x = V
   scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  
   ct2 +
   stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = TRUE)
+```
+
+```{r visit date offset merge}
+
+#delete below. this portion contains visit date offset information
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta.RDS") #this is final merged dataset with meta
+visit_dates <- read_xlsx("./data/hbv_visit_dates_organize.xlsx", sheet = "master_log_cleaned")
+meta_offset<- read_xlsx("./data/HBV_visit_offset.xlsx", shee = "OriginalData")
+setDT(visit_dates)
+setDT(meta_offset) 
+glimpse(visit_dates)
+
+colnames(visit_dates)
+date_cols <- c("v1w0", "v1w1", "v1w4", "v2w0", "v2w1", "v2w4", "v3w0", "v3w1",  "v3w4",  "optional.v1", "optional.v2")
+visit_dates[, (date_cols) := lapply(.SD, as.Date, format="%m/%d/%Y"), .SDcols = date_cols]
+
+glimpse(visit_dates)
+setnames(visit_dates, old = c("Participant ID"), new = c("Participant"))
+glimpse(meta_offset)
+meta_offset <- meta_offset[, .(Participant, Date.Offset)]
+visit_dates[meta_offset, on = .(Participant), Date.Offset := i.Date.Offset]
+# Melt visit_dates to long format
+#visit_dates_long <- melt(visit_dates, id.vars = "Participant", measure.vars = date_cols, variable.name = "Visit", value.name = "VisitDate")
+
+new_cols <- paste0(date_cols,"_offset")
+visit_dates[!is.na(Date.Offset), (new_cols) := lapply(.SD, function(x) x + Date.Offset), .SDcols = date_cols]
+visit_dates[,FirstVisitDate := v1w0_offset]
+
+visit_offset_only <- visit_dates[, .SD, .SDcols = patterns("offset|Participant|First")]
+glimpse(visit_offset_only)
+#make visit_offset_only longer 
+visit_offset_only <- melt(visit_offset_only, id.vars = c("Participant", "FirstVisitDate"), measure.vars = patterns("_offset$"), variable.name = "Visit", value.name = "offset_VisitDate")
+glimpse(visit_offset_only)
+
+visit_offset_only[,Participant := tolower(Participant)]
+visit_offset_only[,Participant := str_replace(Participant, "nlv-", "")]
+visit_offset_only[,make.unique := paste0(tolower(Participant), "_", Visit)]
+
+#delete above
+visit_offset_only <- na.omit(visit_offset_only)
+visit_offset_only[,make.unique := str_replace(make.unique, "_offset", "")]
+visit_offset_only[,Visit := str_replace(Visit, "_offset", "")]
+write_csv(visit_offset_only, "./outs/visit_dates_with_offset.csv")
+
+#clean environment
+to_keep <- c("visit_offset_only", "elisa_mergeMeta", "ct2")
+rm(list = setdiff(ls(), to_keep))
+glimpse(visit_offset_only)
+
+elisa_mergeMeta <- merge(visit_offset_only, elisa_mergeMeta, by = c("make.unique","Participant", "Visit"), all = TRUE)
+glimpse(elisa_mergeMeta)
+names(elisa_mergeMeta)
+not_meta <- c("make.unique", "Participant", "offset_VisitDate", "elisa.HBsAb", "Visit")
+meta_to_impute <- setdiff(names(elisa_mergeMeta), not_meta)
+
+elisa_mergeMeta[, (meta_to_impute) := lapply(.SD, function(x) x[!is.na(x)][1]), 
+     by = Participant, 
+     .SDcols = meta_to_impute]
+elisa_mergeMeta[,FirstVisit := NULL]
+elisa_mergeMeta[,DaysFromFirstVisit := as.numeric(offset_VisitDate - FirstVisitDate)]
+glimpse(elisa_mergeMeta)
+saveRDS(elisa_mergeMeta, "./outs/elisa_mergeMeta_with_offsetVisitDates.rds") #full elisa with offset visit dates
 
 ```
+
+```{r serology plots dates}
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta_with_offsetVisitDates.rds")
+elisa_sub <- elisa_mergeMeta[!make.unique %like% "optional"]
+glimpse(elisa_sub)
+
+elisa_sub[Study.arm == 'HBVnaive-Alum'] %>%
+  ggplot(aes(x = DaysFromFirstVisit, y = elisa.HBsAb, color=AgeSplit50)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
+  scale_color_manual(values = c("#E66100","#5D3A9B"))+ 
+  scale_y_log10() +  
+  ct2
+ggsave("./figs/hbvnaive_alum_elisa_byDaysFromFirstVisit_50agesplit.pdf", width = 6, height = 4)
+
+elisa_sub[Study.arm == 'HBVnaive-Alum'] %>%
+  ggplot(aes(x = DaysFromFirstVisit, y = elisa.HBsAb)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
+  scale_color_manual(values = c("grey20"))+ 
+  scale_y_log10() + 
+  ct2 + theme(text = element_text(size = 16))
+
+
+ggsave("./figs/hbvnaive_alum_elisa_byDaysFromFirstVisit.pdf", width = 6, height = 4)
+
+```
+
+
 
 # --- T tetramer plots ---
 ```{r t-tetramer, eval = FALSE}
