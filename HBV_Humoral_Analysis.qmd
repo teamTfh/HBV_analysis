@@ -48,6 +48,8 @@ library(lmerTest)     # Tests for lme4 models
 library(viridis)
 library(ComplexHeatmap)
 library(stringr)
+library(lme4)
+library(ggnewscale)
 
 
 # --- Custom Theme ---
@@ -57,11 +59,13 @@ ct2 <- theme_bw() +
         panel.grid.minor = element_blank(),
         strip.background = element_blank(),
         strip.text = element_text(color = "black"),
-        # axis.text.x = element_text(color = "black", angle = 45, hjust = 1),
+        axis.text.x = element_text(color = "black", angle = 45, hjust = 1),
         axis.text.y = element_text(color = "black"),
         # text = element_text(family = "Arial"),
         plot.title = element_text(hjust = 0.5), 
-        axis.ticks.x.bottom = element_blank())
+        axis.ticks.x.bottom = element_blank()) +
+  theme(text = element_text(size = 16)) 
+  
 
 
 ```
@@ -472,6 +476,7 @@ ggplot(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'], aes(y = elisa.HBsAb, x = V
   stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = TRUE)
 ```
 
+#--- Merge visit dates with offset ---
 ```{r visit date offset merge}
 
 #delete below. this portion contains visit date offset information
@@ -535,6 +540,7 @@ saveRDS(elisa_mergeMeta, "./outs/elisa_mergeMeta_with_offsetVisitDates.rds") #fu
 
 ```
 
+#--- serology time plots ---
 ```{r serology plots dates}
 elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta_with_offsetVisitDates.rds")
 elisa_sub <- elisa_mergeMeta[!make.unique %like% "optional"]
@@ -545,21 +551,602 @@ elisa_sub[Study.arm == 'HBVnaive-Alum'] %>%
   geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
   scale_color_manual(values = c("#E66100","#5D3A9B"))+ 
   scale_y_log10() +  
-  ct2
-ggsave("./figs/hbvnaive_alum_elisa_byDaysFromFirstVisit_50agesplit.pdf", width = 6, height = 4)
+  ct2 + theme(text = element_text(size = 16))
+ggsave("./figs/hbvnaive_alum_elisa_byDaysFromFirstVisit_50agesplit.pdf", width = 6, height = 3)
 
 elisa_sub[Study.arm == 'HBVnaive-Alum'] %>%
   ggplot(aes(x = DaysFromFirstVisit, y = elisa.HBsAb)) + 
   geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
   scale_color_manual(values = c("grey20"))+ 
   scale_y_log10() + 
+  ct2# + theme(text = element_text(size = 16))
+
+
+ggsave("./figs/hbvnaive_alum_elisa_byDaysFromFirstVisit.pdf", width = 5, height = 3)
+
+#alum naive approx months
+elisa_naivealum <- elisa_sub[Study.arm == 'HBVnaive-Alum']
+elisa_naivealum[, approxMonths := fcase(
+  Visit == "v1w0", 0,
+  Visit == "v1w1", 0.25,
+  Visit == "v2w0", 1.00,
+  Visit == "v2w1", 1.25,
+  Visit == "v2w4", 2,
+  Visit == "v3w0", 6,
+  Visit == "v3w1", 6.25,
+  Visit == "v3w4", 7,
+  # Add more conditions here
+  default = NA_real_
+)]
+
+elisa_naivealum[, approxMonths]
+
+elisa_naivealum %>%
+  ggplot(aes(x = approxMonths, y = elisa.HBsAb)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + 
+  #geom_point(size=2,alpha=0.6)  + 
+  #geom_boxplot(aes(group = approxMonths)) +
+  scale_color_manual(values = c("grey20"))+ 
+  scale_y_log10() + 
   ct2 + theme(text = element_text(size = 16))
 
+elisa_naivealum %>%
+  group_by(approxMonths) %>%
+  summarise(
+    mean_val = mean(elisa.HBsAb, na.rm = TRUE),
+    sd_val = sd(elisa.HBsAb, na.rm = TRUE)
+  ) %>%
+  ggplot(aes(x = approxMonths, y = mean_val)) +
+    geom_line() +
+    geom_point() +
+    geom_errorbar(aes(ymin = mean_val - sd_val, ymax = mean_val + sd_val), width = 0.2) +
+    labs(y = "Mean elisa.HBsAb", x = "Months") +ct2
 
-ggsave("./figs/hbvnaive_alum_elisa_byDaysFromFirstVisit.pdf", width = 6, height = 4)
+elisa_naivealum %>%
+  group_by(approxMonths, AgeSplit50) %>% # Add age.group here
+  summarise(
+    mean_val = mean(elisa.HBsAb, na.rm = TRUE),
+    sd_val = sd(elisa.HBsAb, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = approxMonths, y = mean_val, color = AgeSplit50, group = AgeSplit50)) +
+    geom_line(position = position_dodge(0.2)) +
+    geom_point(position = position_dodge(0.2)) +
+    geom_errorbar(
+      aes(ymin = mean_val - sd_val, ymax = mean_val + sd_val), 
+      width = 0.2,
+      position = position_dodge(0.2)
+    ) +
+    labs(
+      y = "Mean elisa.HBsAb", 
+      x = "Months",
+      color = "Age Group"
+    ) + ct2
+
+
+elisa_naivealum %>%
+  group_by(approxMonths, AgeSplit50) %>%
+  summarise(
+    mean_val = mean(elisa.HBsAb, na.rm = TRUE),
+    sd_val = sd(elisa.HBsAb, na.rm = TRUE),
+    n_val = n(),
+    sem_val = sd_val / sqrt(n_val), # Calculate SEM
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = approxMonths, y = mean_val, color = AgeSplit50, group = AgeSplit50)) +
+    geom_line(position = position_dodge(0.2)) +
+    geom_point(position = position_dodge(0.2)) +
+    geom_errorbar(
+      aes(ymin = mean_val - sem_val, ymax = mean_val + sem_val), # Use sem_val
+      width = 0.1, # Slightly narrower bar for a cleaner look
+      position = position_dodge(0.2)
+    ) +
+    labs(
+      y = "Mean elisa.HBsAb ± SEM", 
+      x = "Months",
+      color = "Age Group"
+    ) + ct2
+
+elisa_naivealum %>% #this plot for plotting 95% CI
+  group_by(approxMonths, AgeSplit50) %>%
+  summarise(
+    mean_val = mean(elisa.HBsAb, na.rm = TRUE),
+    sd_val = sd(elisa.HBsAb, na.rm = TRUE),
+    n_val = n(),
+    sem_val = sd_val / sqrt(n_val),
+    # 95% CI calculation
+    ci_multiplier = qt(0.975, df = n_val - 1), # Use t-distribution for accuracy
+    lower_ci = mean_val - (ci_multiplier * sem_val),
+    upper_ci = mean_val + (ci_multiplier * sem_val),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = approxMonths, y = mean_val, color = AgeSplit50, group = AgeSplit50)) +
+    geom_line(position = position_dodge(0.2)) +
+    geom_point(position = position_dodge(0.2)) +
+    geom_errorbar(
+      aes(ymin = lower_ci, ymax = upper_ci), 
+      width = 0.15, 
+      position = position_dodge(0.2)
+    ) +
+    scale_color_manual(values = c("#E66100","#5D3A9B"))+ ct2 + scale_y_log10() +
+  theme() +
+    ylab("elisa.HBsAb ± 95%CI") 
+ggsave("./figs/agesplit50_95CI.pdf", width = 5, height = 3)
+
+
+elisa_naivealum %>%
+  group_by(approxMonths, AgeSplit50) %>%
+  summarise(
+    mean_val = mean(elisa.HBsAb, na.rm = TRUE),
+    sd_val = sd(elisa.HBsAb, na.rm = TRUE),
+    n_val = n(),
+    sem_val = sd_val / sqrt(n_val),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = approxMonths, y = mean_val, color = AgeSplit50)) +
+    geom_line(position = position_dodge(0.2)) +
+    geom_point(position = position_dodge(0.2)) +
+    geom_errorbar(
+      aes(ymin = mean_val - sem_val, ymax = mean_val + sem_val),
+      width = 0.1, 
+      position = position_dodge(0.2)
+    ) +
+    scale_color_manual(values = c("#E66100","#5D3A9B"))+ 
+  ylab("elisa.HBsAb ± SEM") +
+    scale_y_log10() + # This makes the RAW error bars look uneven
+    annotation_logticks(sides = "l") + ct2
+ggsave("./figs/agesplit50_SEM.pdf", width = 5, height = 3)
+
+# 1. Transform the data (Standard for titers)
+# 2. Fit a model: Does the slope (approxMonths) differ by Age Group?
+# 'Participant' is a random effect because you have repeated measures
+temp <- elisa_naivealum[Visit %in% c("v1w0", "v1w1", "v2w0", "v2w1", "v2w4")] # from day 0 until 4 weeks after 2nd vax
+temp[, log_elisa.HBsAb := log10(elisa.HBsAb)]
+model <- lmer(log_elisa.HBsAb ~ approxMonths * AgeSplit50 + (1 | Participant), 
+              data = temp)
+summary(model)
+
+table(elisa_sub$Study.arm)
+elisa_sub[Visit %in% c("v1w0", "v2w0", "v3w0")][Study.arm == "HBVnaive-Alum"] %>% 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant)) +
+  geom_point() + 
+  geom_line() + scale_y_log10() + ct2
+
+elisa_sub[Visit %in% c("v1w0", "v1w1", "v2w1","v3w1")][Study.arm == "HBVnaive-Alum"] %>% 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant)) +
+  geom_point() + 
+  geom_line() + scale_y_log10() + ct2
+
+elisa_sub[Visit %in% c("v1w0", "v2w0", "v3w0")][Study.arm == "HBVnaive-Alum"] %>% 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = AgeSplit50)) +
+  geom_point() + 
+  geom_line() + scale_y_log10() + ct2  +
+  scale_color_manual(values = c("#E66100","#5D3A9B"))
+
+visits <- c("v1w0", "v2w0", "v3w0")
+elisa_select <- elisa_naivealum[Visit %in% visits]
+
+stat.test <- elisa_select %>%
+  #drop_na(elisa, age_group, subject) %>%
+  group_by(Visit) %>%
+  wilcox_test(elisa.HBsAb ~ AgeSplit50) %>%
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "Visit", dodge = 0.8)
+stat.test <- stat.test %>%
+  filter(!p.adj.signif == "ns")
+stat.test <- stat.test %>%
+   mutate(y.position = c(2.8, 3)[seq_len(n())])
+
+medianData <- elisa_select[, .(median.elisa = median(elisa.HBsAb, na.rm = TRUE)), by = .(Visit, Study.arm, AgeSplit50)]
+
+elisa_select %>% 
+  ggplot(aes(y = elisa.HBsAb, x = Visit, color=AgeSplit50)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
+  geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit, color=AgeSplit50, group=AgeSplit50), alpha=1, linewidth=2)+ 
+  scale_color_manual(values = c("#E66100","#5D3A9B"))+ scale_y_log10() +  
+  ct2 + stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = TRUE)
+
+ggsave("./figs/v1w0.v2w0.v3w0_agesplit50.pdf", width = 3.5, height = 3)
+
+stat.test <- elisa_select %>%
+  #drop_na(elisa, age_group, subject) %>%
+  #group_by() %>%
+  wilcox_test(elisa.HBsAb ~ Visit) %>%
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "Visit", dodge = 0.8)
+stat.test <- stat.test %>%
+  filter(!p.adj.signif == "ns")
+stat.test <- stat.test %>%
+   mutate(y.position = c(2.8, 3)[seq_len(n())])
+
+elisa_select %>% 
+  ggplot(aes(y = elisa.HBsAb, x = Visit)) + 
+  geom_line(aes(group=Participant), alpha=0.2) + geom_point(size=2,alpha=0.6)  + 
+  geom_line(data=medianData[Study.arm == 'HBVnaive-Alum'], aes(y = median.elisa, x = Visit), alpha=1, linewidth=2)+ 
+  scale_y_log10() +   
+  ct2 + stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = TRUE)
+
+ggsave("./figs/v1w0.v2w0.v3w0_timecourse.pdf", width = 3, height = 3)
+
+
 
 ```
 
+#--- meta correlations ---
+```{r}
+elisa_mergeMeta
+
+
+names(elisa_mergeMeta)
+
+#ipsi(even) and contra(odd)
+elisa_mergeMeta[, ID_Parity := ifelse(as.numeric(sub(".*(\\d)$", "\\1", Participant)) %% 2 == 0, "even", "odd")]
+#temp <- subset(elisa_mergeMeta, grepl("w[01]$", Visit)) #subset w0s and w1s
+elisa_mergeMeta[grepl("w[01]$", Visit) & Study.arm == 'HBVnaive-Alum'] |> 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = ID_Parity)) + 
+  geom_line() + 
+  geom_point(alpha = 0.6) + 
+  ct2 + scale_y_log10()
+
+table(elisa_mergeMeta$Visit)
+elisa_mergeMeta[!Visit %in% c("optional.v1", "optional.v2") & 
+  Study.arm == 'HBVnaive-Alum' & ID_Parity == "odd"] |> 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = ID_Parity)) + 
+  geom_line() + 
+  geom_point(alpha = 0.6) + 
+  scale_y_log10() + 
+  ct2
+
+elisa_mergeMeta[Visit %in% c(#"v2w0", "v2w1", "v2w4", 
+  "v3w0", "v3w1", "v3w4") & Study.arm == 'HBVnaive-Alum'] |> 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = ID_Parity)) + 
+  geom_line() + 
+  geom_point(alpha = 0.6) + 
+  scale_y_log10() + 
+  ct2
+
+elisa_mergeMeta[Visit %in% c("v3w4") & Study.arm == 'HBVnaive-Alum']
+
+
+geo_summary <- function(x) {
+  x <- x[x > 0 & !is.na(x)]  # Remove zeros and NAs
+  if (length(x) < 2) return(data.frame(y = NA, ymin = NA, ymax = NA))
+  
+  logx <- log(x)
+  m    <- mean(logx)
+  se   <- sd(logx) / sqrt(length(logx))
+  ci   <- 1.96 * se  # 95% CI multiplier
+  
+  data.frame(
+    y    = exp(m),
+    ymin = exp(m - ci),
+    ymax = exp(m + ci)
+  )
+}
+
+#remove_highv1w0 <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum' & Visit == "v1w0" & elisa.HBsAb > 100]
+#table(remove_highv1w0$Participant)
+
+temp  <- elisa_mergeMeta[#Visit %in% c("v3w0", "v3w1", "v3w4") 
+  !Visit %in% c("optional.v1", "optional.v2") & Study.arm == 'HBVnaive-Alum' &
+    !Participant %in% Participant[Visit == "v1w0" & elisa.HBsAb > 100]]
+temp %>%
+  ggplot(aes(x = Visit, y = elisa.HBsAb)) +
+  # Individual "Spaghetti" Lines
+  geom_line(aes(group = Participant, color = ID_Parity), size = 0.2, alpha = 0.4) +
+  geom_point(aes(color = ID_Parity), size = 1, alpha = 0.4) +
+  scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") +
+
+  # New Scale for Summary Stats
+  new_scale_color() +
+  new_scale_fill() +
+
+  # Summary Lines (Geometric Mean)
+  stat_summary(fun.data = geo_summary, geom = "line",
+               aes(color = ID_Parity, group = ID_Parity), size = 1) +
+
+  # Summary Points + Error Bars
+  stat_summary(fun.data = geo_summary, geom = "errorbar", width = 0.3,
+               aes(color = ID_Parity), position = position_dodge(width = 0.3)) +
+  stat_summary(fun.data = geo_summary, geom = "point", shape = 21,
+               aes(fill = ID_Parity), color = "black", size = 2.5, position = position_dodge(width = 0.3)) +
+
+  # Styling
+  scale_y_log10(labels = scales::label_number(),
+                expand = expansion(mult = c(0.1, 0.1))) +
+  scale_color_manual(name = "Final dose rand.", values = c("#E66100","#5D3A9B")) +
+  scale_fill_manual(name = "Final dose rand.", values = c("#E66100","#5D3A9B")) +
+  ct2 
+
+
+#subset timepoint ipsi/contra stats
+#
+stat.test <- temp[Visit %in% c("v3w0", "v3w1", "v3w4"), 
+                            .(Visit, ID_Parity, log_elisa.HBsAb = log10(elisa.HBsAb))] %>%
+  group_by(Visit) %>%
+  wilcox_test(log_elisa.HBsAb ~ ID_Parity) %>%  # Formula must be inside brackets
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "Visit", dodge = 0.8) %>%
+  mutate(y.position = 3.5) # Adjusted slightly higher for log scale
+stat.test# <- stat.test %>% filter(!p.adj.signif == "ns")
+
+temp[Visit %in% c("v3w0", "v3w1", "v3w4") & Study.arm == 'HBVnaive-Alum'] |>
+  ggplot(aes(x = Visit, y = elisa.HBsAb)) +
+  # Individual "Spaghetti" Lines
+  geom_line(aes(group = Participant, color = ID_Parity), size = 0.2, alpha = 0.4) +
+  geom_point(aes(color = ID_Parity), size = 1, alpha = 0.4,) +
+  scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") +
+
+  # New Scale for Summary Stats
+  new_scale_color() +
+  new_scale_fill() +
+
+  # Summary Lines (Geometric Mean)
+  stat_summary(fun.data = geo_summary, geom = "line",
+               aes(color = ID_Parity, group = ID_Parity), size = 1, position = position_dodge(width = 0.3)) +
+
+  # Summary Points + Error Bars
+  stat_summary(fun.data = geo_summary, geom = "errorbar", width = 0.3,
+               aes(color = ID_Parity), position = position_dodge(width = 0.3)) +
+  stat_summary(fun.data = geo_summary, geom = "point", shape = 21,
+               aes(fill = ID_Parity), color = "black", size = 2.5, position = position_dodge(width = 0.3)) +
+
+  # Styling
+  scale_y_log10(labels = scales::label_number(),
+                expand = expansion(mult = c(0.1, 0.1))) +
+  scale_color_manual(name = "Final dose rand.", values = c("#E66100","#5D3A9B")) +
+  scale_fill_manual(name = "Final dose rand.", values = c("#E66100","#5D3A9B")) +
+  ct2 + stat_pvalue_manual(stat.test, 
+                     label = "p.adj.signif",  # shows *, **, ***
+                     tip.length = 0.01,
+                     hide.ns = FALSE, size = 7)
+
+#foldchange
+names(elisa_mergeMeta)
+temp <- elisa_mergeMeta[, .N, by = make.unique][N > 1]
+conflicts <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum', .N, 
+                             by = .(Participant, Visit)][N > 1]
+print(conflicts)
+elisa_mergeMeta[Participant == "hbvx-0015" & Visit == "v3w4"] #issue is 0015 v3w4 and v3w3 misnamed?
+elisa_mergeMeta <- elisa_mergeMeta[make.unique != "hbvx-0015_v3w3"]
+
+elisa_wide <- dcast(elisa_mergeMeta[Study.arm == 'HBVnaive-Alum' & !Visit %in% c("optional.v1", "optional.v2")],
+                    Participant + ID_Parity ~ Visit, 
+                    value.var = "elisa.HBsAb")
+# elisa_wide <- dcast(temp[Study.arm == 'HBVnaive-Alum' & !Visit %in% c("optional.v1", "optional.v2")],
+#                     Participant + ID_Parity ~ Visit, 
+#                     value.var = "elisa.HBsAb")
+
+elisa_wide[, `:=`(
+  fc_v1w1_v1w0 = get("v1w1") / get("v1w0"),
+  fc_v3w4_v3w0 = get("v3w4") / get("v3w0")
+)]
+
+
+stat.test <- elisa_wide %>%
+  wilcox_test(fc_v3w4_v3w0 ~ ID_Parity) %>%  # Formula must be inside brackets
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "ID_Parity"#, dodge = 0.8
+                  ) %>%
+  mutate(y.position = 10) # Adjusted slightly higher for log scale]
+
+elisa_wide |> ggplot(aes(x = ID_Parity, y = fc_v3w4_v3w0, color = ID_Parity)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+  geom_jitter(width = 0.2, size = 2, alpha = 0.7) +
+  #scale_y_log10() +
+  scale_y_continuous(trans = "log2", labels = scales::label_number(accuracy = 0.01),
+                     breaks = c(0, 0.25, 0.5, 1, 2, 4, 8, 16, 32)) +
+  ct2 +
+  #labs(y = "Fold Change (v1w1 / v1w0)", x = "ID Parity") +
+  scale_color_manual(values = c("#E66100","#5D3A9B")) + 
+  theme(legend.position = "none") + stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = FALSE, size = 7)
+
+elisa_wide[, fc_v1w1_v1w0_highlow := 
+             fcase(fc_v1w1_v1w0 >= 2, "high", fc_v1w1_v1w0 < 2,  "low")]
+table(elisa_wide$fc_v1w1_v1w0_highlow, elisa_wide$Participant)
+glimpse(elisa_wide)
+elisa_wide|>
+#[ID_Parity == "odd"]|>
+  ggplot(aes(x = v1w0, y = v3w4, group = Participant)) +
+  geom_point(aes(color = ID_Parity)) +
+  #facet_wrap(~fc_v1w1_v1w0_highlow) + # Creates side-by-side plots
+  scale_y_log10() + ct2 
+
+
+stat.test <- elisa_wide %>%
+  wilcox_test(fc_v1w1_v1w0 ~ ID_Parity) %>%  # Formula must be inside brackets
+  adjust_pvalue(method = "holm") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "ID_Parity"#, dodge = 0.8
+                  ) %>%
+  mutate(y.position = 8) # Adjusted slightly higher for log scale]
+
+names(elisa.wide)
+elisa_wide %>% 
+  ggplot(aes(y = fc_v3w4_v3w0, x = ID_Parity)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+  geom_quasirandom(width = 0.2, aes(color = fc_v1w1_v1w0_highlow)) + ct2 +  
+  scale_y_continuous(trans = "log2"#, labels = scales::label_number(accuracy = 0.01),
+                     #breaks = c(0, 0.25, 0.5, 1, 2, 4, 8, 16, 32)
+                     ) +
+  facet_wrap(~fc_v1w1_v1w0_highlow)
+  #+ 
+  #stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = FALSE, size = 7) 
+ 
+elisa_wide[, `:=`(
+  fc_v1w1_v1w0_highlow = ifelse(fc_v1w1_v1w0 >= 2, "high", "low"),
+  fc_v3w4_v3w0_highlow = ifelse(get("v3w4")/get("v3w0") >= 2, "high", "low")
+)]
+
+elisa_wide %>% ggplot(aes(x = fc_v1w1_v1w0, y = fc_v3w4_v3w0)) +
+  geom_point(aes(color = ID_Parity)) + ct2 +
+  scale_y_continuous(trans = "log2") +
+  scale_x_continuous(trans = "log2")
+
+
+elisa_mergeMeta[elisa_wide, 
+                fc_v1w1_v1w0_highlow := i.fc_v1w1_v1w0_highlow, 
+                fc_v3w4_v3w0_highlow := i.fc_v3w4_v3w0_highlow,
+                on = "Participant"]
+names(elisa_mergeMeta)
+elisa_mergeMeta$Visit
+elisa_mergeMeta[Visit %in% c("v1w0", "v1w1") & #ID_Parity == "even" & 
+                   !is.na(fc_v1w1_v1w0_highlow)]  |> 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = fc_v1w1_v1w0_highlow)) +
+  geom_line(alpha = 0.5) +
+  facet_wrap(~ID_Parity + fc_v1w1_v1w0_highlow) + 
+    scale_color_manual(values = c("blue","red")) + # Creates side-by-side plots
+  scale_y_log10() +
+  ct2 
+
+elisa_mergeMeta[!Visit %in% c("optional.v1", "optional.v2") &
+                   !is.na(fc_v1w1_v1w0_highlow)]  |> 
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = fc_v1w1_v1w0_highlow)) +
+  geom_line(alpha = 0.5) +
+  facet_wrap(~fc_v1w1_v1w0_highlow + ID_Parity) + 
+    scale_color_manual(values = c("blue","red")) + # Creates side-by-side plots
+  scale_y_log10() +
+  ct2 
+
+  
+stat.test <- elisa_wide %>%
+  group_by(ID_Parity) %>%
+  wilcox_test(fc_v3w4_v3w0 ~ fc_v1w1_v1w0_highlow) %>%  # Formula must be inside brackets
+  adjust_pvalue(method = "holm") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "fc_v1w1_v1w0_highlow"#, dodge = 0.8
+                  ) %>%
+  mutate(y.position = 7) # Adjusted slightly higher for log scale]
+stat.test
+  
+elisa_wide %>% 
+  ggplot(aes(y = fc_v3w4_v3w0, x = fc_v1w1_v1w0_highlow)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+  geom_quasirandom(width = 0.2, aes(color = fc_v1w1_v1w0_highlow)) + ct2 +  
+  scale_color_manual(values = c("blue","red")) + # Creates side-by-side plot
+  scale_y_continuous(trans = "log2") + #, labels = scales::label_number(accuracy = 
+  facet_wrap(~ID_Parity) +
+  stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = FALSE, size = 7)
+
+elis_wide
+
+stat.test <- elisa_wide %>%
+  group_by(fc_v1w1_v1w0_highlow) %>%
+  wilcox_test(fc_v3w4_v3w0 ~ ID_Parity) %>%  # Formula must be inside brackets
+  adjust_pvalue(method = "holm") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "ID_Parity"#, dodge = 0.8
+                  ) %>%
+  mutate(y.position = 7) # Adjusted slightly higher for log scale]
+stat.test
+
+elisa_wide %>% 
+  ggplot(aes(y = fc_v3w4_v3w0, x = ID_Parity)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.5, aes(color = ID_Parity)) +
+  geom_quasirandom(width = 0.2, aes(color = ID_Parity)) + ct2 +  
+  scale_color_manual(values = c("#E66100","#5D3A9B")) + 
+  scale_y_continuous(trans = "log2") + #, labels = scales::label_number(accuracy = 
+  facet_wrap(~fc_v1w1_v1w0_highlow) +
+  stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = FALSE, size = 7)
+
+
+
+
+elisa_mergeMeta[!Visit %in% c("optional.v1", "optional.v2") & Study.arm == 'HBVnaive-Alum' & #ID_Parity == "odd" &
+                  !is.na(fc_v1w1_v1w0_highlow)] |>
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = fc_v1w1_v1w0_highlow)) +
+  geom_line(alpha = 0.5) +
+  facet_wrap(~fc_v1w1_v1w0_highlow + ID_Parity) + # Creates side-by-side plots
+  scale_y_log10() +
+  ct2 
+
+elisa_mergeMeta[!Visit %in% c("optional.v1", "optional.v2") & Study.arm == 'HBVnaive-Alum' & ID_Parity == "odd" &
+                  !is.na(fc_v1w1_v1w0_highlow)] |>
+  ggplot(aes(x = Visit, y = elisa.HBsAb, group = Participant, color = fc_v1w1_v1w0_highlow)) +
+  geom_line(alpha = 0.5) +
+  facet_wrap(~fc_v1w1_v1w0_highlow) + # Creates side-by-side plots
+  scale_y_log10() +
+  ct2 
+
+target_visits <- c("v3w0", "v3w1", "v3w4")
+
+temp <- elisa_mergeMeta[
+    Study.arm == 'HBVnaive-Alum' & 
+    ID_Parity == "even" &
+    Visit %in% target_visits & 
+    !is.na(fc_v1w1_v1w0_highlow)
+]#[, if(.N == 3) .SD, by = Participant] # Only keep IDs that have all 3 visits
+names(temp)
+
+stat.test <- temp %>% #[Visit %in% c("v3w0", "v3w1", "v3w4"), 
+                            #.(Visit, ID_Parity, fc_v1w1_v1w0_highlow, log_elisa.HBsAb = log10(elisa.HBsAb))] %>%
+  group_by(Visit) %>%
+  wilcox_test(elisa.HBsAb ~ fc_v1w1_v1w0_highlow) %>% 
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "Visit", dodge = 0.8) %>%
+  mutate(y.position = 3.5) # Adjusted slightly higher for log scale
+stat.test# <- stat.test %>% filter(!p.adj.signif == "ns")
+
+temp|>
+  ggplot(aes(x = Visit, y = elisa.HBsAb)) +
+  # Individual "Spaghetti" Lines
+  geom_line(aes(group = Participant, color = fc_v1w1_v1w0_highlow), size = 0.2, alpha = 0.4) +
+  geom_point(aes(color = fc_v1w1_v1w0_highlow), size = 1, alpha = 0.4,) +
+  scale_color_manual(values = c("blue","red"), guide = "none") +
+
+  #scale_color_manual(values = c("#FFAE4D","#AA87E8"), guide = "none") +
+
+  # New Scale for Summary Stats
+  new_scale_color() +
+  new_scale_fill() +
+
+  # Summary Lines (Geometric Mean)
+  stat_summary(fun.data = geo_summary, geom = "line",
+               aes(color = fc_v1w1_v1w0_highlow, group = fc_v1w1_v1w0_highlow), size = 1, position = position_dodge(width = 0.3)) +
+
+  # Summary Points + Error Bars
+  stat_summary(fun.data = geo_summary, geom = "errorbar", width = 0.3,
+               aes(color = fc_v1w1_v1w0_highlow), position = position_dodge(width = 0.3)) +
+  stat_summary(fun.data = geo_summary, geom = "point", shape = 21,
+               aes(fill = fc_v1w1_v1w0_highlow), color = "black", size = 2.5, position = position_dodge(width = 0.3)) +
+
+  # Styling
+  scale_y_log10(labels = scales::label_number(),
+                expand = expansion(mult = c(0.1, 0.1))) +
+ scale_color_manual(values = c("blue","red")) +
+  scale_fill_manual(values = c("blue","red")) +
+  # scale_color_manual(name = "Final dose rand.", values = c("#E66100","#5D3A9B")) +
+  # scale_fill_manual(name = "Final dose rand.", values = c("#E66100","#5D3A9B")) +
+  ct2 + stat_pvalue_manual(stat.test, 
+                     label = "p.adj.signif",  # shows *, **, ***
+                     tip.length = 0.01,
+                     hide.ns = FALSE, size = 7)
+
+
+
+
+# data <- elisa_mergeMeta[Study.arm == 'HBVnaive-Alum'& Visit == "v2w4", #& LNBx == "Y", 
+#                         .(elisa.HBsAb, Age, BMI, DaysFromVaxToUltrasound, YearsSinceQuit)]
+# plot(data , pch=20 , cex=0.5 , col="#69b3a2")
+# 
+# table(elisa_mergeMeta$LNBx)
+# glimpse(elisa_mergeMeta)
+
+#data <- mtcars[ , c(1,3:6)]
+ 
+
+
+
+
+
+
+
+```
 
 
 # --- T tetramer plots ---
@@ -1172,5 +1759,9 @@ df.boost %>%
   theme(strip.text = element_blank()) +
   # Add p-value significance annotations stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0.01, hide.ns = FALSE)
   ggsave("R:/heratr01lab/heratr01labspace/Hepatitis_B/ELISA_data_only/merged_elisa/traditional_HBsAg_elisa/hbv_elisa_analysis_han/outs/boost_timecourse.pdf", height = 3, width = 3)
+
+
+
+
 
 ```
