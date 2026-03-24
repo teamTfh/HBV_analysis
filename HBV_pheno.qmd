@@ -1,0 +1,352 @@
+---
+title: "phenotyping"
+author: "Xiaomin"
+format: html
+editor: visual
+---
+
+This document details the process of cleaning, preparing, and analyzing humoral data related to HBV vaccination. The analysis involves several steps, including data import, merging of different batches, handling of duplicates, and integration of metadata. The primary goal is to explore the antibody responses over time, particularly in different age groups and vaccine types.
+
+# Load libraries
+
+```{r call-libraries, echo=FALSE, message=FALSE, warning=FALSE}
+# Block 1: Data Import and Library Loading
+
+# --- Load Libraries ---
+# This section loads all the necessary R packages for data manipulation, visualization, and statistical analysis.
+library(reshape2)     # data reshaping
+library(ggplot2)      # Plotting
+library(dplyr)        # Data manipulation
+library(readr)        # Reading CSV files
+library(readxl)       # Reading Excel files
+library(ggpubr)       # Publication-ready plots
+library(gridExtra)    # Arranging grid layouts
+library(cowplot)      # Arranging plots
+library(rstatix)      # Statistical tests
+library(tidyr)        # Tidy data principles
+# library(GGally)       # Advanced plots
+library(ggbeeswarm)   # Beeswarm plots
+library(plotly)       # Interactive plots
+library(patchwork)    # Combining ggplot plots
+# library(extrafont)    # Using custom fonts
+library(writexl)      # Writing to Excel files
+# library(lubridate)    # Date-time manipulation
+# library(ggnewscale)   # Multiple color scales in ggplot
+library(ggrepel)      # Repel overlapping text labels
+library(data.table)
+library(emmeans)      # Estimated marginal means
+library(lme4)         # Linear mixed-effects models
+library(lmerTest)     # Tests for lme4 models
+library(viridis)
+library(ggbreak)
+
+# --- Custom Theme ---
+# A custom ggplot theme is defined for consistent plot styling.
+ct2 <- theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(color = "black"),
+        # axis.text.x = element_text(color = "black", angle = 45, hjust = 1),
+        axis.text.y = element_text(color = "black"),
+        # text = element_text(family = "Arial"),
+        plot.title = element_text(hjust = 0.5), 
+        axis.ticks.x.bottom = element_blank())
+
+
+```
+
+# --- Load Data and processing for merge---
+
+```{r}
+phenoflow<-read_excel("./data/20260320Pheno_cleandata_table_xy.xls")
+phenoflow <- phenoflow |>
+  mutate(make.unique = paste(Participant, Visit, sep = "_"))
+elisaMeta<-read_csv("./outs/elisa_mergeMeta.csv")
+phenoflow <- phenoflow |>
+  mutate(DRBsum = `DRB0101+` + `DRB0701+`)
+```
+
+#-----merge pheno with elisaMeta-----
+
+```{r}
+phenoflow_elisa_Meta <- full_join(
+  phenoflow,
+  elisaMeta,
+  by = "make.unique",
+  suffix = c(".pheno", ".elisa")
+) |>
+  select(
+    -ends_with(".elisa")
+  )
+# 1) Build a clean metadata table from elisaMeta
+meta_clean <- elisaMeta %>%
+  group_by(Participant) %>%        # or Participant.pheno if that's the name there
+  summarise(
+    FirstVisit        = first(na.omit(FirstVisit)),
+    Age               = first(na.omit(Age)),
+    Sex               = first(na.omit(Sex)),
+    Race              = first(na.omit(Race)),
+    Ethnicity         = first(na.omit(Ethnicity)),
+    BMI               = first(na.omit(BMI)),
+    StatusAtEnrollment = first(na.omit(StatusAtEnrollment)),
+    Product           = first(na.omit(Product)),
+    .groups = "drop"
+  )
+
+# 2) Join this back to the stitched data
+phenoflow_elisa_Meta <- phenoflow_elisa_Meta %>%
+  left_join(meta_clean,
+            by = c("Participant.pheno" = "Participant"),
+            suffix = c("", ".meta"))
+
+# 3) Fill NAs in stitched columns from the meta_clean columns
+phenoflow_elisa_Meta <- phenoflow_elisa_Meta %>%
+  mutate(
+    FirstVisit        = coalesce(FirstVisit,        FirstVisit.meta),
+    Age               = coalesce(Age,               Age.meta),
+    Sex               = coalesce(Sex,               Sex.meta),
+    Race              = coalesce(Race,              Race.meta),
+    Ethnicity         = coalesce(Ethnicity,         Ethnicity.meta),
+    BMI               = coalesce(BMI,               BMI.meta),
+    StatusAtEnrollment = coalesce(StatusAtEnrollment, StatusAtEnrollment.meta),
+    Product           = coalesce(Product,           Product.meta)
+  ) %>%
+  select(
+    -ends_with(".meta")   # remove helper columns
+  )
+
+```
+
+#-----T-Tets plots timecourse, DRB0701, keep only Pos_=HLA Pos_?HLArows-----
+```{r}
+###naive group
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Tets %in% c("DRB01&07_≠HLA","DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA" ),
+         StatusAtEnrollment == "HBVnaive")
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno))
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0701_mean = mean(`DRB0701+`, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 2) plot with red average line
+ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
+  geom_point() +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
+  # red average line + points at each visit
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 2
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0701+`),
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0701+ % of CD4 T cells",
+    title = "DRB0701 over visits for HLA matching samples"
+  ) +
+  ct2
+###immune group
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Tets %in% c("DRB01&07_≠HLA","DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+         StatusAtEnrollment == "HBVimmune")
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno))
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0701_mean = mean(`DRB0701+`, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 2) plot with red average line
+ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
+  geom_point() +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
+  # red average line + points at each visit
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 2
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0701+`),
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0701+ % of CD4 T cells",
+    title = "DRB0701 over visits for HLA matching samples"
+  ) +
+  ct2
+```
+#-----T-Tets plots timecourse, DRB0101, keep only Pos_=HLA Pos_?HLArows-----
+```{r}
+###naive group
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Tets %in% c("DRB01_?HLA", "DRB01_≠HLA","DRB01&07_≠HLA", "DRB01_=HLA"),
+         StatusAtEnrollment == "HBVnaive")
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno))
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0101_mean = mean(`DRB0101+`, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 2) plot with red average line
+ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
+  geom_point() +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
+  # red average line + points at each visit
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 2
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0101+`),
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0101+ (% of CD4 T cells)",
+    title = "DRB0101 over visits"
+  ) +
+  ct2
+###immune group
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Tets %in% c("DRB01_?HLA", "DRB01_≠HLA","DRB01&07_≠HLA", "DRB01_=HLA"),
+         StatusAtEnrollment == "HBVimmune")
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno))
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0101_mean = mean(`DRB0101+`, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 2) plot with red average line
+ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
+  geom_point() +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
+  # red average line + points at each visit
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 2
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0101+`),
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0101+ (% of CD4 T cells)",
+    title = "DRB0101 over visits"
+  ) +
+  ct2
+```
+#-----T-Tets plots Ab correlation-----
+```{r}
+# keep only Pos_=HLA rows
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Tets %in% c("Pos_=HLA", "Pos_?HLA"),
+         StatusAtEnrollment == "HBVnaive")
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno))
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0701_mean = mean(`DRB0701+`, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 2) plot with red average line
+ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
+  geom_point() +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
+  geom_smooth(method = "loess", se = FALSE, color = "blue", size = 1.2) +
+  # red average line + points at each visit
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 2
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0701+`),
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0701",
+    title = "DRB0701 over visits for HLA matching samples"
+  ) +
+  ct2
+```
+```
+
