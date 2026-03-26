@@ -39,6 +39,8 @@ library(lme4)         # Linear mixed-effects models
 library(lmerTest)     # Tests for lme4 models
 library(viridis)
 library(ggbreak)
+library(broom)
+library(rlang)   # for ensym / !! / :=
 
 # --- Custom Theme ---
 # A custom ggplot theme is defined for consistent plot styling.
@@ -63,8 +65,7 @@ phenoflow<-read_excel("./data/20260320Pheno_cleandata_table_xy.xls")
 phenoflow <- phenoflow |>
   mutate(make.unique = paste(Participant, Visit, sep = "_"))
 elisaMeta<-read_csv("./outs/elisa_mergeMeta.csv")
-phenoflow <- phenoflow |>
-  mutate(DRBsum = `DRB0101+` + `DRB0701+`)
+
 ```
 
 #-----merge pheno with elisaMeta-----
@@ -75,10 +76,8 @@ phenoflow_elisa_Meta <- full_join(
   elisaMeta,
   by = "make.unique",
   suffix = c(".pheno", ".elisa")
-) |>
-  select(
-    -ends_with(".elisa")
-  )
+) 
+  
 # 1) Build a clean metadata table from elisaMeta
 meta_clean <- elisaMeta %>%
   group_by(Participant) %>%        # or Participant.pheno if that's the name there
@@ -115,18 +114,50 @@ phenoflow_elisa_Meta <- phenoflow_elisa_Meta %>%
   select(
     -ends_with(".meta")   # remove helper columns
   )
+#remove space in column names
+names(phenoflow_elisa_Meta) <- gsub(" ", ".", names(phenoflow_elisa_Meta))
+
+#define final elisa for every participant
+phenoflow_elisa_Meta <- phenoflow_elisa_Meta %>%
+  group_by(Participant.elisa) %>%
+  arrange(Visit.elisa, .by_group = TRUE) %>%
+  mutate(
+    Elisa.final = {
+      # last non-NA elisa.HBsAb in this participant
+      vals <- elisa.HBsAb
+      vals[rev(seq_along(vals))[which(!is.na(rev(vals)))[1]]]
+    }
+  ) %>%
+  ungroup()
+#define memoryTtets and Activate.cTfh %in CD4
+phenoflow_elisa_Meta <- phenoflow_elisa_Meta %>%
+  mutate(
+    memDRB01 = `DRB0101+`*DRB01_nonnaive/100,
+    memDRB07 = `DRB0701+`*DRB07_nonnaive/100,
+    Activated.cTfh.CD4 = Activated.cTfh*cTfh/100,
+    CD8.GZMB = `CD8.GZMB+...39`+ `CD8.GZMB+...40`
+  ) 
 
 ```
 
-#-----T-Tets plots timecourse, DRB0701, keep only Pos_=HLA Pos_?HLArows-----
+#-----T-Tets plots timecourse, DRB0701### naive group all DRB0701-----
+
 ```{r}
-###naive group
+###naive group all DRB0701
+# 1) Filter data
 df_plot <- phenoflow_elisa_Meta %>%
-  filter(Tets %in% c("DRB01&07_≠HLA","DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA" ),
-         StatusAtEnrollment == "HBVnaive")
+  filter(
+    Tets %in% c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+    StatusAtEnrollment == "HBVnaive"
+  )
+
+# 2) Labels for last visit per participant
 df_labels <- df_plot %>%
   group_by(Participant.pheno) %>%
-  filter(Visit.pheno == max(Visit.pheno))
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
 df_avg <- df_plot %>%
   group_by(Visit.pheno) %>%
   summarise(
@@ -134,17 +165,56 @@ df_avg <- df_plot %>%
     .groups = "drop"
   )
 
-# 2) plot with red average line
-ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
-  geom_point() +
-  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
-  # red average line + points at each visit
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0701_base = `DRB0701+`) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0701 = `DRB0701+`),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0701_base[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      y <- DRB0701[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0701_mean + 0.4 * diff(range(DRB0701_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pnaive <- ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
   geom_line(
     data = df_avg,
     aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
     inherit.aes = FALSE,
     color = "red",
-    size = 2
+    size = 1.5
   ) +
   geom_point(
     data = df_avg,
@@ -156,21 +226,47 @@ ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
   geom_text_repel(
     data = df_labels,
     aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0701+`),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
     size = 3
   ) +
   labs(
     x = "Visit",
-    y = "DRB0701+ % of CD4 T cells",
-    title = "DRB0701 over visits for HLA matching samples"
+    y = "DRB0701+ (% of CD4 T cells)",
+    title = "DRB0701 over visits"
   ) +
-  ct2
-###immune group
+  ct2 
+
+#####--------------------------------------------------------------------
+###immune group all DRB0701
+# 1) Filter data
 df_plot <- phenoflow_elisa_Meta %>%
-  filter(Tets %in% c("DRB01&07_≠HLA","DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
-         StatusAtEnrollment == "HBVimmune")
+  filter(
+    Tets %in% c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+    StatusAtEnrollment == "HBVimmune"
+  )
+
+# 2) Labels for last visit per participant
 df_labels <- df_plot %>%
   group_by(Participant.pheno) %>%
-  filter(Visit.pheno == max(Visit.pheno))
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
 df_avg <- df_plot %>%
   group_by(Visit.pheno) %>%
   summarise(
@@ -178,17 +274,56 @@ df_avg <- df_plot %>%
     .groups = "drop"
   )
 
-# 2) plot with red average line
-ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
-  geom_point() +
-  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
-  # red average line + points at each visit
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0701_base = `DRB0701+`) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0701 = `DRB0701+`),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0701_base[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      y <- DRB0701[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0701_mean + 0.4 * diff(range(DRB0701_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pimmune <- ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
   geom_line(
     data = df_avg,
     aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
     inherit.aes = FALSE,
     color = "red",
-    size = 2
+    size = 1.5
   ) +
   geom_point(
     data = df_avg,
@@ -200,24 +335,364 @@ ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
   geom_text_repel(
     data = df_labels,
     aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0701+`),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
     size = 3
   ) +
   labs(
     x = "Visit",
-    y = "DRB0701+ % of CD4 T cells",
-    title = "DRB0701 over visits for HLA matching samples"
+    y = "DRB0701+ (% of CD4 T cells)",
+    title = "DRB0701 over visits"
   ) +
   ct2
+
+print(pnaive)
+print(pimmune)
+######################################################DRB0701+ memory phenotype over time(naive)
+df_long <- phenoflow_elisa_Meta %>%
+  select(Participant.pheno, Visit.pheno, DRB07_naive, DRB07_nonnaive,
+         StatusAtEnrollment, Tets) %>%
+  pivot_longer(
+    cols = c("DRB07_naive", "DRB07_nonnaive"),
+    names_to = "Subtype",
+    values_to = "Value"
+  ) %>%
+  mutate(
+    Subtype = factor(
+      Subtype,
+      levels = c("DRB07_naive", "DRB07_nonnaive"),
+      labels = c("Naive", "Non-naive")
+    )
+  ) %>%
+  filter(
+    Visit.pheno != "NA",
+    Tets %in% c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+    StatusAtEnrollment == "HBVnaive"
+  ) %>%
+  group_by(Participant.pheno, Visit.pheno) %>%
+  # keep only participant-visit pairs where Naive + Non-naive > 0
+  filter(sum(Value, na.rm = TRUE) > 0) %>%
+  ungroup()
+
+# Aggregate and convert to percentages per visit
+df_pct <- df_long %>%
+  group_by(Visit.pheno, Subtype) %>%
+  summarise(Value = sum(Value, na.rm = TRUE), .groups = "drop_last") %>%
+  mutate(
+    Total = sum(Value, na.rm = TRUE),
+    Percent = 100 * Value / Total
+  ) %>%
+  ungroup()
+
+ggplot(df_pct, aes(x = Visit.pheno, y = Percent, fill = Subtype)) +
+  geom_col(position = "stack") +
+  labs(
+    x = "Visit",
+    y = " % of DRB0701+",
+    fill = "Subtype",
+   
+    title = "DRB0701 memory phenotype over visits"
+  ) +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+ ct2
+######################################################DRB0701+ memory phenotype over time(immune)
+df_long <- phenoflow_elisa_Meta %>%
+  select(Participant.pheno, Visit.pheno, DRB07_naive, DRB07_nonnaive,
+         StatusAtEnrollment, Tets) %>%
+  pivot_longer(
+    cols = c("DRB07_naive", "DRB07_nonnaive"),
+    names_to = "Subtype",
+    values_to = "Value"
+  ) %>%
+  mutate(
+    Subtype = factor(
+      Subtype,
+      levels = c("DRB07_naive", "DRB07_nonnaive"),
+      labels = c("Naive", "Non-naive")
+    )
+  ) %>%
+  filter(
+    Visit.pheno != "NA",
+    Tets %in% c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+    StatusAtEnrollment == "HBVimmune"
+  ) %>%
+  group_by(Participant.pheno, Visit.pheno) %>%
+  # keep only participant-visit pairs where Naive + Non-naive > 0
+  filter(sum(Value, na.rm = TRUE) > 0) %>%
+  ungroup()
+
+# Aggregate and convert to percentages per visit
+df_pct <- df_long %>%
+  group_by(Visit.pheno, Subtype) %>%
+  summarise(Value = sum(Value, na.rm = TRUE), .groups = "drop_last") %>%
+  mutate(
+    Total = sum(Value, na.rm = TRUE),
+    Percent = 100 * Value / Total
+  ) %>%
+  ungroup()
+
+ggplot(df_pct, aes(x = Visit.pheno, y = Percent, fill = Subtype)) +
+  geom_col(position = "stack") +
+  labs(
+    x = "Visit",
+    y = " % of DRB0701+",
+    fill = "Subtype",
+   
+    title = "DRB0701 memory phenotype over visits"
+  ) +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+ ct2
+################################################################memDRB0701 immune
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(
+    Tets %in% c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+    StatusAtEnrollment == "HBVimmune"
+  )
+
+# 2) Labels for last visit per participant
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0701_mean = mean(memDRB07, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0701_base = memDRB07) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0701 = memDRB07),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0701_base[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      y <- DRB0701[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0701_mean + 0.4 * diff(range(DRB0701_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pimmune <- ggplot(df_plot, aes(x = Visit.pheno, y = memDRB07)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = memDRB07),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0701+ (% of CD4 T cells)",
+    title = "Non_naive DRB0701+ over visits"
+  ) +
+  ct2 
+################################################################memDRB0701 naive
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(
+    Tets %in% c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+    StatusAtEnrollment == "HBVnaive"
+  )
+
+# 2) Labels for last visit per participant
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0701_mean = mean(memDRB07, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0701_base = memDRB07) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0701 = memDRB07),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0701_base[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      y <- DRB0701[!is.na(DRB0701_base) & !is.na(DRB0701)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0701_mean + 0.4 * diff(range(DRB0701_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pnaive <- ggplot(df_plot, aes(x = Visit.pheno, y = memDRB07)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0701_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = memDRB07),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0701+ (% of CD4 T cells)",
+    title = "Non_naive DRB0701+ over visits"
+  ) +
+  ct2 
+print(pnaive)
+print(pimmune)
 ```
-#-----T-Tets plots timecourse, DRB0101, keep only Pos_=HLA Pos_?HLArows-----
+
+
+#-----T-Tets plots timecourse, DRB0101### naive group all DRB0101-----
+
 ```{r}
-###naive group
+###naive group all DRB0101
+# 1) Filter data
 df_plot <- phenoflow_elisa_Meta %>%
-  filter(Tets %in% c("DRB01_?HLA", "DRB01_≠HLA","DRB01&07_≠HLA", "DRB01_=HLA"),
-         StatusAtEnrollment == "HBVnaive")
+  filter(
+    Tets %in% c("DRB01_=HLA","DRB01_?HLA","DRB01_≠HLA"),
+    StatusAtEnrollment == "HBVnaive"
+  )
+
+# 2) Labels for last visit per participant
 df_labels <- df_plot %>%
   group_by(Participant.pheno) %>%
-  filter(Visit.pheno == max(Visit.pheno))
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
 df_avg <- df_plot %>%
   group_by(Visit.pheno) %>%
   summarise(
@@ -225,17 +700,56 @@ df_avg <- df_plot %>%
     .groups = "drop"
   )
 
-# 2) plot with red average line
-ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
-  geom_point() +
-  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
-  # red average line + points at each visit
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0101_base = `DRB0101+`) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0101 = `DRB0101+`),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0101_base[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      y <- DRB0101[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0101_mean + 0.4 * diff(range(DRB0101_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pnaive01 <- ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
   geom_line(
     data = df_avg,
     aes(x = Visit.pheno, y = DRB0101_mean, group = 1),
     inherit.aes = FALSE,
     color = "red",
-    size = 2
+    size = 1.5
   ) +
   geom_point(
     data = df_avg,
@@ -247,6 +761,22 @@ ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
   geom_text_repel(
     data = df_labels,
     aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0101+`),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
     size = 3
   ) +
   labs(
@@ -255,13 +785,22 @@ ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
     title = "DRB0101 over visits"
   ) +
   ct2
-###immune group
+#####--------------------------------------------------------------------
+###immune group all DRB0101
+# 1) Filter data
 df_plot <- phenoflow_elisa_Meta %>%
-  filter(Tets %in% c("DRB01_?HLA", "DRB01_≠HLA","DRB01&07_≠HLA", "DRB01_=HLA"),
-         StatusAtEnrollment == "HBVimmune")
+  filter(
+    Tets %in% c("DRB01_=HLA","DRB01_?HLA","DRB01_≠HLA"),
+    StatusAtEnrollment == "HBVimmune"
+  )
+
+# 2) Labels for last visit per participant
 df_labels <- df_plot %>%
   group_by(Participant.pheno) %>%
-  filter(Visit.pheno == max(Visit.pheno))
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
 df_avg <- df_plot %>%
   group_by(Visit.pheno) %>%
   summarise(
@@ -269,17 +808,56 @@ df_avg <- df_plot %>%
     .groups = "drop"
   )
 
-# 2) plot with red average line
-ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
-  geom_point() +
-  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
-  # red average line + points at each visit
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0101_base = `DRB0101+`) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0101 = `DRB0101+`),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0101_base[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      y <- DRB0101[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0101_mean + 0.4 * diff(range(DRB0101_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pimmune01 <- ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
   geom_line(
     data = df_avg,
     aes(x = Visit.pheno, y = DRB0101_mean, group = 1),
     inherit.aes = FALSE,
     color = "red",
-    size = 2
+    size = 1.5
   ) +
   geom_point(
     data = df_avg,
@@ -291,6 +869,22 @@ ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
   geom_text_repel(
     data = df_labels,
     aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0101+`),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
     size = 3
   ) +
   labs(
@@ -299,54 +893,1172 @@ ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0101+`)) +
     title = "DRB0101 over visits"
   ) +
   ct2
+print(pnaive01)
+print(pimmune01)
+######################################################DRB0101+ memory phenotype over time
+df_long <- phenoflow_elisa_Meta %>%
+  select(Participant.pheno, Visit.pheno, DRB01_naive, DRB01_nonnaive,
+         StatusAtEnrollment, Tets) %>%
+  pivot_longer(
+    cols = c("DRB01_naive", "DRB01_nonnaive"),
+    names_to = "Subtype",
+    values_to = "Value"
+  ) %>%
+  mutate(
+    Subtype = factor(
+      Subtype,
+      levels = c("DRB01_naive", "DRB01_nonnaive"),
+      labels = c("Naive", "Non-naive")
+    )
+  ) %>%
+  filter(
+    Visit.pheno != "NA",
+    Tets %in% c("DRB01_=HLA","DRB01_?HLA","DRB01_≠HLA"),
+    StatusAtEnrollment == "HBVnaive"
+  ) %>%
+  group_by(Participant.pheno, Visit.pheno) %>%
+  # keep only participant-visit pairs where Naive + Non-naive > 0
+  filter(sum(Value, na.rm = TRUE) > 0) %>%
+  ungroup()
+
+# Aggregate and convert to percentages per visit
+df_pct <- df_long %>%
+  group_by(Visit.pheno, Subtype) %>%
+  summarise(Value = sum(Value, na.rm = TRUE), .groups = "drop_last") %>%
+  mutate(
+    Total = sum(Value, na.rm = TRUE),
+    Percent = 100 * Value / Total
+  ) %>%
+  ungroup()
+
+ggplot(df_pct, aes(x = Visit.pheno, y = Percent, fill = Subtype)) +
+  geom_col(position = "stack") +
+  labs(
+    x = "Visit",
+    y = " % of DRB0101+",
+    fill = "Subtype",
+   
+    title = "DRB0101 memory phenotype over visits"
+  ) +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+ ct2
+################################################################memDRB0101 immune
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(
+    Tets %in% c("DRB01_=HLA","DRB01_?HLA","DRB01_≠HLA"),
+    StatusAtEnrollment == "HBVimmune"
+  )
+
+# 2) Labels for last visit per participant
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0101_mean = mean(memDRB01, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0101_base = memDRB01) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0101 = memDRB01),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0101_base[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      y <- DRB0101[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0101_mean + 0.4 * diff(range(DRB0101_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pimmune <- ggplot(df_plot, aes(x = Visit.pheno, y = memDRB01)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = memDRB01),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0101+ (% of CD4 T cells)",
+    title = "Non_naive DRB0101+ over visits"
+  ) +
+  ct2 
+################################################################memDRB0101 naive
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(
+    Tets %in% c("DRB01_=HLA","DRB01_?HLA","DRB01_≠HLA"),
+    StatusAtEnrollment == "HBVnaive"
+  )
+
+# 2) Labels for last visit per participant
+df_labels <- df_plot %>%
+  group_by(Participant.pheno) %>%
+  filter(Visit.pheno == max(Visit.pheno)) %>%
+  ungroup()
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    DRB0101_mean = mean(memDRB01, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, DRB0101_base = memDRB01) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, DRB0101 = memDRB01),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- DRB0101_base[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      y <- DRB0101[!is.na(DRB0101_base) & !is.na(DRB0101)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = DRB0101_mean + 0.4 * diff(range(DRB0101_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+pnaive <- ggplot(df_plot, aes(x = Visit.pheno, y = memDRB01)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = DRB0101_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = memDRB01),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "DRB0101+ (% of CD4 T cells)",
+    title = "Non_naive DRB0101+ over visits"
+  ) +
+  ct2 
+print(pnaive)
+print(pimmune)
 ```
+
+
+
 #-----T-Tets plots Ab correlation-----
+
 ```{r}
-# keep only Pos_=HLA rows
+df <- phenoflow_elisa_Meta
+make_cor_plot <- function(
+  df,
+  tets_values,
+  drb_col,
+  visit_pheno,
+  visit_elisa,
+  x_label,
+  y_label,
+  title
+) {
+  # phenotype at specified Visit.pheno
+  pheno <- df %>%
+    filter(
+      Tets %in% tets_values,
+      Visit.pheno == visit_pheno
+    ) %>%
+    select(Participant.pheno, DRB = all_of(drb_col))
+  
+  # ELISA at specified Visit.elisa
+  elisa <- df %>%
+    filter(Visit.elisa == visit_elisa) %>%
+    select(Participant.elisa, elisa = elisa.HBsAb)
+  
+  # join by participant
+  dat <- pheno %>%
+    inner_join(elisa, by = c("Participant.pheno" = "Participant.elisa"))
+  
+  # compute Pearson correlation (change to "spearman" if desired)
+  ct <- cor.test(dat$DRB, dat$elisa, use = "complete.obs", method = "pearson")
+  r_val <- unname(ct$estimate)
+  p_val <- ct$p.value
+  
+  ggplot(dat, aes(x = DRB, y = elisa)) +
+    geom_point(size = 2) +
+    geom_smooth(method = "lm", se = FALSE, color = "red") +
+    labs(
+      x = x_label,
+      y = y_label,
+      title = title,
+      subtitle = paste0("r = ", round(r_val, 2), 
+                        ", p = ", signif(p_val, 3))
+    ) +
+    theme_bw()
+}
+
+p_DRB01_v2 <- make_cor_plot(
+  df = df,
+  tets_values = c("DRB01_=HLA","DRB01_?HLA","DRB01_≠HLA"),
+  drb_col = "memDRB01",
+  visit_pheno = "v2w1",
+  visit_elisa = "v2w4",
+  x_label = "memDRB01 at v2w1 ((% of CD4 T cells))",
+  y_label = "HBsAb (ELISA) at v2w4",
+  title   = "memDRB01 v2w1 vs HBsAb v2w4"
+)
+p_DRB01_v2
+
+p_DRB01_v3 <- make_cor_plot(
+  df = df,
+  tets_values = c("DRB01_=HLA","DRB01_?HLA","DRB01_≠HLA"),
+  drb_col = "memDRB01",
+  visit_pheno = "v3w1",
+  visit_elisa = "v3w4",
+  x_label = "memDRB01 at v3w1 ((% of CD4 T cells))",
+  y_label = "HBsAb (ELISA) at v3w4",
+  title   = "memDRB01 v3w1 vs HBsAb v3w4"
+)
+p_DRB01_v3
+
+p_DRB07_v2 <- make_cor_plot(
+  df = df,
+  tets_values = c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+  drb_col = "memDRB07",
+  visit_pheno = "v2w1",
+  visit_elisa = "v2w4",
+  x_label = "memDRB07 at v2w1 ((% of CD4 T cells))",
+  y_label = "HBsAb (ELISA) at v2w4",
+  title   = "memDRB07 v2w1 vs HBsAb v2w4"
+)
+p_DRB07_v2
+
+p_DRB07_v3 <- make_cor_plot(
+  df = df,
+  tets_values = c("DRB07_=HLA","DRB07_?HLA","DRB07_≠HLA"),
+  drb_col = "memDRB07",
+  visit_pheno = "v3w1",
+  visit_elisa = "v3w4",
+  x_label = "memDRB07 at v3w1 ((% of CD4 T cells))",
+  y_label = "HBsAb (ELISA) at v3w4",
+  title   = "memDRB07 v3w1 vs HBsAb v3w4"
+)
+p_DRB07_v3
+
+```
+#-----------cTfh phenotypes----------------------
+\`\`\`
+```{r}
+######################################################naive group 
+# 1) Filter data
 df_plot <- phenoflow_elisa_Meta %>%
-  filter(Tets %in% c("Pos_=HLA", "Pos_?HLA"),
-         StatusAtEnrollment == "HBVnaive")
-df_labels <- df_plot %>%
-  group_by(Participant.pheno) %>%
-  filter(Visit.pheno == max(Visit.pheno))
+  filter(Visit.pheno != "NA",
+    StatusAtEnrollment == "HBVnaive"
+  )
+
+# 3) Average per visit
 df_avg <- df_plot %>%
   group_by(Visit.pheno) %>%
   summarise(
-    DRB0701_mean = mean(`DRB0701+`, na.rm = TRUE),
+    cTfh_mean = mean(cTfh, na.rm = TRUE),
     .groups = "drop"
   )
 
-# 2) plot with red average line
-ggplot(df_plot, aes(x = Visit.pheno, y = `DRB0701+`)) +
-  geom_point() +
-  geom_line(aes(group = Participant.pheno), alpha = 0.5) +
-  geom_smooth(method = "loess", se = FALSE, color = "blue", size = 1.2) +
-  # red average line + points at each visit
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, cTfh_base = cTfh) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, cTfh = cTfh),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- cTfh_base[!is.na(cTfh_base) & !is.na(cTfh)]
+      y <- cTfh[!is.na(cTfh_base) & !is.na(cTfh)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = cTfh_mean + 1 * diff(range(cTfh_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+ ggplot(df_plot, aes(x = Visit.pheno, y = cTfh)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
   geom_line(
     data = df_avg,
-    aes(x = Visit.pheno, y = DRB0701_mean, group = 1),
+    aes(x = Visit.pheno, y = cTfh_mean, group = 1),
     inherit.aes = FALSE,
     color = "red",
-    size = 2
+    size = 1.5
   ) +
   geom_point(
     data = df_avg,
-    aes(x = Visit.pheno, y = DRB0701_mean),
+    aes(x = Visit.pheno, y = cTfh_mean),
     inherit.aes = FALSE,
     color = "red",
     size = 5
   ) +
   geom_text_repel(
     data = df_labels,
-    aes(label = Participant.pheno, x = Visit.pheno, y = `DRB0701+`),
+    aes(label = Participant.pheno, x = Visit.pheno, y = cTfh),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
     size = 3
   ) +
   labs(
     x = "Visit",
-    y = "DRB0701",
-    title = "DRB0701 over visits for HLA matching samples"
+    y = "cTfh (% of CD4 T cells)",
+    title = "cTfh over visits"
   ) +
-  ct2
+  ct2 
+ 
+ #######################################################immune group
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Visit.pheno != "NA",
+    StatusAtEnrollment == "HBVimmune"
+  )
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    cTfh_mean = mean(cTfh, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, cTfh_base = cTfh) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, cTfh = cTfh),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- cTfh_base[!is.na(cTfh_base) & !is.na(cTfh)]
+      y <- cTfh[!is.na(cTfh_base) & !is.na(cTfh)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = cTfh_mean + 1 * diff(range(cTfh_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+ ggplot(df_plot, aes(x = Visit.pheno, y = cTfh)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = cTfh_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = cTfh_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = cTfh),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "cTfh (% of CD4 T cells)",
+    title = "cTfh over visits"
+  ) +
+   scale_x_discrete(limits = c("v1w0", "v1w1"))+  # fixed x axis labels
+  ct2 
+ 
 ```
+
+
+#-----------activated cTfh phenotypes % of CD4----------------------
+
+```{r}
+######################################################naive group 
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Visit.pheno != "NA",
+    StatusAtEnrollment == "HBVnaive"
+  )
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    Activated.cTfh.CD4_mean = mean(Activated.cTfh.CD4, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, Activated.cTfh.CD4_base = Activated.cTfh.CD4) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, Activated.cTfh.CD4 = Activated.cTfh.CD4),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- Activated.cTfh.CD4_base[!is.na(Activated.cTfh.CD4_base) & !is.na(Activated.cTfh.CD4)]
+      y <- Activated.cTfh.CD4[!is.na(Activated.cTfh.CD4_base) & !is.na(Activated.cTfh.CD4)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = Activated.cTfh.CD4_mean + 1 * diff(range(Activated.cTfh.CD4_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+ ggplot(df_plot, aes(x = Visit.pheno, y = Activated.cTfh.CD4)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh.CD4_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh.CD4_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = Activated.cTfh.CD4),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "Activated.cTfh (% of CD4 T cells)",
+    title = "Activated.cTfh over visits"
+  ) +
+  ct2 
+ 
+ #######################################################immune group
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Visit.pheno != "NA",
+    StatusAtEnrollment == "HBVimmune"
+  ) %>%
+  droplevels()
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    Activated.cTfh.CD4_mean = mean(Activated.cTfh.CD4, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, Activated.cTfh.CD4_base = Activated.cTfh.CD4) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, Activated.cTfh.CD4 = Activated.cTfh.CD4),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- Activated.cTfh.CD4_base[!is.na(Activated.cTfh.CD4_base) & !is.na(Activated.cTfh.CD4)]
+      y <- Activated.cTfh.CD4[!is.na(Activated.cTfh.CD4_base) & !is.na(Activated.cTfh.CD4)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = Activated.cTfh.CD4_mean + 1 * diff(range(Activated.cTfh.CD4_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+ ggplot(df_plot, aes(x = Visit.pheno, y = Activated.cTfh.CD4)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh.CD4_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh.CD4_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = Activated.cTfh.CD4),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "Activated.cTfh (% of CD4 T cells)",
+    title = "Activated.cTfh over visits"
+  ) +
+   scale_x_discrete(limits = c("v1w0", "v1w1"))+  # fixed x axis labels
+  ct2 
+```
+
+#-----------activated cTfh phenotypes % of cTfh----------------------
+```{r}
+######################################################naive group 
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(Visit.pheno != "NA",
+    StatusAtEnrollment == "HBVnaive"
+  )
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    Activated.cTfh_mean = mean(Activated.cTfh, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, Activated.cTfh_base = Activated.cTfh) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, Activated.cTfh = Activated.cTfh),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- Activated.cTfh_base[!is.na(Activated.cTfh_base) & !is.na(Activated.cTfh)]
+      y <- Activated.cTfh[!is.na(Activated.cTfh_base) & !is.na(Activated.cTfh)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = Activated.cTfh_mean + 1 * diff(range(Activated.cTfh_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+ ggplot(df_plot, aes(x = Visit.pheno, y = Activated.cTfh)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = Activated.cTfh),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "Activated.cTfh (% of cTfh)",
+    title = "Activated.cTfh over visits"
+  ) +
+  ct2 
+ 
+ #######################################################immune group
+# 1) Filter data
+df_plot <- phenoflow_elisa_Meta %>%
+  filter(!is.na(Visit.pheno),
+    StatusAtEnrollment == "HBVimmune"
+  ) %>%
+  droplevels()
+
+# 3) Average per visit
+df_avg <- df_plot %>%
+  group_by(Visit.pheno) %>%
+  summarise(
+    Activated.cTfh_mean = mean(Activated.cTfh, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 4) Compute p-values for each visit vs v1w0
+#    Assumes Visit.pheno is something like "v1w0", "v1w4", etc.
+baseline_visit <- "v1w0"
+
+# paired t-test per visit vs baseline (by Participant.pheno)
+df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, Activated.cTfh_base = Activated.cTfh) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, Activated.cTfh = Activated.cTfh),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+      x <- Activated.cTfh_base[!is.na(Activated.cTfh_base) & !is.na(Activated.cTfh)]
+      y <- Activated.cTfh[!is.na(Activated.cTfh_base) & !is.na(Activated.cTfh)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+# 5) Prepare text positions for p-values (slightly above mean line)
+df_ptext <- df_avg %>%
+  left_join(df_pvals, by = "Visit.pheno") %>%
+  mutate(
+    label = ifelse(is.na(p_value),
+                   NA_character_,
+                   paste0("p = ", signif(p_value, 3))),
+    y_pos = Activated.cTfh_mean + 1 * diff(range(Activated.cTfh_mean, na.rm = TRUE)) # adjust offset
+  ) %>%
+  filter(!is.na(label))  # keep only rows that will be labeled
+
+# 6) Plot
+ ggplot(df_plot, aes(x = Visit.pheno, y = Activated.cTfh)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh_mean, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = Activated.cTfh_mean),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = Activated.cTfh),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+  geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+  labs(
+    x = "Visit",
+    y = "Activated.cTfh (% of cTfh)",
+    title = "Activated.cTfh over visits"
+  ) +
+   scale_x_discrete(limits = c("v1w0", "v1w1"))+  # fixed x axis labels
+  ct2 
+```
+#-----------iterations of different flowmarkers over visit plot function----------------------
+
+```{r}
+
+plot_marker_over_visits <- function(df,
+                                    marker,
+                                    status_group = c("HBVnaive", "HBVimmune"),
+                                    baseline_visit = "v1w0",
+                                    labels_df = NULL,
+                                    y_label = NULL,
+                                    plot_title = NULL,
+                                    x_limits = NULL) {
+
+  status_group <- match.arg(status_group)
+
+  marker_sym  <- ensym(marker)
+  marker_syml <- sym(paste0(as_string(marker_sym), " (% of parent)"))
+
+  # 1) Filter data
+  df_plot <- df %>%
+    filter(
+      !is.na(Visit.pheno),
+      StatusAtEnrollment == status_group
+    )
+
+  # 2) Average per visit
+  df_avg <- df_plot %>%
+    group_by(Visit.pheno) %>%
+    summarise(
+      mean_val = mean(!!marker_sym, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  # 3) Paired t-test vs baseline
+  df_pvals <- df_plot %>%
+  filter(Visit.pheno %in% c(baseline_visit)) %>%
+  select(Participant.pheno, Visit.pheno, base = !!marker_sym) %>%
+  right_join(
+    df_plot %>% select(Participant.pheno, Visit.pheno, value = !!marker_sym),
+    by = "Participant.pheno"
+  ) %>%
+  filter(Visit.pheno.y != baseline_visit) %>%   # keep non-baseline visits
+  group_by(Visit.pheno.y) %>%
+  summarise(
+    p_value = {
+      # match baseline and current visit within participant
+        x <- base[!is.na(base) & !is.na(value)]
+        y <- value[!is.na(base) & !is.na(value)]
+      if (length(x) > 1) {
+        t.test(y, x, paired = TRUE)$p.value
+      } else {
+        NA_real_
+      }
+    },
+    .groups = "drop"
+  ) %>%
+  rename(Visit.pheno = Visit.pheno.y)
+
+  # 4) P‑value label positions
+  df_ptext <- df_avg %>%
+    left_join(df_pvals, by = "Visit.pheno") %>%
+    mutate(
+      label = ifelse(
+        is.na(p_value),
+        NA_character_,
+        paste0("p = ", signif(p_value, 3))
+      ),
+      y_pos = mean_val + 1 * diff(range(mean_val, na.rm = TRUE))
+    ) %>%
+    filter(!is.na(label))
+
+  # Default labels if not provided
+  if (is.null(y_label)) {
+    y_label <- rlang::as_name(marker_syml)
+  }
+  if (is.null(plot_title)) {
+    plot_title <- paste0(rlang::as_name(marker_sym), " over visits (", status_group, ")")
+  }
+
+  # Labels df
+  if (!is.null(labels_df)) {
+    labels_df <- labels_df %>%
+      mutate(value = !!marker_sym)
+  } else {
+    labels_df <- df_plot %>%
+      mutate(value = !!marker_sym)
+  }
+
+  # 5) Plot
+ p <- ggplot(df_plot, aes(x = Visit.pheno, y = !!marker_sym)) +
+  geom_point(color = "lightgray") +
+  geom_line(aes(group = Participant.pheno), alpha = 0.5, color= "lightgray") +
+  geom_line(
+    data = df_avg,
+    aes(x = Visit.pheno, y = mean_val, group = 1),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 1.5
+  ) +
+  geom_point(
+    data = df_avg,
+    aes(x = Visit.pheno, y = mean_val),
+    inherit.aes = FALSE,
+    color = "red",
+    size = 5
+  ) +
+  geom_text_repel(
+    data = df_labels,
+    aes(label = Participant.pheno, x = Visit.pheno, y = !!marker_sym),
+    size = 2,
+    color = "lightgray",
+    max.overlaps = Inf,        # let ggrepel consider all labels
+  box.padding = 0.4,         # more padding around labels
+  point.padding = 0.3,
+  min.segment.length = 0,    # always draw segments
+  force = 1.5               # increase repulsion
+  ) +
+  # add p-values as text above the mean line
+   geom_text(
+    data = df_ptext,
+    aes(x = Visit.pheno, y = y_pos, label = label),
+    inherit.aes = FALSE,
+    color = "red",
+    fontface = "bold.italic",
+    vjust = 0,
+    size = 3
+  ) +
+ labs(
+    x = "Visit",
+    y = y_label,
+    title = plot_title
+  ) +
+  ct2 
+ print(p)
+  }
+
+
+
+```
+
+
+```{r}
+
+markers <- colnames(phenoflow_elisa_Meta)
+markers <- markers[-c(1:3, 17:30, 32, 33, 39, 40, 41:81)]
+plots_naive <- lapply(
+  markers,
+  \(m) plot_marker_over_visits(
+    df = phenoflow_elisa_Meta,
+    marker = !!sym(m),       # Add the bang-bang operator here
+    status_group = "HBVnaive",
+    baseline_visit = "v1w0"
+  )
+)
+# 1. Define the layout (3 columns x 7 rows = 21 plots per page)
+# 'grobs' is your list of plots
+# 'nrow' and 'ncol' define the grid
+# 'top' can be a dynamic title or NULL
+multi_page_plot <- marrangeGrob(
+  grobs = plots_naive, 
+  nrow = 6, 
+  ncol = 2, 
+  top = "HBV Naive Marker Analysis"
+)
+
+# 2. Export to PDF
+# Adjust width and height for a standard A4 or Letter feel (e.g., 8.5 x 11 or 12 x 18)
+ggsave(
+  filename = "./outs/HBVnaive_Markers_Grid.pdf", 
+  plot = multi_page_plot, 
+  width = 12, 
+  height = 18
+)
+```
+
+```{r}
+print(markers)
 ```
 
