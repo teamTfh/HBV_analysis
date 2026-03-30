@@ -2051,7 +2051,7 @@ multi_page_plot <- marrangeGrob(
 # 2. Export to PDF
 # Adjust width and height for a standard A4 or Letter feel (e.g., 8.5 x 11 or 12 x 18)
 ggsave(
-  filename = "./outs/HBVnaive_Markers_Grid.pdf", 
+  filename = "./figs/Flow_pheno_HBVnaive_Markers_Grid.pdf", 
   plot = multi_page_plot, 
   width = 12, 
   height = 18
