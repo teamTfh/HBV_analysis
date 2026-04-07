@@ -64,7 +64,12 @@ ct2 <- theme_bw() +
 phenoflow<-read_excel("./data/20260320Pheno_cleandata_table_xy.xls")
 phenoflow <- phenoflow |>
   mutate(make.unique = paste(Participant, Visit, sep = "_"))
-elisaMeta<-read_csv("./outs/elisa_mergeMeta.csv")
+#elisaMeta <- read_csv("./outs/elisa_mergeMeta.csv")
+elisaMeta <- readRDS("./outs/elisa_mergeMeta_with_offsetVisitDates.rds")
+elisaMeta <- elisaMeta %>%
+  mutate(FirstVisitDate = if_else(Participant == "hbvx-0009" & is.na(FirstVisitDate), 
+                                  as.Date("2023-03-01"), 
+                                  FirstVisitDate))
 
 ```
 
@@ -82,8 +87,9 @@ phenoflow_elisa_Meta <- full_join(
 meta_clean <- elisaMeta %>%
   group_by(Participant) %>%        # or Participant.pheno if that's the name there
   summarise(
-    FirstVisit        = first(na.omit(FirstVisit)),
+    FirstVisitDate    = first(na.omit(FirstVisitDate)),
     Age               = first(na.omit(Age)),
+    AgeSplit50        = first(na.omit(AgeSplit50)),
     Sex               = first(na.omit(Sex)),
     Race              = first(na.omit(Race)),
     Ethnicity         = first(na.omit(Ethnicity)),
@@ -102,8 +108,9 @@ phenoflow_elisa_Meta <- phenoflow_elisa_Meta %>%
 # 3) Fill NAs in stitched columns from the meta_clean columns
 phenoflow_elisa_Meta <- phenoflow_elisa_Meta %>%
   mutate(
-    FirstVisit        = coalesce(FirstVisit,        FirstVisit.meta),
+    FirstVisitDate    = coalesce(FirstVisitDate,   FirstVisitDate.meta),
     Age               = coalesce(Age,               Age.meta),
+    AgeSplit50        = coalesce(AgeSplit50,        AgeSplit50.meta),
     Sex               = coalesce(Sex,               Sex.meta),
     Race              = coalesce(Race,              Race.meta),
     Ethnicity         = coalesce(Ethnicity,         Ethnicity.meta),
@@ -674,7 +681,6 @@ print(pnaive)
 print(pimmune)
 ```
 
-
 #-----T-Tets plots timecourse, DRB0101### naive group all DRB0101-----
 
 ```{r}
@@ -1160,8 +1166,6 @@ print(pnaive)
 print(pimmune)
 ```
 
-
-
 #-----T-Tets plots Ab correlation-----
 
 ```{r}
@@ -1260,8 +1264,9 @@ p_DRB07_v3 <- make_cor_plot(
 p_DRB07_v3
 
 ```
-#-----------cTfh phenotypes----------------------
-\`\`\`
+
+#-----------cTfh phenotypes---------------------- \`\`\`
+
 ```{r}
 ######################################################naive group 
 # 1) Filter data
@@ -1467,7 +1472,6 @@ df_ptext <- df_avg %>%
   ct2 
  
 ```
-
 
 #-----------activated cTfh phenotypes % of CD4----------------------
 
@@ -1678,6 +1682,7 @@ df_ptext <- df_avg %>%
 ```
 
 #-----------activated cTfh phenotypes % of cTfh----------------------
+
 ```{r}
 ######################################################naive group 
 # 1) Filter data
@@ -1883,6 +1888,166 @@ df_ptext <- df_avg %>%
    scale_x_discrete(limits = c("v1w0", "v1w1"))+  # fixed x axis labels
   ct2 
 ```
+
+#---------------activated cTfh  of cTfh plots Ab correlation-----
+
+```{r}
+# Define the visits you want to process
+all_visits <- c("v1w0", "v1w1", "v2w0", "v2w1", "v3w0", "v3w1")
+plot_list <- list() # Initialize a list to store plots
+# Loop through each visit
+for (v in all_visits) {
+  
+  # 1. Filter and pull the two columns for the current visit
+  cor_data <- phenoflow_elisa_Meta %>%
+    filter(Visit.pheno == v,
+           StatusAtEnrollment == "HBVnaive") %>%
+    select(Activated.cTfh, Elisa.final) %>%
+    drop_na() 
+  
+  # Check if we have enough data (at least 3 points) to run a correlation
+  if (nrow(cor_data) > 2) {
+    
+    # 2. Run the correlation
+    result <- cor.test(cor_data$Activated.cTfh, cor_data$Elisa.final, method = "pearson")
+    r_val <- unname(result$estimate)
+    p_val <- result$p.value
+    
+    # 3. Plot
+    p <- ggplot(cor_data, aes(x = Activated.cTfh, y = Elisa.final)) +
+      geom_point(size = 2) +
+      geom_smooth(method = "lm", se = FALSE, color = "red") +
+      labs(
+        x = "Activated cTfh (% of cTfh)",
+        y = "HBsAb (mIU/mL)",
+        title = paste("Activated cTfh vs Final HBsAb at", v),
+        subtitle = paste0("r = ", round(r_val, 2), 
+                          ", p = ", format.pval(p_val, digits = 3))
+      ) +
+      theme_bw()
+    
+    # Print the plot so it shows up in your Plots pane
+    print(p)
+    # Store the plot in the list
+    plot_list[[v]] <- p
+  } else {
+    message(paste("Skipping", v, "- not enough data points."))
+  }
+}
+# Save all plots to a single PDF page with 3 rows and 2 columns
+ggsave(
+  filename = "./figs/Flow_pheno_ActivatedcTfh_Ab_correlation_percentageofcTfh.pdf", 
+  plot = marrangeGrob(plot_list, nrow = 3, ncol = 2), 
+  width = 8.5, height = 11
+)
+```
+
+#---------------activated cTfh  of CD4 plots Ab correlation-----
+
+```{r}
+# Define the visits you want to process
+all_visits <- c("v1w0", "v1w1", "v2w0", "v2w1", "v3w0", "v3w1")
+plot_list <- list() # Initialize a list to store plots
+# Loop through each visit
+for (v in all_visits) {
+  
+  # 1. Filter and pull the two columns for the current visit
+  cor_data <- phenoflow_elisa_Meta %>%
+    filter(Visit.pheno == v,
+           StatusAtEnrollment == "HBVnaive") %>%
+    select(Activated.cTfh.CD4, Elisa.final) %>%
+    drop_na() 
+  
+  # Check if we have enough data (at least 3 points) to run a correlation
+  if (nrow(cor_data) > 2) {
+    
+    # 2. Run the correlation
+    result <- cor.test(cor_data$Activated.cTfh.CD4, cor_data$Elisa.final, method = "pearson")
+    r_val <- unname(result$estimate)
+    p_val <- result$p.value
+    
+    # 3. Plot
+    p <- ggplot(cor_data, aes(x = Activated.cTfh.CD4, y = Elisa.final)) +
+      geom_point(size = 2) +
+      geom_smooth(method = "lm", se = FALSE, color = "red") +
+      labs(
+        x = "Activated cTfh (% of CD4)",
+        y = "HBsAb (mIU/mL)",
+        title = paste("Activated cTfh vs Final HBsAb at", v),
+        subtitle = paste0("r = ", round(r_val, 2), 
+                          ", p = ", format.pval(p_val, digits = 3))
+      ) +
+      theme_bw()
+        # Store the plot in the list
+    plot_list[[v]] <- p
+    # Print the plot so it shows up in your Plots pane
+    print(p)
+    
+  } else {
+    message(paste("Skipping", v, "- not enough data points."))
+  }
+}
+ggsave(
+  filename = "./figs/Flow_pheno_ActivatedcTfh_Ab_correlation_percentageofCD4.pdf", 
+  plot = marrangeGrob(plot_list, nrow = 3, ncol = 2), 
+  width = 8.5, height = 11
+)
+```
+#-----------iterations of flowmarkers at each visit cor final Ab----------------------
+```{r}
+# 1. define the flowmarkers to correlate, also the visits and plot_list
+cols <- colnames(phenoflow_elisa_Meta)
+cols
+target_cols <- cols[c(4:16, 31, 34:38, 87:88)]
+all_visits <- c("v1w0", "v1w1", "v2w0", "v2w1", "v3w0", "v3w1")
+plot_list <- list()
+
+# 2. Nested Loop
+for (v in all_visits) {
+  for (col_name in target_cols) {
+    
+    cor_data <- phenoflow_elisa_Meta %>%
+      filter(Visit.pheno == v, StatusAtEnrollment == "HBVnaive") %>%
+      select(all_of(col_name), Elisa.final) %>%
+      drop_na()
+    
+    if (nrow(cor_data) > 3) {
+      result <- cor.test(cor_data[[col_name]], cor_data$Elisa.final, method = "pearson")
+      r_val <- round(unname(result$estimate), 2)
+      p_val <- format.pval(result$p.value, digits = 2)
+      
+      p <- ggplot(cor_data, aes(x = .data[[col_name]], y = Elisa.final)) +
+        geom_point(size = 0.8, alpha = 0.5) +
+        geom_smooth(method = "lm", color = "red", se = FALSE, linewidth = 0.5) +
+        labs(
+          title = paste(v, "|", col_name),
+          subtitle = paste0("r=", r_val, " p=", p_val),
+          x = NULL, y = NULL 
+        ) +
+        theme_bw(base_size = 7) + 
+        theme(
+          plot.title = element_text(size = 6, face = "bold"),
+          plot.subtitle = element_text(size = 6),
+          axis.text = element_text(size = 5),
+          plot.margin = margin(2, 2, 2, 2) # Tighten margins
+        )
+      
+      plot_list[[paste(v, col_name, sep="_")]] <- p
+    }
+  }
+}
+
+# 3. Save to PDF (3 cols, 7 rows fits one visit per page perfectly)
+final_grid <- marrangeGrob(plot_list, nrow = 7, ncol = 3, top = "HBVNaive phenomarkers at each visit Correlations with final Ab ")
+
+ggsave(
+  filename = "./figs/Flow_pheno_HBV_Naive_Ab_Correlations_3x7.pdf", 
+  plot = final_grid, 
+  width = 8.5, height = 11
+)
+
+```
+
 #-----------iterations of different flowmarkers over visit plot function----------------------
 
 ```{r}
@@ -2023,7 +2188,6 @@ plot_marker_over_visits <- function(df,
 
 ```
 
-
 ```{r}
 
 markers <- colnames(phenoflow_elisa_Meta)
@@ -2061,4 +2225,3 @@ ggsave(
 ```{r}
 print(markers)
 ```
-
