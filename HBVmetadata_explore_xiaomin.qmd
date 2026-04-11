@@ -68,7 +68,7 @@ elisaMeta <- elisaMeta %>%
                                   as.Date("2023-03-01"), 
                                   FirstVisitDate))
 #omint optional
-elisaMeta <- elisaMeta %>% filter(!str_detect(Visit, "optional"))
+elisaMeta <- elisaMeta %>% dplyr::filter(!str_detect(Visit, "optional"))
 #define final elisa for every participant
 elisaMeta <- elisaMeta %>%
   group_by(Participant) %>%
@@ -82,10 +82,12 @@ elisaMeta <- elisaMeta %>%
   ) %>%
   ungroup()
 colnames(elisaMeta)
+#Remove space in SmokingStatus column
+elisaMeta$SmokingStatus <- trimws(elisaMeta$SmokingStatus)
 #view separate study arms
-hbvimmune <- elisaMeta%>%filter(Study.arm =="HBVimmune-Alum")
-hbvnaiveAlum <- elisaMeta%>%filter(Study.arm =="HBVnaive-Alum")
-hbvnaiveCpG <- elisaMeta%>%filter(Study.arm =="HBVnaive-CpG")
+hbvimmune <- elisaMeta%>%dplyr::filter(Study.arm =="HBVimmune-Alum")
+hbvnaiveAlum <- elisaMeta%>%dplyr::filter(Study.arm =="HBVnaive-Alum")
+hbvnaiveCpG <- elisaMeta%>%dplyr::filter(Study.arm =="HBVnaive-CpG")
 ```
 
 #---Age distribution---
@@ -93,7 +95,7 @@ hbvnaiveCpG <- elisaMeta%>%filter(Study.arm =="HBVnaive-CpG")
 ```{r}
 # 1. Filter and prepare data
 arms <- c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")
-plot_data <- elisaMeta %>% filter(Visit == "v1w0", Study.arm %in% arms)
+plot_data <- elisaMeta %>% dplyr::filter(Visit == "v1w0", Study.arm %in% arms)
 
 # 2. Create summary table with sub-counts
 stats_df <- plot_data %>%
@@ -131,7 +133,7 @@ ggplot(plot_data, aes(x = Age)) +
 ```{r}
 # 1. Filter and prepare data
 arms <- c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")
-plot_data <- elisaMeta %>% filter(Visit == "v1w0", Study.arm %in% arms)
+plot_data <- elisaMeta %>% dplyr::filter(Visit == "v1w0", Study.arm %in% arms)
 
 # 2. Create summary table with sub-counts
 stats_df <- plot_data %>%
@@ -162,7 +164,41 @@ ggplot(plot_data, aes(x = BMI)) +
 
 
 ```
+#---Race distribution---
+
+```{r}
+# 1. Filter and prepare data
+arms <- c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")
+plot_data <- elisaMeta %>% dplyr::filter(Visit == "v1w0", Study.arm %in% arms)
+
+# 2. Create summary table with sub-counts
+stats_df <- plot_data %>%
+  group_by(Study.arm) %>%
+  summarize(
+    total_n = n()
+  )
+
+# 3. Plot with updated labels
+ggplot(plot_data, aes(x = Race)) +
+  # 1. Use geom_bar for discrete categories
+  geom_bar(fill = "steelblue", color = "white", alpha = 0.7) +
+  
+  # 2. Total N labels from your stats_df
+  geom_text(data = stats_df, aes(x = Inf, y = Inf, 
+                label = paste0("Total N: ", total_n)),
+            hjust = 1.1, vjust = 1.5, fontface = "bold", 
+            inherit.aes = FALSE, size = 3.5) +
+  
+  facet_wrap(~Study.arm) +
+  labs(title = "Race Distribution by Study Arm", y = "Count") +
+  theme_minimal() +
+  # 3. Rotate x-axis labels if they overlap
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
 #---dichotomy of ELISA by age groups---
+
 ```{r}
 # 1. Define Geometric Mean and Geometric SE functions for Log10
 geomean_fun <- function(x) {
@@ -182,10 +218,10 @@ geomean_se_fun <- function(x) {
 
 # 2. Prepare and filter data
 plot_data <- elisaMeta %>%
-  filter(Study.arm %in% c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")) %>%
+  dplyr::filter(Study.arm %in% c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")) %>%
   # ADD THIS LINE: Remove zeros and NAs before plotting
-  filter(elisa.HBsAb > 0, !is.na(elisa.HBsAb)) %>% 
-  filter(
+  dplyr::filter(elisa.HBsAb > 0, !is.na(elisa.HBsAb)) %>% 
+  dplyr::filter(
     (Study.arm == "HBVnaive-Alum" & Visit != "v1w4") |
     (Study.arm == "HBVimmune-Alum" & Visit %in% c("v1w0", "v1w1", "v1w4")) |
     (Study.arm == "HBVnaive-CpG" & !Visit %in% c("v1w4", "v3w0", "v3w1", "v3w4"))
@@ -202,11 +238,11 @@ arms <- c("HBVnaive-Alum", "HBVnaive-CpG")
 
 # Filter out the baseline visit (v1w0)
 post_treatment_data <- plot_data %>% 
-  filter(Visit != "v1w0", Visit != "v1w1")
+  dplyr::filter(Visit != "v1w0", Visit != "v1w1")
 
 # Run the loop again
 for (arm_name in arms) {
-  arm_df <- post_treatment_data %>% filter(Study.arm == arm_name)
+  arm_df <- post_treatment_data %>% dplyr::filter(Study.arm == arm_name)
   
   if(length(unique(arm_df$Status)) < 2) next
 
@@ -258,7 +294,9 @@ ggplot(plot_data, aes(x = Visit, y = elisa.HBsAb, group = AgeGroup, color = Stat
 
 
 ```
+
 #---dichotomy of ELISA by BMI groups---
+
 ```{r}
 # 1. Define Geometric Mean and Geometric SE functions for Log10
 geomean_fun <- function(x) {
@@ -278,10 +316,10 @@ geomean_se_fun <- function(x) {
 
 # 2. Prepare and filter data
 plot_data <- elisaMeta %>%
-  filter(Study.arm %in% c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")) %>%
+  dplyr::filter(Study.arm %in% c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")) %>%
   # ADD THIS LINE: Remove zeros and NAs before plotting
-  filter(elisa.HBsAb > 0, !is.na(elisa.HBsAb)) %>% 
-  filter(
+  dplyr::filter(elisa.HBsAb > 0, !is.na(elisa.HBsAb)) %>% 
+  dplyr::filter(
     (Study.arm == "HBVnaive-Alum" & Visit != "v1w4") |
     (Study.arm == "HBVimmune-Alum" & Visit %in% c("v1w0", "v1w1", "v1w4")) |
     (Study.arm == "HBVnaive-CpG" & !Visit %in% c("v1w4", "v3w0", "v3w1", "v3w4"))
@@ -297,11 +335,11 @@ arms <- c("HBVnaive-Alum", "HBVnaive-CpG")
 
 # Filter out the baseline visit (v1w0)
 post_treatment_data <- plot_data %>% 
-  filter(Visit != "v1w0", Visit != "v1w1")
+  dplyr::filter(Visit != "v1w0", Visit != "v1w1")
 
 # Run the loop again
 for (arm_name in arms) {
-  arm_df <- post_treatment_data %>% filter(Study.arm == arm_name)
+  arm_df <- post_treatment_data %>% dplyr::filter(Study.arm == arm_name)
   
   if(length(unique(arm_df$BMIStatus)) < 2) next
 
@@ -351,7 +389,280 @@ ggplot(plot_data, aes(x = Visit, y = elisa.HBsAb, group = BMIGroup, color = BMIS
   ct2 +
   theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
 ```
+
+#---dichotomy of ELISA by sex groups---
+
+```{r}
+# 1. Define Geometric Mean and Geometric SE functions for Log10
+geomean_fun <- function(x) {
+  10^mean(log10(x[x > 0]), na.rm = TRUE)
+}
+
+geomean_se_fun <- function(x) {
+  log_x <- log10(x[x > 0])
+  m <- mean(log_x, na.rm = TRUE)
+  se <- sd(log_x, na.rm = TRUE) / sqrt(sum(!is.na(log_x)))
+  data.frame(
+    y = 10^m,
+    ymin = 10^(m - se),
+    ymax = 10^(m + se)
+  )
+}
+
+# 2. Prepare and filter data
+plot_data <- elisaMeta %>%
+  dplyr::filter(Study.arm %in% c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")) %>%
+  # ADD THIS LINE: Remove zeros and NAs before plotting
+  dplyr::filter(elisa.HBsAb > 0, !is.na(elisa.HBsAb)) %>% 
+  dplyr::filter(
+    (Study.arm == "HBVnaive-Alum" & Visit != "v1w4") |
+    (Study.arm == "HBVimmune-Alum" & Visit %in% c("v1w0", "v1w1", "v1w4")) |
+    (Study.arm == "HBVnaive-CpG" & !Visit %in% c("v1w4", "v3w0", "v3w1", "v3w4"))
+  ) 
+# List of arms to analyze
+arms <- c("HBVnaive-Alum", "HBVnaive-CpG")
+
+# Filter out the baseline visit (v1w0)
+post_treatment_data <- plot_data %>% 
+  dplyr::filter(Visit != "v1w0")
+
+# Run the loop again
+for (arm_name in arms) {
+  arm_df <- post_treatment_data %>% dplyr::filter(Study.arm == arm_name)
+  
+  if(length(unique(arm_df$Sex)) < 2) next
+
+  # Re-run model on post-treatment data only
+  lmm_model <- lmer(log10(elisa.HBsAb) ~ Sex + Visit + (1|Participant), data = arm_df)
+  
+  cat("\n--- LMM Results (Excluding Baseline) for Arm:", arm_name, "---\n")
+  
+  coef_table <- summary(lmm_model)$coefficients
+  status_row <- grep("Sex", rownames(coef_table), value = TRUE)
+  
+  if(length(status_row) > 0) {
+    print(coef_table[status_row, , drop = FALSE])
+  }
+}
+# 3. Plot with p-values
+ggplot(plot_data, aes(x = Visit, y = elisa.HBsAb, group = Sex, color = Sex)) +
+  # BACKGROUND LAYER: Individual subject lines and points
+  geom_line(aes(group = Participant), color = "lightgray", alpha = 0.3, linewidth = 0.3) +
+  geom_point(color = "lightgray", alpha = 0.2, size = 1) +
+  
+  # FOREGROUND LAYER: Group Geometric Means
+  stat_summary(fun = geomean_fun, geom = "line", linewidth = 1.2) +
+  stat_summary(fun = geomean_fun, geom = "point", size = 3) +
+  stat_summary(fun.data = geomean_se_fun, geom = "errorbar", width = 0.2) +
+
+  facet_grid(. ~ Study.arm, scales = "free", space = "free_x") + 
+  scale_color_manual(values = c("M" = "blue", "F" = "red")) +
+  # 3. Log Ticks (Major and Minor)
+  # sides = "l" adds them to the left (Y-axis)
+  annotation_logticks(sides = "l", color = "gray60") + 
+  
+  # 4. Y-Axis Configuration
+  scale_y_log10(
+    # Sets major breaks at 1, 10, 100, 1000, etc.
+    breaks = trans_breaks("log10", function(x) 10^x),
+    # Labels as plain numbers (4, 40, 400)
+    labels = label_number(accuracy = 1) 
+  ) + 
+  
+  labs(
+    title = "ELISA Trends: Group Comparison with P-Values",
+    x = "Visit",
+    y = "elisa.HBsAb (GeoMean +/- GeoSEM)",
+    color = "Sex Category"
+  ) +
+  ct2 +
+  theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+
+
+```
+#---Tetrachotomy of ELISA by Race groups---
+
+```{r}
+# 1. Define Geometric Mean and Geometric SE functions for Log10
+geomean_fun <- function(x) {
+  10^mean(log10(x[x > 0]), na.rm = TRUE)
+}
+
+geomean_se_fun <- function(x) {
+  log_x <- log10(x[x > 0])
+  m <- mean(log_x, na.rm = TRUE)
+  se <- sd(log_x, na.rm = TRUE) / sqrt(sum(!is.na(log_x)))
+  data.frame(
+    y = 10^m,
+    ymin = 10^(m - se),
+    ymax = 10^(m + se)
+  )
+}
+
+# 2. Prepare and filter data
+plot_data <- elisaMeta %>%
+  dplyr::filter(Study.arm %in% c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")) %>%
+  # ADD THIS LINE: Remove zeros and NAs before plotting
+  dplyr::filter(elisa.HBsAb > 0, !is.na(elisa.HBsAb)) %>% 
+  dplyr::filter(
+    (Study.arm == "HBVnaive-Alum" & Visit != "v1w4") |
+    (Study.arm == "HBVimmune-Alum" & Visit %in% c("v1w0", "v1w1", "v1w4")) |
+    (Study.arm == "HBVnaive-CpG" & !Visit %in% c("v1w4", "v3w0", "v3w1", "v3w4"))
+  ) 
+# List of arms to analyze
+arms <- c("HBVnaive-Alum", "HBVnaive-CpG")
+
+# Filter out the baseline visit (v1w0)
+post_treatment_data <- plot_data %>% 
+  dplyr::filter(Visit != "v1w0")
+
+# Run the loop again
+for (arm_name in arms) {
+  arm_df <- post_treatment_data %>% dplyr::filter(Study.arm == arm_name)
+  
+  if(length(unique(arm_df$Race)) < 2) next
+
+  # Re-run model on post-treatment data only
+  lmm_model <- lmer(log10(elisa.HBsAb) ~ Race + Visit + (1|Participant), data = arm_df)
+  
+  cat("\n--- LMM Results (Excluding Baseline) for Arm:", arm_name, "---\n")
+  
+  coef_table <- summary(lmm_model)$coefficients
+  status_row <- grep("Race", rownames(coef_table), value = TRUE)
+  
+  if(length(status_row) > 0) {
+    print(coef_table[status_row, , drop = FALSE])
+  }
+}
+# 3. Plot with p-values
+ggplot(plot_data, aes(x = Visit, y = elisa.HBsAb, group = Race, color = Race)) +
+  # BACKGROUND LAYER: Individual subject lines and points
+  geom_line(aes(group = Participant), color = "lightgray", alpha = 0.3, linewidth = 0.3) +
+  geom_point(color = "lightgray", alpha = 0.2, size = 1) +
+  
+  # FOREGROUND LAYER: Group Geometric Means
+  stat_summary(fun = geomean_fun, geom = "line", linewidth = 1.2) +
+  stat_summary(fun = geomean_fun, geom = "point", size = 3) +
+  stat_summary(fun.data = geomean_se_fun, geom = "errorbar", width = 0.2) +
+
+  facet_grid(. ~ Study.arm, scales = "free", space = "free_x") + 
+  scale_color_manual(values = c("Asian" = "blue", "Black/AfricanAmerican" = "red", "Multiple/NR" ="black", "White/Caucasian"="yellow" )) +
+  # 3. Log Ticks (Major and Minor)
+  # sides = "l" adds them to the left (Y-axis)
+  annotation_logticks(sides = "l", color = "gray60") + 
+  
+  # 4. Y-Axis Configuration
+  scale_y_log10(
+    # Sets major breaks at 1, 10, 100, 1000, etc.
+    breaks = trans_breaks("log10", function(x) 10^x),
+    # Labels as plain numbers (4, 40, 400)
+    labels = label_number(accuracy = 1) 
+  ) + 
+  
+  labs(
+    title = "ELISA Trends: Group Comparison with P-Values",
+    x = "Visit",
+    y = "elisa.HBsAb (GeoMean +/- GeoSEM)",
+    color = "Race Category"
+  ) +
+  ct2 +
+  theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+
+
+```
+#---Trichotomy of ELISA by SmokingStatus groups---
+
+```{r}
+# 1. Define Geometric Mean and Geometric SE functions for Log10
+geomean_fun <- function(x) {
+  10^mean(log10(x[x > 0]), na.rm = TRUE)
+}
+
+geomean_se_fun <- function(x) {
+  log_x <- log10(x[x > 0])
+  m <- mean(log_x, na.rm = TRUE)
+  se <- sd(log_x, na.rm = TRUE) / sqrt(sum(!is.na(log_x)))
+  data.frame(
+    y = 10^m,
+    ymin = 10^(m - se),
+    ymax = 10^(m + se)
+  )
+}
+
+# 2. Prepare and filter data
+plot_data <- elisaMeta %>%
+  dplyr::filter(Study.arm %in% c("HBVnaive-Alum", "HBVimmune-Alum", "HBVnaive-CpG")) %>%
+  # ADD THIS LINE: Remove zeros and NAs before plotting
+  dplyr::filter(elisa.HBsAb > 0, !is.na(elisa.HBsAb)) %>% 
+  dplyr::filter(
+    (Study.arm == "HBVnaive-Alum" & Visit != "v1w4") |
+    (Study.arm == "HBVimmune-Alum" & Visit %in% c("v1w0", "v1w1", "v1w4")) |
+    (Study.arm == "HBVnaive-CpG" & !Visit %in% c("v1w4", "v3w0", "v3w1", "v3w4"))
+  ) %>%
+  dplyr::filter(SmokingStatus %in% c("Never", "Active","Quit"))
+# List of arms to analyze
+arms <- c("HBVnaive-Alum", "HBVnaive-CpG","HBVimmune-Alum")
+
+# Filter out the baseline visit (v1w0)
+post_treatment_data <- plot_data %>% 
+  dplyr::filter(Visit != "v1w0")
+
+# Run the loop again
+for (arm_name in arms) {
+  arm_df <- post_treatment_data %>% dplyr::filter(Study.arm == arm_name)
+  
+  if(length(unique(arm_df$SmokingStatus)) < 2) next
+
+  # Re-run model on post-treatment data only
+  lmm_model <- lmer(log10(elisa.HBsAb) ~ SmokingStatus + Visit + (1|Participant), data = arm_df)
+  
+  cat("\n--- LMM Results (Excluding Baseline) for Arm:", arm_name, "---\n")
+  
+  coef_table <- summary(lmm_model)$coefficients
+  status_row <- grep("SmokingStatus", rownames(coef_table), value = TRUE)
+  
+  if(length(status_row) > 0) {
+    print(coef_table[status_row, , drop = FALSE])
+  }
+}
+# 3. Plot with p-values
+ggplot(plot_data, aes(x = Visit, y = elisa.HBsAb, group = SmokingStatus, color = SmokingStatus)) +
+  # BACKGROUND LAYER: Individual subject lines and points
+  geom_line(aes(group = Participant), color = "lightgray", alpha = 0.3, linewidth = 0.3) +
+  geom_point(color = "lightgray", alpha = 0.2, size = 1) +
+  
+  # FOREGROUND LAYER: Group Geometric Means
+  stat_summary(fun = geomean_fun, geom = "line", linewidth = 1.2) +
+  stat_summary(fun = geomean_fun, geom = "point", size = 3) +
+  stat_summary(fun.data = geomean_se_fun, geom = "errorbar", width = 0.2) +
+
+  facet_grid(. ~ Study.arm, scales = "free", space = "free_x") + 
+  scale_color_manual(values = c("Never" = "blue", "Quit" = "red", "Active" ="black" )) +
+  # 3. Log Ticks (Major and Minor)
+  # sides = "l" adds them to the left (Y-axis)
+  annotation_logticks(sides = "l", color = "gray60") + 
+  
+  # 4. Y-Axis Configuration
+  scale_y_log10(
+    # Sets major breaks at 1, 10, 100, 1000, etc.
+    breaks = trans_breaks("log10", function(x) 10^x),
+    # Labels as plain numbers (4, 40, 400)
+    labels = label_number(accuracy = 1) 
+  ) + 
+  
+  labs(
+    title = "ELISA Trends: Group Comparison with P-Values",
+    x = "Visit",
+    y = "elisa.HBsAb (GeoMean +/- GeoSEM)",
+    color = "Smoking Status Category"
+  ) +
+  ct2 +
+  theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+
+
+```
 #---HBsAb vs Age correlation over time---
+
 ```{r}
 
 # Use your post_treatment_data or plot_data
@@ -381,7 +692,9 @@ stat_cor(method = "pearson",
     legend.position = "none")
 
 ```
+
 #---HBsAb vs BMI correlation over time---
+
 ```{r}
 
 # Use your post_treatment_data or plot_data
@@ -403,6 +716,37 @@ ggplot(plot_data, aes(x = BMI, y = elisa.HBsAb, color = Study.arm)) +
            vjust = 3)  +
   labs(title = "Correlation Between BMI and ELISA Titers Over Time",
        x = "BMI", y = "elisa.HBsAb (Log10)") +
+  theme_minimal()+
+  theme(
+    axis.text.x = element_text(size = 7), # Smaller x-axis numbers
+    axis.text.y = element_text(size = 6), # Smaller y-axis numbers
+    strip.text = element_text(size = 8),  # Optional: Smaller facet titles
+    legend.position = "none")
+
+```
+#---Age vs BMI correlation over time---
+
+```{r}
+
+# Use your post_treatment_data or plot_data
+ggplot(plot_data, aes(x = BMI, y = Age, color = Study.arm)) +
+  # Individual data points
+  geom_point(alpha = 0.5) +
+  # Linear regression line with confidence intervals
+  geom_smooth(method = "lm", se = TRUE) +
+  # Facet by Study.arm and Visit to see the iteration
+  facet_grid2(Study.arm ~ Visit, scales = "free", independent = "x") +
+  # Use log10 for ELISA titers as previously discussed
+  scale_y_continuous() +
+  # Automatically add correlation coefficient (R) and p-value per facet
+  stat_cor(method = "pearson", 
+           label.x.npc = "left", 
+           label.y.npc = "top",
+           label.sep = "\n", 
+           size = 2,
+           vjust = 3)  +
+  labs(title = "Correlation Between BMI and Age Over Time",
+       x = "BMI", y = "Age") +
   theme_minimal()+
   theme(
     axis.text.x = element_text(size = 7), # Smaller x-axis numbers
