@@ -1,0 +1,247 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+
+```{r load-libraries}
+
+library(tidyverse)
+library(dplyr)
+library(viridis)
+library(viridisLite)
+library(RColorBrewer)
+library(Seurat)
+library(SeuratObject)
+library(patchwork)
+library(scRepertoire)
+library(reshape2)
+library(pheatmap)
+library(SingleCellExperiment)
+library(tidyr)
+library(readxl)
+library(DESeq2)
+library(SummarizedExperiment)
+library(GSEABase)
+# library(GSVA)
+# library(ggbiplot)
+library(glmGamPoi)
+library(scuttle)
+library(limma)
+library(rstatix)
+library(data.table)
+library(ggrepel)
+# remotes::install_github("huayc09/SeuratExtend")
+# library(SeuratExtend)
+# library(circlize)
+
+```
+
+```{r load-visium-008}
+options(future.globals.maxSize = 16000 * 1024^2)
+# data set taken from https://www.10xgenomics.com/datasets/visium-hd-cytassist-gene-expression-human-tonsil-fresh-frozen-if
+# but this was low yield. not a lot of germinal centers and just could not cluster out the Tfh
+# will switch instead to alternative:  https://www.10xgenomics.com/datasets/visium-hd-cytassist-gene-expression-human-tonsil-fresh-frozen
+
+hires_img <- Read10X_Image(image.dir = "visium-tonsil-notIF/binned_outputs/square_008um/spatial", image.name = "tissue_hires_image.png")
+lores_img <- Read10X_Image(image.dir = "visium-tonsil-notIF/binned_outputs/square_008um/spatial", image.name = "tissue_lowres_image.png")
+
+data_dir <- "visium-tonsil-notIF/binned_outputs/square_008um/"
+tonsil <- Load10X_Spatial(data.dir = data_dir, filename = "filtered_feature_bc_matrix.h5", assay = "Spatial")
+tonsil <- subset(tonsil, subset = nCount_Spatial > 0)
+raw_counts <- GetAssayData(tonsil, assay = "Spatial", layer = "counts")
+selected_genes <- rownames(raw_counts)[Matrix::rowSums(raw_counts) > 3]
+tonsil <- subset(tonsil, features = selected_genes)
+tonsil <- SCTransform(tonsil, assay = "Spatial", verbose = TRUE, vst.flavor = "v2", conserve.memory = TRUE)
+spatial_genes <- c("GNG4", "BCL6", "CXCL13")
+a <- SpatialFeaturePlot(tonsil, features = spatial_genes, ncol = 3, pt.size.factor = 10, 
+  alpha = c(0.1, 1) ) ;  a
+# ggsave(plot = a, filename = "output.pdf")
+tonsil <- RunPCA(tonsil, assay = "SCT", verbose = FALSE)
+tonsil <- FindNeighbors(tonsil, dims = 1:30)
+tonsil <- FindClusters(tonsil, resolution = 0.5)
+tonsil <- RunUMAP(tonsil, dims = 1:30)
+
+cluster_path <- "visium-tonsil-notIF/binned_outputs/square_008um/analysis/clustering/gene_expression_graphclust/clusters.csv"
+graph_clusters <- read.csv(cluster_path)
+rownames(graph_clusters) <- graph_clusters$Barcode
+tonsil <- AddMetaData(  object = tonsil, metadata = graph_clusters["Cluster"], col.name = "Loupe_GraphClust" )
+
+# qs2::qs_save(tonsil, file = "visium-tonsil_08um.qs2", nthreads = 4)
+# tonsil <- qs2::qs_read(file = "visium-tonsil_08um.qs2", nthreads = 4)
+```
+
+
+```{r subcluster-visium-008}
+
+a <- SpatialDimPlot(tonsil, pt.size.factor = 5) +  theme_bw() + theme(axis.title = element_text(size = 12), axis.text = element_text(size = 10)); a; 
+# ggsave(plot = a, filename = 'Images/Tonsil-clusters-img.pdf')
+
+# zoom1_xlim <- c(2234,3000);  zoom1_ylim <- c(660, 1000)
+# coords_segm_zoom1 <- GetTissueCoordinates(tonsil, scale = "hires") %>% filter(x>zoom1_xlim[1], x <= zoom1_xlim[2])
+# sub.tonsil <- subset(tonsil, cells = coords_segm_zoom1$cell)
+# a <- SpatialFeaturePlot(sub.tonsil, features = 'BCL6', pt.size.factor = 10, alpha = c(0.1, 1) ); ggsave(plot = a, filename = 'Images/Subtonsil-Bcl6-img.pdf')
+a <- DimPlot(tonsil, label= TRUE,  alpha = c(0.5) ); a; # ggsave(plot = a, filename = 'Images/tonsil-clusters-umap.pdf')
+markers <- c("MS4A1", "CD4", "CD3E", "BCL6", "KRT8", "CSF1R", "GNLY","VWF"  )
+a <- DotPlot(tonsil, features = markers); a; # ggsave(plot = a, filename = 'Images/tonsil-dotplot.pdf')
+
+keepClusters <- c(3,5,8,12)
+CD4.cells <-  subset(tonsil, seurat_clusters %in% c(keepClusters))
+CD4.cells <- FindVariableFeatures(CD4.cells)
+CD4.cells <- RunPCA(CD4.cells, assay = "SCT", verbose = FALSE)
+CD4.cells <- FindNeighbors(CD4.cells, dims = 1:20)
+CD4.cells <- FindClusters(CD4.cells, resolution = 0.5)
+CD4.cells <- RunUMAP(CD4.cells, dims = 1:20)
+a <- DimPlot(CD4.cells, label= TRUE, group.by = 'seurat_clusters', alpha = c(0.5) ); a; ggsave(plot = a, filename = 'Images/Visium_CD4-clusters-umap.pdf')
+a <- FeaturePlot(CD4.cells, label= F, features = c('CD3E', 'CD4','MS4A1','XBP1','BCL6','CXCR5','PDCD1'), alpha = c(0.5), keep.scale = NULL ); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4-selectedGenes-featPlot.pdf')
+a <- DotPlot(CD4.cells, features = c('CD4','MS4A1','XBP1','BCL6','CXCR5','PDCD1','MKI67')); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4-dotplot.pdf')
+
+# qs2::qs_save(CD4.cells, file = "CD4_Tonsil_08um.qs2", nthreads = 4)
+# CD4.cells <- qs2::qs_read(file = "CD4_Tonsil_08um.qs2", nthreads = 4)
+
+keepClusters <- c(2, 3, 8)
+CD4.cells.sub <-  subset(CD4.cells, seurat_clusters %in% c(keepClusters))
+CD4.cells.sub <- FindVariableFeatures(CD4.cells.sub)
+CD4.cells.sub <- RunPCA(CD4.cells.sub, assay = "SCT", verbose = FALSE)
+CD4.cells.sub <- FindNeighbors(CD4.cells.sub, dims = 1:20)
+CD4.cells.sub <- FindClusters(CD4.cells.sub, resolution = 0.3)
+CD4.cells.sub <- RunUMAP(CD4.cells.sub, dims = 1:20)
+a <- DimPlot(CD4.cells.sub, label= TRUE, group.by = 'seurat_clusters', alpha = c(0.5) ); a; ggsave(plot = a, filename = 'Images/Visium_CD4.sub-clusters-umap.pdf')
+a <- FeaturePlot(CD4.cells.sub, label= F, features = c('CD3E', 'CD4','MS4A1','XBP1','BCL6','CXCR5','PDCD1'), alpha = c(0.5), keep.scale = NULL ); a;
+# ggsave(plot = a, filename = 'Images/Visium_CD4.sub-selectedGenes-featPlot.pdf')
+a <- DotPlot(CD4.cells.sub, features = c('CD4','MS4A1','XBP1','BCL6','CXCR5','PDCD1','MKI67')); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4.sub-dotplot.pdf')
+
+md <- as.data.table(CD4.cells@meta.data)
+```
+
+
+
+```{r FindAnchors-tfh}
+
+tfh <- qs2::qs_read(file = "tfh.qs2", nthreads = 5)  # import HBV dataset
+table(Idents(tfh))
+DefaultAssay(tfh) <- "SCT"
+DefaultAssay(CD4.cells) <- "SCT" 
+
+DefaultAssay(tfh) <- "RNA"       # Assuming 'RNA' is the raw assay name in your scRNA obj
+DefaultAssay(CD4.cells) <- "Spatial"
+tfh <- NormalizeData(tfh)
+CD4.cells <- NormalizeData(CD4.cells)
+
+tfh <- FindVariableFeatures(tfh, selection.method = "vst", nfeatures = 2000)
+
+ # First start by applying Tfh subsets signatures to all CD4...
+anchors <- FindTransferAnchors(  reference = tfh, query = CD4.cells, normalization.method = "LogNormalize", reduction = "cca", dims = 1:30)
+
+Reductions(CD4.cells)
+
+predictions <- TransferData(anchorset = anchors, refdata = Idents(tfh), weight.reduction = CD4.cells[["pca"]], dims = 1:30 )
+
+CD4.cells <- AddMetaData(CD4.cells, metadata = predictions)
+tail(colnames(CD4.cells@meta.data), 15)
+
+md <- as.data.table(CD4.cells@meta.data)
+
+DefaultAssay(CD4.cells) <- "SCT"
+
+features_to_plot <- c("prediction.score.GNG4.subset", "prediction.score.TNFR2.subset", "prediction.score.GPR183.subset",
+  "prediction.score.VIM.subset", "prediction.score.HSP.subset", "prediction.score.IL7R.subset")
+a <- SpatialFeaturePlot(object = CD4.cells, features = features_to_plot, ncol = 3, pt.size.factor = 10, alpha = c(0.1, 1) ); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4-tfhSubsets-img.pdf', width=20, height=12)
+# 
+# qs2::qs_save(CD4.cells, file = "CD4_labeltsfr_Tonsil_08um.qs2", nthreads = 4)
+# CD4.cells <- qs2::qs_read(file = "CD4_labeltsfr_Tonsil_08um.qs2", nthreads = 4)
+
+subset.cols <- c(
+  "GNG4 subset"   = "mediumaquamarine", # Mature GC-Tfh
+  "HSP subset"    = "darkorange3",      # Stressed/Early (The darker orange you requested)
+  "IL7R subset"   = "salmon",           # Quiescent/Memory-like
+  "GPR183 subset" = "thistle",          # Transitional/Outer-follicle
+  "VIM subset"    = "yellowgreen",      # Highly active/Invasive
+  "TNFR2 subset"  = "skyblue"           # Early Activation/Starter
+)
+
+tonsil$Loupe_GraphClust <- as.factor(tonsil$Loupe_GraphClust)
+colpalette <- DiscretePalette(n = length(levels(tonsil$Loupe_GraphClust)), 
+                              palette = "alphabet2")
+names(colpalette) <- levels(tonsil$Loupe_GraphClust)
+a <- SpatialDimPlot(tonsil, group.by = 'Loupe_GraphClust', pt.size.factor = 5, 
+                    cols = colpalette ); a; 
+# ggsave(plot = a, filename = 'Images/Visium_tonsil-Regions-img.pdf', width=8, height=8)
+a <- VlnPlot(object = CD4.cells, features = features_to_plot, group.by = 'Loupe_GraphClust', pt.size = 0.1, alpha=0.1, same.y.lims = T); a;
+# ggsave(plot = a, filename = 'Images/Visium_CD4-tfhSubsets-Vln.pdf', width=20, height=12)
+
+clust8 <- as.data.table(md)[Loupe_GraphClust == 8]
+clust8.compos <- clust8[, .(count = .N), by=predicted.id][, percent := (count / sum(count)) * 100]
+a <- ggplot(clust8.compos, aes(x = reorder(predicted.id, -percent), y = percent, fill = predicted.id)) +
+  geom_bar(stat = "identity") + theme_classic() +
+  labs(title = "Tfh Subsets in Cluster 8", x = "Predicted Tfh Subset",y = "Percentage (%)",) +
+  theme(legend.position = 'none',axis.title.x = element_blank()); a 
+# ggsave(plot = a, filename = 'Images/Visium_CD4-tfhSubsets-clust8.pdf', width=4)
+a <- ggplot(clust8.compos, aes(x = "Region 8", y = percent, fill = predicted.id)) +
+  geom_bar(stat = "identity", color = "black", width = 0.6) + 
+  theme_minimal() + scale_fill_manual(values = subset.cols) +
+  labs(title = "Cluster 8", y = "Percentage (%)", fill = "Tfh Subset") +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.text.y = element_text(color='black')) ; a
+# ggsave(plot = a, filename = 'Images/Visium_CD4-tfhSubsets-clust8-stacked.pdf', width = 2.5, height=3)
+
+# a <- ggplot(cxcr5_expr, aes(x = V1)) + geom_histogram(binwidth=0.1) + theme_classic(); a;  ggsave(plot = a, filename = 'output.pdf')
+cxcr5.expr <-  GetAssayData(CD4.cells, assay = "SCT", layer = "data")["CXCR5", ] 
+CD4.cells <- AddMetaData(CD4.cells, metadata = cxcr5.expr, col.name = 'CXCR5.expr')
+
+CD4.tfh <- subset(CD4.cells, CXCR5.expr > 0)
+
+features_to_plot <- c("prediction.score.GNG4.subset", "prediction.score.TNFR2.subset", "prediction.score.GPR183.subset",
+  "prediction.score.VIM.subset", "prediction.score.HSP.subset", "prediction.score.IL7R.subset")
+a <- SpatialFeaturePlot(object =  subset(CD4.tfh, prediction.score.max>0.5 ), features = features_to_plot, ncol = 3, pt.size.factor = 30, alpha = c(0.1, 1) ) & scale_fill_viridis(option = "inferno"); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4tfh-tfhSubsets-img.pdf', width=20, height=12)
+
+print(GetTissueCoordinates(CD4.tfh, scale = "hires") %>% summary )
+zoom1_xlim <- c(3200,3800);  zoom1_ylim <- c(1600, 2300)
+coords_segm_zoom1 <- GetTissueCoordinates(CD4.tfh, scale = "hires") %>% 
+  filter(x>zoom1_xlim[1], x <= zoom1_xlim[2], y > zoom1_ylim[1], y<=zoom1_ylim[2])
+CD4.tfh.zoom <- subset(CD4.tfh, cells = coords_segm_zoom1$cell )
+CD4.tfh.zoom <- subset(CD4.tfh.zoom, prediction.score.max>0.5 )
+
+a <- SpatialDimPlot(CD4.tfh.zoom, pt.size.factor = 0); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4tfh-HandE-img.zoom.pdf', width=20, height=12)
+
+a <- SpatialFeaturePlot(object = CD4.tfh.zoom, features = features_to_plot, ncol = 3, pt.size.factor = 30, alpha = c(0.1, 1) ) & 
+  scale_fill_viridis(option = "inferno"); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4tfh-tfhSubsets-img.zoom.pdf', width=20, height=12)
+
+
+
+ 
+# CD4.tfh@images$slice1 <- lores_img
+# CD4.tfh.zoom@images$slice1 <- lores_img
+a <- SpatialDimPlot(CD4.tfh, images = "slice1", pt.size.factor = 0)  + coord_fixed(xlim = c(3200, 3800), ylim = c(1600, 2300)) + theme(legend.position = 'none'); a; 
+# ggsave(plot = a, filename = 'Images/Visium_CD4tfh-HandE-img.zoom.pdf', width=20, height=12)
+
+# qs2::qs_save(t, file = "Tfh_Tonsil_08um_labeltsfr.qs2", nthreads = 4)
+
+sessionInfo() 
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
