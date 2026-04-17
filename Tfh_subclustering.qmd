@@ -1,0 +1,1799 @@
+---
+title: "Tfh_subclustering"
+format: 
+  pdf:
+    geometry:
+      - top=20mm
+      - left=10mm
+      - right=10mm
+      - bottom=20mm
+    fontsize: 10pt
+
+editor: visual
+---
+
+## Load libraries
+
+```{r load-libraries}
+
+library(tidyverse)
+library(dplyr)
+library(viridis)
+library(viridisLite)
+library(RColorBrewer)
+library(Seurat)
+library(SeuratObject)
+library(patchwork)
+library(scRepertoire)
+library(reshape2)
+library(pheatmap)
+library(SingleCellExperiment)
+library(tidyr)
+library(readxl)
+library(DESeq2)
+library(SummarizedExperiment)
+library(GSEABase)
+library(GSVA)
+library(ggbiplot)
+library(glmGamPoi)
+library(scuttle)
+library(limma)
+library(rstatix)
+library(data.table)
+library(ggrepel)
+# remotes::install_github("huayc09/SeuratExtend")
+library(SeuratExtend)
+library(circlize)
+
+```
+
+## Find CD4 subsets
+
+```{r cd4-subsets}
+obj1 <- readRDS("lymph_node_cd4s_reclustered.rds")
+VlnPlot(obj1, features = c('CD4'), pt.size = 0)  # clusters 0,1,2,3,4,5,6,7,8,10,14,15  though not sure about 4
+VlnPlot(obj1, features = c('CD8A'), pt.size = 0)  # cluster 9
+VlnPlot(obj1, features = c('MS4A1'), pt.size = 0) # clusters 11,12,13
+obj1.clean <- subset(obj1, subset = seurat_clusters %in% c(0:8,10,14,15))
+obj1.clean$age_group <- ifelse(obj1.clean$Age < 50, "Younger", "Older")
+obj1.clean <- RunPCA(obj1.clean, verbose = FALSE); ElbowPlot(obj1.clean)
+obj1.clean <- harmony::RunHarmony(obj1.clean, group.by.vars = "orig.ident", assay.use = "SCT")
+obj1.clean <- FindNeighbors(obj1.clean, dims = 1:10, reduction='harmony')  
+obj1.clean <- FindClusters(obj1.clean, resolution = 0.5, verbose = FALSE)
+obj1.clean <- RunUMAP(obj1.clean, dims = 1:20, reduction='harmony')  
+DimPlot(obj1.clean, group.by = "seurat_clusters",label = TRUE) + NoLegend() + ggtitle("CD4 T cells in lymph node, reclustered")
+DimPlot(obj1.clean, group.by = "orig.ident", label = TRUE) + NoLegend() + ggtitle("CD4 T cells in lymph node, reclustered")
+top.genes <- FindAllMarkers(obj1.clean, only.pos = TRUE, min.pct = 0.25, 
+                        logfc.threshold = 0.25) 
+# write.csv(top.genes, file = 'outs/CD4-subsets-FindAllMarkers.csv')
+top20 <- top.genes %>% group_by(cluster) %>% slice_max(n = 50, order_by = avg_log2FC)
+FeaturePlot(obj1.clean, features = c('CXCR5'), pt.size = 0.3)
+FeaturePlot(obj1.clean, features = c('CXCL13'), pt.size = 0.3)
+
+# cluster annotations
+# cluster 0: Naive_1 (+LEF1,+SELL)
+# cluster 1: Fos-Jun activated 
+# cluster 2: Effector memory
+# cluster 3: Tfh (+CXCR5,+BCL6)    
+# cluster 4: Naive_2 TIGIT memory
+# cluster 5: Treg (+FOXP3,+PRDM1)   
+# cluster 6: Quiescent memory 
+# cluster 7: Proliferating (+MKI67, +BIRC5)
+
+new.cluster.ids <- c( "0" = "Naive_1", "1" = "Fos-Jun", "2" = "Effector memory", 
+                      "3" = "Tfh", "4" = "Naive_2",
+                      "5" = "Treg", "6" = "Quiescent memory", "7" = "Proliferating")
+obj1.clean <- RenameIdents(obj1.clean, new.cluster.ids)
+obj1.clean$CD4.subset.annotation <- Idents(obj1.clean)
+DimPlot(obj1.clean, reduction = "umap", label = TRUE, group.by = 'CD4.subset.annotation') + NoLegend() + ggtitle("Lymph node CD4 T cells")
+# ggsave(filename = 'Images/CD4-UMAP-subsets.pdf', height=5, width=5 )
+
+top.genes <- FindAllMarkers(obj1.clean, only.pos = TRUE, min.pct = 0.25, 
+                        logfc.threshold = 0.25) 
+# write.csv(top.genes, file = 'outs/CD4-subsets-FindAllMarkers.csv')
+
+data.table::as.data.table(table(obj1.clean$CD4.subset.annotation, obj1.clean$subject))
+DimPlot(obj1.clean, split.by = "subject", group.by='CD4.subset.annotation', label = F) + ggtitle("CD4 T cells in lymph node, reclustered")
+# ggsave(filename = 'Images/CD4-UMAP-splitSubject.pdf', height=4, width=18 )
+
+df <- data.frame(
+  subject = c( "NLV-HBVX-0022", "NLV-HBVX-0029",  "NLV-HBVX-0033", "NLV-HBVX-0036", "NLV-HBVX-0041", "NLV-HBVX-0043", 
+               "NLV-HBVX-0058", "NLV-HBVX-0063", "NLV-HBVX-0069", "NLV-HBVX-0076"),
+  antibody_titer = c(350,  0.1, 27.79851,  10.25068563, 377.7495387, 135, 476.1468, 55.41045, 275, 443.3457 )   )
+new.meta <- obj1.clean@meta.data %>% left_join(df, by = "subject")
+rownames(new.meta) <- rownames(obj1.clean@meta.data)
+obj1.clean@meta.data <- new.meta
+obj1.clean$titer.categ <- ifelse(obj1.clean$antibody_titer < 100, "Under100", "Over100")
+
+
+rm(df, obj1)
+```
+
+## HBV clonotypes overlay
+
+```{r hbv-clonotypes-overlay}
+
+x <- obj1.clean@meta.data
+x<- x %>% separate(CTaa, into = c("TRA","TRB"), sep = "_", remove=F)
+x <- subset(x, TRB != "NA")
+x <- x[,c("barcode","TRB")]
+x <- x %>%  separate(TRB, into = c("TRB", "TRB2"), sep = ";")
+
+x2 <- x[,c("barcode","TRB")]
+x3 <- x[,c("barcode", "TRB2")]
+x3 <- subset(x3, TRB2 != "NA")
+colnames(x3) <- c("barcode","TRB")
+meta4 <- rbind(x2, x3)  # now contains all of the TCRB in tonsil CD4
+
+# matches in cd4s ln vs hep b iedb
+cd4seq <- readxl::read_excel("iedb_hepatitis_b_epitopes.xlsx")
+cd4seq <- cd4seq[,c('Chain 2...53')]  # the 53rd column has the CDR3
+cd4seq <- distinct(cd4seq)  # ~500 duplicates removed
+
+m <- merge(meta4, cd4seq, by.x="TRB", by.y="Chain 2...53")  # map one dataset to another
+
+hbv.specific <- m$barcode
+
+DimPlot(obj1.clean, label=F, cells.highlight = hbv.specific, 
+        cols.highlight = "darkorange", cols= "grey", pt.size=1.5, sizes.highlight=1.5, 
+        group.by = 'CD4.subset.annotation', alpha=0.7) +  
+  ggtitle("HBV clonotypes") + 
+  scale_color_manual(labels = c("CD4 cells","HBV clonotype"), 
+                     values = c("grey90", "darkorange"))  
+# ggsave(filename = 'Images/CD4-matchCDR3-HBV.pdf', height=6, width=8 )
+
+rstatix::fisher_test(matrix(c(nrow(m),nrow(cd4seq),nrow(obj1.clean@meta.data),1e8), nrow=2))
+
+# A tibble: 1 × 3
+#          n        p p.signif
+#*     <dbl>    <dbl> <chr>   
+#1 100006973 8.13e-96 ****    
+            
+# rm(x2, x3, meta4, cd4seq, m, cellname, b)
+```
+
+## Subcluster Tfh
+
+```{r subcluster-tfh}
+
+tfh <- subset(obj1.clean, CD4.subset.annotation == "Tfh")
+tfh <- RunPCA(tfh, verbose = FALSE); ElbowPlot(tfh)
+tfh <- harmony::RunHarmony(tfh, group.by.vars = "orig.ident", assay.use = "SCT")
+tfh <- FindNeighbors(tfh, dims = 1:10, reduction='harmony') #adjust based on elbow plot
+tfh <- FindClusters(tfh, resolution = 0.6, verbose = FALSE)
+tfh <- RunUMAP(tfh, dims = 1:20, reduction='harmony') #adjust based on elbow plot
+DimPlot(tfh, group.by = "orig.ident",label = TRUE) + NoLegend() + ggtitle("Tfh, reclustered")
+DimPlot(tfh, group.by = "seurat_clusters",label = TRUE) + NoLegend() + ggtitle("Tfh, reclustered")
+top20 <- FindAllMarkers(tfh, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25) %>% 
+  group_by(cluster) %>% slice_max(n = 50, order_by = avg_log2FC)
+# cluster annotations
+# cluster 0: GNG4 
+# cluster 1: KLF6/HSP
+# cluster 2: KLF2/IL7R
+# cluster 3: GPR183
+# cluster 4: LAG3/VIM
+# cluster 5: CD38/TNFR2
+col.palette  <- viridis(n = 100, option = "viridis", direction=-1)
+FeaturePlot(tfh, features = c('BCL6','CD38','GNG4','GPR183','IL7R','MKI67','TNFRSF1B',
+                              'IL10','IL21'), pt.size = 0.2, 
+            cols=c('gray95','darkorange4') )  
+# ggsave(filename = 'Images/Tfh-FeaturePlot-selectedGenes.pdf',height=9, width=10)
+
+FeaturePlot(tfh, features = c('KLF6','NR4A1','IL7R','SLAMF1','RUNX3','TCF7'), 
+            pt.size = 0.2, cols=c('gray95','darkorange4') )  
+new.cluster.ids <- c( "0"="GNG4 subset", "1"="HSP subset", "2"="IL7R subset", 
+                      "3"="GPR183 subset", "4"="VIM subset", "5"="TNFR2 subset")
+tfh <- RenameIdents(tfh, new.cluster.ids)
+tfh$tfh.subset.annotation <- Idents(tfh)
+subset.cols <- c(
+  "GNG4 subset"   = "mediumaquamarine", # Mature GC-Tfh
+  "HSP subset"    = "darkorange3",      # Stressed/Early (The darker orange you requested)
+  "IL7R subset"   = "salmon",           # Quiescent/Memory-like
+  "GPR183 subset" = "thistle",          # Transitional/Outer-follicle
+  "VIM subset"    = "yellowgreen",      # Highly active/Invasive
+  "TNFR2 subset"  = "skyblue"           # Early Activation/Starter
+)
+DimPlot(tfh, reduction = "umap", label = TRUE, group.by = 'tfh.subset.annotation',
+        cols = subset.cols) + NoLegend() + ggtitle("Tfh subsets")
+# ggsave(filename = 'Images/Tfh-UMAP-subsetLabels.pdf',height=4, width=4)
+
+
+
+DimPlot(tfh, label=F, cells.highlight = hbv.specific, 
+        cols.highlight = "darkorange", cols= "grey", pt.size=1.5, sizes.highlight=3, 
+        group.by = 'CD4.subset.annotation', alpha=0.7) +  
+  ggtitle("HBV clonotypes") + 
+  scale_color_manual(labels = c("Tfh cells","HBV clonotype"), 
+                     values = c("grey90", "darkorange")) 
+# ggsave(filename = 'Images/Tfh-matchCDR3-HBV.pdf', height=6, width=8 )
+
+rstatix::fisher_test(matrix(c(4,nrow(cd4seq),nrow(tfh@meta.data),1e8), nrow=2))
+
+
+top.genes <- FindAllMarkers(tfh, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25) 
+top.fc <- top.genes %>% group_by(cluster) %>% slice_max(n = 20, order_by = avg_log2FC)
+top.p <- top.genes %>% group_by(cluster) %>% slice_max(n = 20, order_by = avg_log2FC)
+top.genes <- as.data.table(rbind(top.fc, top.p))
+top.genes <- top.genes[avg_log2FC>1]
+top.genes <- unique(top.genes, by = c("cluster", "gene"))
+
+# write.csv(file = "outs/Tfhsubsets.FindAllMarkers.csv", x= FindAllMarkers(tfh, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25) %>% group_by(cluster)  ) 
+
+genes_to_plot <- c("CXCL13", 'GNG4', 'POU2AF1', 'TOX2', 'BCL6', 'CXCR5',
+                   "LAG3", "CD38", 'TNFRSF1B', 'PRDM1', 'DUSP4', 
+                   "GPR183", "CD69", 'JUNB', 'FOS', 'DDIT4', 
+                   "IL7R", "KLF2", 'EMP3', 'TXNIP', 'FLT3LG', 
+                   "HSPA1A", "HSPA1B", 'FKBP4', 'KLF6', 'NR4A1', 
+                   "PTMS", "CD55", 'PLAC8', 'S1PR1', 'CCR7')
+ 
+# GNG4: CXCL13, GNG4, POU2AF1, TOX2, BCL6, CXCR5
+# TNFR2: LAG3, CD38, TNFRSF1B, PRDM1, DUSP4
+# GPR183: GPR183, CD69, JUNB, FOS, DDIT4
+# KLF2:  IL7R, KLF2, EMP3, TXNIP, FLT3LG
+# HSP:  HSPA1A, HSPA1B, FKBP4, KLF6, NR4A1
+# VIM:  PTMS, CD55, PLAC8, S1PR1, CCR7
+
+DotPlot(tfh, features = genes_to_plot, group.by = "tfh.subset.annotation", 
+        dot.scale = 8) + RotatedAxis() +
+  scale_color_gradient2(low = "darkorchid3", mid = "white", high = "darkorange") +
+  labs(title = "Top Marker Expression by Subset", x = " ", y = " ")
+# ggsave(filename = 'Images/Tfh_bubbleplot_selectedGenes.pdf', height=3.5, width=10)
+
+md <- as.data.table(tfh@meta.data, keep.rownames = "cell_id")
+clone_counts <- md[!is.na(CTstrict), .(N_cells = .N), by = CTstrict]
+md <- merge(md, clone_counts, by = "CTstrict", all.x = TRUE)
+md[, Expansion_Status := fcase(
+  is.na(CTstrict) | N_cells == 1, "Single / No TCR",
+  N_cells > 1 & N_cells <= 5,    "Small (2-5)",
+  N_cells > 5 & N_cells <= 20,   "Medium (6-20)",
+  N_cells > 20,                  "Hyperexpanded (>20)"
+)]
+levels_order <- c("Single / No TCR", "Small (2-5)", "Medium (6-20)", "Hyperexpanded (>20)")
+md[, Expansion_Status := factor(Expansion_Status, levels = levels_order)]
+
+md <- md[order(Expansion_Status)]
+tfh@meta.data <- data.frame(md, row.names = md$cell_id)[rownames(tfh@meta.data), ]
+
+dark_palette <- c(
+  "Single / No TCR"     = "grey95",   # Neutral for non-expanded
+  "Small (2-5)"         = "firebrick1",  # Steel Blue
+  "Medium (6-20)"       = "firebrick4",  # Deep Navy
+  "Hyperexpanded (>20)" = "#590d22"   # Near-Black / Deep Blood Red
+)
+
+DimPlot(tfh, group.by = "Expansion_Status", reduction = "umap", 
+        cols = dark_palette, order = levels_order) +
+  ggtitle("Clonotypic expansion") +  
+  theme(plot.title = element_text(hjust = 0.8) )
+# ggsave(filename = 'Images/Tfh_UMAP_expandedClonotypes.pdf', height=5, width=6)
+
+
+md <- as.data.table(tfh@meta.data)
+bar.stats <- md[, .N, by = .(subject, tfh.subset.annotation)]
+stack.order <- c("TNFR2 subset", "VIM subset", "GPR183 subset", 
+                 "IL7R subset", "HSP subset", "GNG4 subset")
+
+bar.stats[, tfh.subset.annotation := factor(tfh.subset.annotation, levels = stack.order)]
+ggplot(bar.stats, aes(x = subject, y = N, fill = tfh.subset.annotation)) +
+  geom_bar(stat = "identity", position = "fill", color = "white", linewidth = 0.1) +
+  scale_fill_manual(values = subset.cols) +
+  scale_y_continuous(labels = scales::percent, expand = c(0,0)) +
+  theme_classic() +
+  labs(title = "Proportion of Tfh Subsets",
+       x = "Participant", y = "Percentage", fill = "Tfh Subset") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    legend.position = "right", panel.grid.major.x = element_blank(),
+    plot.title = element_text(hjust = 0.5), axis.title.x = element_blank())
+# ggsave(filename = 'Images/Tfh-Proportion-across-subjects.pdf', height=4, width=6)
+
+# Calculate subset percentages per subject
+subject.stats <- md[, .N, by = .(subject, tfh.subset.annotation, antibody_titer, 
+                                 titer.categ)]
+subject.stats[, Percentage := (N / sum(N)) * 100, by = subject]
+# Reshape to wide format (one row per subject) for correlation matrix
+subject.stats <- dcast(subject.stats, subject + antibody_titer + titer.categ ~ tfh.subset.annotation, value.var = "Percentage", fill = 0)
+subject.stats
+
+subject.stats <- md[, .N, by = .(subject, tfh.subset.annotation, antibody_titer, titer.categ)]
+subject.stats[, Percentage := (N / sum(N)) * 100, by = subject]
+subject.stats
+
+ggplot(subject.stats, aes(x = titer.categ, y = Percentage, fill = titer.categ)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  ggbeeswarm::geom_quasirandom(width = 0.2, size = 2.5, alpha = 0.8, shape = 21, 
+                               color = "black") +  
+  facet_wrap(~tfh.subset.annotation, scales = "free_y", ) + 
+  scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.3)), limits = c(0, NA)) +
+  ggpubr::stat_compare_means(method = "wilcox.test", 
+        label = "p.format", digits = 2, label.x.npc = "right", label.y.npc = 0.05) +
+  theme_classic() + theme(legend.position = "none", axis.title.x = element_blank())
+# ggsave(filename = "Images/Tfh-subsets-vs-Abtiter.pdf", height=5, width=7)
+
+
+# install.packages("coin")
+eff.stats <- subject.stats[, as.data.table(rstatix::cohens_d(data = .SD, Percentage ~ titer.categ)), by = tfh.subset.annotation]
+eff.stats[, label := paste0("r = ", round(effsize, 2), " (", magnitude, ")")]
+eff.stats[, tfh.subset.annotation := reorder(tfh.subset.annotation, effsize)]
+
+ggplot(eff.stats, aes(x = effsize, y = tfh.subset.annotation)) +
+  geom_segment(aes(x = 0, xend = effsize, y = tfh.subset.annotation, 
+                   yend = tfh.subset.annotation), color = "grey80", linewidth = 1.2) +
+  geom_point(aes(color = tfh.subset.annotation), size = 6) +
+  scale_color_manual(values = subset.cols) +
+  annotate("text", y = 0.6, x = 0.25, label = "Over100", color = "steelblue", size=3) +
+  annotate("text", y = 0.6, x = -0.25, label = "Under100", color = "firebrick3", size=3)+ 
+  theme_classic() +
+  geom_vline(xintercept=0, colour = 'gray50', alpha=0.5)+
+  labs(title = "Tfh Subset frequencies relative to titer",
+       subtitle = "Cohen Effect Size | Over100 vs. Under100",
+       x = "Effect Size", y = NULL) +
+  theme(legend.position = "none", axis.text.y = element_text(color = "black"),
+        panel.grid.minor = element_blank())
+# ggsave(filename = 'Images/Tfh-EffectSize-Lollipop.pdf', height=3, width=4.5)
+
+rm(top.genes, top.fc, top.p, genes_to_plot, clone_counts, dark_palette, levels_order, bar.stats, stack.order)
+```
+
+## GNG4 clonal expansion
+
+```{r gng4-clonal-expansion}
+
+
+gng4.cells <- subset(tfh, subset = tfh.subset.annotation == "GNG4 subset")
+Idents(gng4.cells) <- "Expansion_Status"
+
+# use 'Single / No TCR' as the baseline to find what makes expansion unique
+de_markers <- FindMarkers(
+  gng4.cells, ident.1 = "Medium (6-20)", ident.2 = "Single / No TCR",
+  only.pos = FALSE, min.pct = 0.1, logfc.threshold = 0.25 )
+
+setDT(de_markers, keep.rownames = "gene")
+print(de_markers, 30)
+de_markers[p_val_adj<0.05,gene] 
+
+priority_genes <- c("MYCN", "CENPI", "E2F7", "RGS13", "CD79A", "SYK", "IRAK3", "MS4A6A", "SIGLEC10")
+de_markers[, color_group := "Other"]
+de_markers[gene %in% priority_genes, color_group := "Expanded Signature"]
+de_markers[, label_gene := ifelse(gene %in% priority_genes, gene, "")]
+
+ggplot(de_markers, aes(x = avg_log2FC, y = -log10(p_val_adj))) +
+  geom_point(data = de_markers[color_group == "Other"], color = "grey65", alpha = 0.7, 
+             size = 1) +
+  geom_point(data = de_markers[color_group == "Expanded Signature"], color = "#3D0000", 
+             alpha = 0.8, size=1.5) +
+  geom_text_repel(aes(label = label_gene), box.padding = 0.5, point.padding = 0.3, 
+                  segment.color = "black", size = 4, max.overlaps = Inf) +
+  theme_classic() +
+  labs(title = "GNG4 subset: Medium Expanded vs. Single Clones",
+       x = "Log2 Fold Change", y = "-Log10 Adj. P-value") 
+```
+
+## miloR analysis
+
+```{r milo-differential-abundance}
+options(Matrix.warnDeprecatedCoerce = 0)
+options(warn = 0)
+##  miloR for differential abundance testing by conditions 
+# BiocManager::install("miloR")
+library(miloR)
+
+##  MULTI SEED APPROACH
+# library(foreach); library(doParallel)
+# cl <- makeCluster(detectCores() - 15, type = 'PSOCK')
+# registerDoParallel(cl)
+# res.daresults <- foreach( i = 1:1000) %dopar%
+# {
+#   library(miloR)
+#   options(warn = 0)
+#   print(paste("Iteration:", i))
+#   set.seed(i) # 99
+#   milo_obj <- Milo(Seurat::as.SingleCellExperiment(tfh))
+#   milo_obj <- buildGraph(milo_obj, k = 30, d = 30)
+#   milo_obj <- makeNhoods(milo_obj, prop = 0.15, k = 30, d = 30, refined = TRUE)
+#   milo_obj <- calcNhoodDistance(milo_obj, d=30)
+#   milo_obj <- countCells(milo_obj, meta.data = as.data.frame(SummarizedExperiment::colData(milo_obj)), sample = "subject")
+#   milo_obj.des.titer <- data.frame(SummarizedExperiment::colData(milo_obj))[,c("subject", "titer.categ")]
+#   milo_obj.des.titer <- dplyr::distinct(milo_obj.des.titer)
+#   rownames(milo_obj.des.titer) <- milo_obj.des.titer$subject
+#   milo_obj.des.titer <- milo_obj.des.titer[colnames(nhoodCounts(milo_obj)), , drop=FALSE]
+#   da_results <- testNhoods(milo_obj, design = ~ titer.categ, design.df = milo_obj.des.titer)
+#   milo_obj <- buildNhoodGraph(milo_obj)
+#   da_results <- annotateNhoods(milo_obj, da_results, coldata_col = "titer.categ")
+#   da_results <- annotateNhoods(milo_obj, da_results, coldata_col = "tfh.subset.annotation")
+#   da_results
+# }; stopCluster(cl); rm(cl)
+# 
+# saveRDS(res.daresults, file = "20260407_miloR_Tfh_daresults.RDS")
+res.daresults <- readRDS("20260407_miloR_Tfh_daresults.RDS")
+
+
+# SINGLE SEED APPROACH 
+set.seed(114) # 99, 111
+milo_obj <- Milo(as.SingleCellExperiment(tfh))
+milo_obj <- buildGraph(milo_obj, k = 30, d = 30)
+milo_obj <- makeNhoods(milo_obj, prop = 0.10, k = 30, d = 30, refined = TRUE)
+milo_obj <- calcNhoodDistance(milo_obj, d=30)
+milo_obj <- countCells(milo_obj, meta.data = as.data.frame(colData(milo_obj)), sample = "subject")
+head(nhoodCounts(milo_obj))
+
+milo_obj.des.titer <- data.frame(colData(milo_obj))[,c("subject", "titer.categ")]
+milo_obj.des.titer <- distinct(milo_obj.des.titer)
+rownames(milo_obj.des.titer) <- milo_obj.des.titer$subject
+milo_obj.des.titer <- milo_obj.des.titer[colnames(nhoodCounts(milo_obj)), , drop=FALSE] # Reorder rownames to match col of nhoodCounts()
+da_results <- testNhoods(milo_obj, design = ~ titer.categ, design.df = milo_obj.des.titer)
+milo_obj <- buildNhoodGraph(milo_obj)
+da_results <- annotateNhoods(milo_obj, da_results, coldata_col = "titer.categ")
+da_results <- annotateNhoods(milo_obj, da_results, coldata_col = "tfh.subset.annotation")
+
+plotNhoodGraphDA(milo_obj, da_results, alpha=0.1) +
+  patchwork::plot_layout(guides="collect") +
+  ggtitle("Differential abundance by antibody titer") +
+  scale_fill_gradient2(low = 'steelblue', mid='white', high='firebrick3') + 
+  theme_classic()
+# ggsave(filename = "./Images/Tfh_milo_titer_network.pdf", width = 6,height=6)
+
+
+plotDAbeeswarm(res.daresults[[114]], group.by='tfh.subset.annotation', alpha=0.1) + 
+  geom_hline(yintercept=0, color="grey50", alpha=0.5) +
+  scale_color_gradient2(low = "steelblue", mid = "grey80", high = "firebrick3") +
+  annotate("text", x = -0.1, y = -5, label = "Over100", color = "steelblue", size=5) +
+  annotate("text", x = -0.1, y = 5, label = "Under100", color = "firebrick3", size=5)+ 
+  theme_classic() +
+  theme(axis.title.y= element_blank(), axis.text = element_text(color='black')) 
+# ggsave(filename = "./Images/Tfh_milo_titer_beeswarm.pdf", width = 4.5,height=3)
+
+
+iter_stats <- rbindlist(res.daresults, idcol=T)[, .(
+  Total_Nhoods = .N,
+  Count_Under100 = sum(SpatialFDR < 0.1 & logFC > 0, na.rm = TRUE),
+  Count_Over100  = sum(SpatialFDR < 0.1 & logFC < 0, na.rm = TRUE)
+), by = .(.id, tfh.subset.annotation)]
+
+iter_stats[, `:=`(
+  Percent_Under100 = (Count_Under100 / Total_Nhoods) * 100,
+  Percent_Over100  = (Count_Over100 / Total_Nhoods) * 100)  ]
+
+summary_stats <- iter_stats[, .(
+  under_mean = mean(Percent_Under100),
+  over_mean  = mean(Percent_Over100),
+  under_sd   = sd(Percent_Under100),
+  over_sd    = sd(Percent_Over100),
+  under_ci_lo = quantile(Percent_Under100, 0.025),
+  under_ci_hi = quantile(Percent_Under100, 0.975),
+  over_ci_lo  = quantile(Percent_Over100, 0.025),
+  over_ci_hi  = quantile(Percent_Over100, 0.975)  ), by = tfh.subset.annotation]
+
+summary_stats[, `:=`(
+  x_under = under_mean,
+  x_over  = -over_mean,
+  x_under_sd_lo = under_mean - under_sd,
+  x_under_sd_hi = under_mean + under_sd,
+  x_over_sd_lo = (-over_mean) - over_sd,
+  x_over_sd_hi = (-over_mean) + over_sd,
+  Net_Score = under_mean - over_mean   )]
+
+ggplot(summary_stats, aes(y = reorder(tfh.subset.annotation, Net_Score))) +
+  geom_hline(yintercept = 1:nrow(summary_stats), color = "grey95", linewidth = 0.5) +
+  geom_vline(xintercept = 0, color = "grey40", linewidth = 0.8) +
+  geom_errorbarh(aes(xmin = x_under_sd_lo, xmax = x_under_sd_hi), 
+                 height = 0, color = "firebrick3", linewidth = 1, alpha = 0.5,
+                 position = position_nudge(y = 0.15)) +
+  geom_point(aes(x = x_under), color = "firebrick3", size = 4.5,
+             position = position_nudge(y = 0.15)) +
+  geom_errorbarh(aes(xmin = x_over_sd_lo, xmax = x_over_sd_hi), 
+                 height = 0, color = "steelblue", linewidth = 1, alpha = 0.5,
+                 position = position_nudge(y = -0.15)) +
+  geom_point(aes(x = x_over), color = "steelblue", size = 4.5,
+             position = position_nudge(y = -0.15)) +
+  scale_x_continuous(labels = abs, limits = c(-10, 35), breaks = seq(-10, 30, 10)) +
+  theme_minimal() +
+  labs(title = "Tfh Subset Enrichment",
+       subtitle = "Dots: Mean % Enriched | Bars: ±1 Std Dev (n=1000 iterations)",
+       x = "% of Neighborhoods with Differential Abundance", y = NULL) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+    axis.text.y = element_text(size = 12, color = "black"),
+    plot.title = element_text(hjust = 0.5, size = 15) ) +
+  annotate("text", x = -7.5, y = 0.55, label = "Over100", 
+           color = "steelblue", size = 4) +
+  annotate("text", x = 20, y = 0.55, label = "Under100", 
+           color = "firebrick3", size = 4)
+# ggsave(filename = 'Images/Tfh_milo_beeswarm_aggregate.pdf', height=3.5,width=6)
+
+
+# 
+# da_dt <- as.data.table(da_results)
+# summary_stats <- da_dt[, .(Total_Nhoods = .N, 
+#                            Count_Under100 = sum(SpatialFDR < 0.1 & logFC > 0, 
+#                                                 na.rm = TRUE), 
+#                            Count_Over100 = sum(SpatialFDR < 0.1 & logFC < 0, 
+#                                                na.rm = TRUE)), 
+#                        by = tfh.subset.annotation]
+# summary_stats[, Percent_Under100 := (Count_Under100 / Total_Nhoods) * 100]
+# summary_stats[, Percent_Over100  := (Count_Over100 / Total_Nhoods) * 100]
+# summary_stats[, x_over := -Percent_Over100]
+# summary_stats[, x_under := Percent_Under100]
+# summary_stats[, Net_Score := Percent_Under100 - Percent_Over100]
+# 
+# ggplot(summary_stats, aes(y = reorder(tfh.subset.annotation, Net_Score))) +
+#   geom_hline(yintercept = 1:nrow(summary_stats), color = "grey90", linetype = "solid") +
+#   geom_vline(xintercept = 0, color = "grey50") +
+#   geom_segment(aes(x = 0, xend = x_over, yend = tfh.subset.annotation), 
+#                color = "blue", linewidth = 0.8) +
+#   geom_point(aes(x = x_over), color = "blue", size = 4) +
+#   geom_segment(aes(x = 0, xend = x_under, yend = tfh.subset.annotation), 
+#                color = "red", linewidth = 0.8) +
+#   geom_point(aes(x = x_under), color = "red", size = 4) +
+#   theme_classic() +
+#   scale_x_continuous(labels = abs, limits = c(-30, 30)) +
+#   labs(title = "Proportion of Neighborhoods Enriched",
+#        x = "% Neighborhoods", # "← Over100 (%) | Under100 (%) →",
+#        y = NULL) +
+#   theme(axis.text.y = element_text(size = 11), plot.title = element_text(hjust = 0.5),
+#         legend.position = "none") +
+#   annotate("text", x = -20, y = 0.6, label = "Over100", color = "blue", size = 4) +
+#   annotate("text", x = 20, y = 0.6, label = "Under100", color = "red", size = 4)
+
+
+
+
+# rm(da_dt, summary_stats, iter_stats, da_results, milo_obj, milo_obj.des.titer)
+
+
+
+# ******************  no significant or interpretable results
+# da_results <- groupNhoods(milo_obj, da_results, max.lfc.delta = 2)
+# plotDAbeeswarm(da_results, "NhoodGroup")
+# hvg <- scran::getTopHVGs(scran::modelGeneVar(milo_obj), n=2000)
+# nhood_markers <- findNhoodGroupMarkers(milo_obj, da_results, subset.row = hvg, aggregate.samples = TRUE, 
+#                                        sample_col = "titer.categ")
+# ggplot(nhood_markers, aes(logFC_4,-log10(adj.P.Val_4 ))) + geom_point(alpha=0.5, size=0.5) + geom_hline(yintercept = 2)
+# 
+# ************************************************************
+
+```
+
+## Differential expression by subset
+
+```{r differential-expression-subsets}
+
+deg <- FindMarkers(tfh, ident.1 = "IL7R subset", min.pct = 0.1, logfc.threshold = 0)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+deg$gene_label <- NA
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:60]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() +  
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "IL7R Tfh vs Other Tfh Clusters", x = "log2 Fold Change",
+       y = "-log10 Adjusted P-value") + 
+  theme(legend.title = element_blank(), legend.position = 'none')
+# ggsave(filename = 'Images/Tfh-Volcano-IL7RvsOthers.pdf', height=4, width=5)
+
+
+deg <- FindMarkers(tfh, ident.1 = "GPR183 subset", min.pct = 0.1, logfc.threshold = 0)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+deg$gene_label <- NA
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:60]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() + 
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "GPR183 Tfh vs Other Tfh Clusters", x = "log2 Fold Change",
+       y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank(), legend.position = 'none')
+# ggsave(filename = 'Images/Tfh-Volcano-GPR183vsOthers.pdf', height=4, width=5)
+
+deg <- FindMarkers(tfh, ident.1 = "GNG4 subset", min.pct = 0.1, logfc.threshold = 0)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+deg$gene_label <- NA
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:60]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() + 
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "GNG4 Tfh vs Other Tfh Clusters", x = "log2 Fold Change",
+       y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank(), legend.position = 'none')
+# ggsave(filename = 'Images/Tfh-Volcano-GNG4vsOthers.pdf', height=4, width=5)
+
+deg <- FindMarkers(tfh, ident.1 = "HSP subset", min.pct = 0.1, logfc.threshold = 0)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+deg$gene_label <- NA
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:60]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() + 
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "HSP Tfh vs Other Tfh Clusters", x = "log2 Fold Change",
+       y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank(), legend.position = 'none')
+# ggsave(filename = 'Images/Tfh-Volcano-HSPvsOthers.pdf', height=4, width=5)
+
+deg <- FindMarkers(tfh, ident.1 = "VIM subset", min.pct = 0.1, logfc.threshold = 0)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+deg$gene_label <- NA
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:60]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() + 
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "VIM Tfh vs Other Tfh Clusters", x = "log2 Fold Change",
+       y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank(), legend.position = 'none')
+# ggsave(filename = 'Images/Tfh-Volcano-VIMvsOthers.pdf', height=4, width=5)
+
+deg <- FindMarkers(tfh, ident.1 = "TNFR2 subset", min.pct = 0.1, logfc.threshold = 0)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+deg$gene_label <- NA
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:60]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() + 
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "TNFR2 Tfh vs Other Tfh Clusters", x = "log2 Fold Change",
+       y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank(), legend.position = 'none')
+# ggsave(filename = 'Images/Tfh-Volcano-TNFR2vsOthers.pdf', height=4, width=5)
+
+
+rm(deg, top_genes)
+
+# ******************  no significant or interpretable results
+# #  devtools::install_github('cole-trapnell-lab/monocle3')
+# # had to download grr from tarball and manual install 
+# # remotes::install_github('satijalab/seurat-wrappers')
+# library(monocle3)
+# library(SeuratWrappers)
+# cds <- as.cell_data_set(tfh)
+# cds <- cluster_cells(cds, reduction_method = "UMAP")
+# cds <- learn_graph(cds)
+# cell_ids <- which(colData(cds)[, "tfh.subset.annotation"] == "GNG4 subset")
+# closest_vertex <- cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+# root_pr_nodes <- igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names(which.max(table(closest_vertex[cell_ids,]))))]
+# cds <- order_cells(cds, reduction_method = "UMAP", root_pr_nodes = root_pr_nodes)
+# plot_cells(cds, color_cells_by = "pseudotime")
+# ************************************************************
+
+```
+
+## Hotspot for Tfh - calculate
+
+```{r hotspot-Tfh-calculate}
+
+md <- tfh@meta.data
+tfh$predicted.celltype.l1 <- tfh$Comments <- tfh$Randomized <- tfh$V2weightkg <- tfh$V3weightkg <- tfh$ImmunizationHx <- 
+  tfh$Notes <- tfh$scDblFinder.class <-   tfh$HBsAb2 <- tfh$HBsAb2date <-  NULL   # empty columns 
+
+# devtools::install_github("YosefLab/VISION")
+library(VISION)
+# library(reticulate); py_install("hotspotsc") 
+options(mc.cores=1) # Use 1 core
+vis <- Vision(tfh, signatures = "h.all.v2026.1.Hs.symbols.gmt")
+vis <- analyze(vis)
+vis <- runHotspot(vis, model = "danb") 
+# viewResults(vis)
+
+
+# saveRDS(vis, "tfh_vision_hotspot_results.rds")
+vis <- readRDS("tfh_vision_hotspot_results.rds")
+
+
+tfh <- AddMetaData(tfh, metadata = as.data.frame( vis@ModuleHotspotScores ))
+
+# saveRDS(tfh, "20260407_tfh_subclustered.RDS")
+tfh <- readRDS("20260407_tfh_subclustered.RDS")
+
+```
+
+## HOTSPOT for Tfh - analysis and plots
+
+```{r hotspot-tfh-analyze}
+
+VlnPlot2(tfh, features = "HOTSPOT_3", group.by = "titer.categ", pt=F, stat.method = "wilcox.test") + theme(plot.title = element_text(hjust = 0.5))
+VlnPlot2(tfh, features = "HOTSPOT_5", group.by = "titer.categ", pt=F, stat.method = "wilcox.test") + theme(plot.title = element_text(hjust = 0.5))
+wilcox.test(HOTSPOT_4 ~ titer.categ, data = tfh@meta.data)
+hotspot_4_genes <- as.data.frame(names(vis@modData[["HOTSPOT_4"]]@sigDict))
+
+hotspot_names <- grep("^HOTSPOT_", names(vis@modData), value = TRUE)
+hotspot_list <- lapply(hotspot_names, function(mod_name) {
+  names(vis@modData[[mod_name]]@sigDict)  }) # Extract the gene lists for every module
+names(hotspot_list) <- hotspot_names # Name the lists  
+
+# Pad the shorter modules with empty spaces to make them fit in a table
+padded_modules <- lapply(hotspot_list, function(genes) {
+  length(genes) <- max(sapply(hotspot_list, length)) # maximum # genes in any module
+  genes[is.na(genes)] <- ""  
+  return(genes)
+})
+hotspot_export_df <- as.data.frame(padded_modules) # Bind all together into dataframe
+# write.csv(hotspot_export_df, file = "HBV_Study_Hotspot_Modules_Complete.csv", 
+#           row.names = FALSE, quote = FALSE)
+
+genes.modules <-  hotspot_export_df %>% unlist
+genes.modules <- genes.modules[which(genes.modules != "")]
+Idents(tfh) <- "tfh.subset.annotation"
+DefaultAssay(tfh) <- "RNA"
+genes.modules <- lapply(as.list(padded_modules), function(x) {
+  x[x != "" & !is.na(x)] })  # For each column, remove the empty strings ("")
+existing_genes <- intersect(unlist(genes.modules), rownames(tfh[["RNA"]]))
+avg_exp <- AverageExpression(tfh, features = existing_genes, 
+                             group.by = "tfh.subset.annotation", 
+                             assay = "RNA", slot = "data")$RNA
+avg_exp <- t(scale(t(avg_exp)))
+gene_groups <- rep(names(genes.modules), times = sapply(genes.modules, length))
+names(gene_groups) <- unlist(genes.modules)
+gene_groups <- gene_groups[existing_genes]
+row_split_factor <- factor(gene_groups, levels = names(genes.modules))
+col_fun <- circlize::colorRamp2(c(-2, 0, 2), c("darkorchid3", "linen", "darkorange"))
+ComplexHeatmap::Heatmap(
+  matrix = as.matrix(avg_exp), 
+  col = col_fun,
+  name = "Z-score", 
+  cluster_columns = TRUE,    
+  cluster_rows = TRUE, 
+  row_split = row_split_factor, 
+  row_title_rot = 0,
+  column_names_rot = 45,
+  show_row_names = FALSE,    # Hides the overlapping gene names 
+  column_title = "Transcriptional Identity of Tfh Subsets",
+  row_gap = unit(2, "mm")
+)
+
+
+tfh <- AddModuleScore(object = tfh, 
+                      features = list(
+                        Canonical_GCTfh = genes.modules[["HOTSPOT_3"]],
+                        BCL6_module = genes.modules[["HOTSPOT_5"]],
+                        IL2_STAT5_module = genes.modules[["HOTSPOT_8"]]),
+                      name = "HS_Score_") # prefix to the metadata columns
+colnames(tfh@meta.data)[grep("HS_Score_1", colnames(tfh@meta.data))] <- "Canonical_GCTfh"
+colnames(tfh@meta.data)[grep("HS_Score_2", colnames(tfh@meta.data))] <- "BCL6_module"
+colnames(tfh@meta.data)[grep("HS_Score_3", colnames(tfh@meta.data))] <- "IL2_STAT5_module"
+
+FeaturePlot(tfh, features = "Canonical_GCTfh", pt.size =1, 
+            cols =c('gray95','darkorange4')) + 
+  labs(title = "HOTSPOT_3 (Canonical_GCTfh)") +  theme_classic()
+# ggsave(filename = 'Images/Tfh-UMAP-hotspot-3.pdf', height=4, width=5)
+
+FeaturePlot(tfh, features = "BCL6_module", pt.size =1, 
+            cols =c('gray95','darkorange4')) + 
+  labs(title = "HOTSPOT_5 (BCL6_module)") +  theme_classic()
+# ggsave(filename = 'Images/Tfh-UMAP-hotspot-5.pdf', height=4, width=5)
+
+FeaturePlot(tfh, features = "IL2_STAT5_module", pt.size =1, 
+            cols =c('gray95','darkorange4')) + 
+  labs(title = "HOTSPOT_8 (IL2_STAT5_module)")+  theme_classic()
+# ggsave(filename = 'Images/Tfh-UMAP-hotspot-8.pdf', height=4, width=5)
+
+
+# saveRDS(tfh, "20260319_tfh_subclustered.RDS")
+# tfh <- readRDS("20260319_tfh_subclustered.RDS")
+
+
+plot.hotspot.genes <- function(object, module.name, gene.mod, emph.genes=NULL, 
+                               metadata.feature)
+{
+  module_genes <- gene.mod[[module.name]]
+  avg_exp <- AverageExpression(tfh, features = module_genes, group.by = metadata.feature, 
+                                     assay = "RNA", slot = "data")$RNA
+  existing_target_genes <- intersect(module_genes, rownames(avg_exp))
+  avg_exp_subset <- avg_exp[existing_target_genes, ]
+  avg_exp <- t(scale(t(avg_exp_subset)))
+  col_fun = colorRamp2(c(-1.5, 0, 1.5), c("steelblue", "white", "firebrick3"))
+  genes_in_heatmap <- rownames(avg_exp)
+  font_faces <- rep("italic", length(genes_in_heatmap))
+  bold_genes <- emph.genes
+  bold_indices <- which(genes_in_heatmap %in% bold_genes)
+  font_faces[bold_indices] <- "bold.italic"
+  
+  a <- ComplexHeatmap::Heatmap(avg_exp, 
+          name = "Z-score", 
+          col = col_fun,
+          cluster_columns = FALSE,  
+          row_names_gp = grid::gpar(fontsize = 5, fontface=font_faces ),
+          column_title = module.name,
+          column_names_rot = 0) 
+    return(a)
+}
+
+plot.hotspot.genes(object = tfh, module.name = 'HOTSPOT_3', gene.mod = genes.modules, 
+                   metadata.feature ='titer.categ',
+                   emph.genes = c("PDCD1", "TIGIT", "CXCR5", "IL21", 
+                                  "TOX2","FAS", "POU2AF1" ))
+plot.hotspot.genes(object = tfh, module.name = 'HOTSPOT_10', gene.mod = genes.modules, 
+                   metadata.feature ='titer.categ')
+
+md <- tfh@meta.data
+clusters <- unique(md$tfh.subset.annotation)
+results_list <- list()
+modules <- grep("^HOTSPOT_", colnames(md), value = TRUE)
+for (clust in clusters) {
+  meta_clust <- md[md$tfh.subset.annotation == clust, ]   # Isolate cells per cluster
+  # Skip the cluster if it doesn't have enough cells in both titer groups to test
+  if(sum(meta_clust$titer.categ == "Over100") < 5 | sum(meta_clust$titer.categ == "Under100") < 5) next
+  for (mod in modules) {
+    scores_high <- meta_clust[meta_clust$titer.categ == "Over100", mod]
+    scores_low  <- meta_clust[meta_clust$titer.categ == "Under100", mod]
+    test_result <- wilcox.test(scores_high, scores_low, exact = FALSE) # Wilcoxon test
+    W <- test_result$statistic      # Calculate AUC
+    auc_value <- unname(W / (length(scores_high) * length(scores_low)))
+    results_list[[paste(clust, mod)]] <- data.frame(
+      Cluster = clust,
+      Module = mod,
+      AUC = auc_value,
+      P_val = test_result$p.value
+    )
+  }
+}
+
+# 
+# Method details
+# 
+# Step 2: The Inner Loop (The Module Test)
+# 
+# for (mod in modules) { ... }
+# 
+# Inside each cluster, the code now loops through all 18 Hotspot modules.
+# 
+# Group Splitting: It separates the Hotspot scores for that specific module into two buckets: scores_high (Responders) and scores_low (Non-responders).
+# 
+# The Wilcoxon Test: wilcox.test(scores_high, scores_low) This is a non-parametric test (it doesn't assume your data follows a perfect bell curve). It ranks all the cells from lowest to highest expression and checks if the "Over100" group consistently ranks higher than the "Under100" group.
+# 
+# Step 3: The AUC Calculation (Effect Size)
+# 
+# auc_value <- unname(W / (length(scores_high) * length(scores_low)))
+# 
+# This is the most critical part of your "Success vs. Failure" story.
+# 
+# W: This is the "U-statistic" from the Wilcoxon test—it’s essentially a count of how many times a cell from the "Over100" group "beat" a cell from the "Under100" group.
+# 
+# The Denominator: By dividing by the product of the group sizes, we turn that count into a probability (0 to 1).
+# 
+# AUC = 0.5: Means the module is identical in both groups (random chance).
+# 
+# AUC = 0.9: Means there is a 90% probability that a responder cell has a higher score than a non-responder cell. This is a massive "hit."
+
+
+
+rm(scores_high); rm(scores_low); rm(test_result); rm(auc_value); rm(W)
+enrichment_df <- bind_rows(results_list)
+enrichment_df$FDR <- p.adjust(enrichment_df$P_val, method = "fdr")
+enrichment_df <- enrichment_df %>% filter(FDR < 0.05) %>% arrange(-AUC)
+enrichment_df$Significance <- ifelse(enrichment_df$FDR < 0.05, "*", "")
+
+setDT(enrichment_df)
+avg.hotspot <- enrichment_df[, .(AvgAUC = mean(AUC)), by = Module]
+avg.hotspot <- avg.hotspot[order(AvgAUC, decreasing=T)]
+enrichment_df[, Module := factor(Module, levels = avg.hotspot$Module)]  # sort the results
+
+ggplot(enrichment_df, aes(x = Cluster, y = Module, fill = AUC)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = Significance), color = "black", size = 3, vjust = 0.7) +
+  scale_fill_gradient2(low = "steelblue", mid = "white",
+                       high = "firebrick3", midpoint = 0.5,
+                       name = "AUC\n(Red = Enriched in >100)") +
+  theme_minimal() +
+  labs(title = "Module Enrichment",
+       x = "Tfh Subcluster",
+       y = "Hotspot Module") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5))
+
+
+rm(padded_modules, meta_clust, avg.hotspot, hotspot_list, hotspot_4_genes,
+   hotspot_export_df, avg_exp, results_list, new.meta)
+```
+
+So this tells me that the Hotspots are not uniform. Hotspots are identifying co-correlated genes but this is across the full Tfh spectrum. There must be another layer to consider, because miloR suggested differential abundance for sub-groups in narrowly-defined regions of the UMAP projection.
+
+Although Hotspot_10 is the most interesting for relevance to high antibody titer, not all of these subsets are performing the same function so hard to say what this means. These enrichments could reflect global effects but may not offer insight into what really distinguishes strong vs weak antibody producers. Probably we need to focus in on the specific interesting subset.
+
+## FGSEA for the hotspot modules
+
+```{r hotspot-tfh-fgsea, fig.height=7, width=5}
+library(fgsea)
+# top <- FindMarkers(tfh, ident.1 = "GNG4 subset",  
+#                                group.by = "tfh.subset.annotation", assay = "RNA", 
+#                                slot = "data", logfc.threshold = 0.5) 
+#   setDT(top, keep.rownames = "gene")
+#   min_p <- min(top[p_val > 0, p_val])
+#   top[p_val == 0, p_val := min_p]
+#   top[, rank_score := avg_log2FC * -log10(p_val)]
+#   ranks <- setNames(top$rank_score, top$gene)
+#   ranks <- sort(ranks, decreasing = TRUE) 
+#   pathways <- tfh_msig # genes.modules
+#   fgseaRes <- fgsea(pathways = pathways, stats = ranks, minSize = 10,maxSize = 500)
+#   significant_modules <- fgseaRes[padj < 0.05][order(NES, decreasing = TRUE)]
+# plotEnrichment(comp_pathways, ranks) + 
+#   labs(title = "GNG4 Identity: Comparison to Canonical Tfh",
+#        subtitle = paste0("NES: ", round(fgseaRes[pathway == "GSE21379_TFH_VS_NON_TFH_UP", NES], 2)))
+#   
+  
+# 
+# tfh_msig <- msigdbr::msigdbr(species = "human", collection = "C7") %>%
+#   filter(grepl("TFH", gs_name)) %>% split(x = .$gene_symbol, f = .$gs_name)
+# saveRDS(tfh_msig, "20260318_MSigDB_C7_grepTfh.RDS")
+tfh_msig <- readRDS("20260318_MSigDB_C7_grepTfh.RDS")
+
+top <- FindMarkers(tfh, ident.1 = "GNG4 subset",
+                               group.by = "tfh.subset.annotation", assay = "RNA",
+                               slot = "data", logfc.threshold = 0.5)
+setDT(top, keep.rownames = "gene")
+min_p <- min(top[p_val > 0, p_val])
+top[p_val == 0, p_val := min_p]
+top[, rank_score := avg_log2FC * -log10(p_val)]
+ranks <- setNames(top$rank_score, top$gene)
+ranks <- sort(ranks, decreasing = TRUE)
+selected <- tfh_msig[c(
+  "GSE21379_GC_VS_NON_GC_TFH_CD4_T_CELL_UP",
+  "GSE10325_CD4_T_CELL_VS_B_CELL_UP", # Tfh-like help genes
+  "GSE21379_MAFF_VS_CTRL_TFH_CD4_T_CELL_UP" # Tfh maturation
+)]
+comp_pathways <- tfh_msig # c(list(HOTSPOT_3 = genes.modules[["HOTSPOT_3"]]), selected)
+comp_results <- fgsea(pathways = comp_pathways, stats = ranks, minSize = 10, maxSize = 500)
+ggplot(comp_results, aes(x = reorder(pathway, NES), y = NES, fill = NES > 0)) +
+  geom_point(aes(size=-log10(padj)), color = "black", pch=21) +
+  coord_flip() + scale_fill_manual(values = c("steelblue", "firebrick3")) +
+  theme_minimal() +
+  labs(title = "HOTSPOT_3 vs. Canonical Tfh Biology",
+       subtitle = "Enrichment in Over100 vs. Under100",
+       x = "Signature", y = "Normalized Enrichment Score (NES)") +
+  theme(axis.text.y = element_text(size = 8))
+
+
+rm(comp_pathways, ranks, top, min_p, selected)
+```
+
+Again, I think this tells me that the Hotspots are not uniform. I see a lot of results that are in-line with expectations. For example, top hit for NES is Tfh-vs-Th1-UP for HOTSPOT_3. But then the next hit is Tfh-vs-LY6Cloweffector_DOWN which does not make sense (same for the next few hits). But anyway these enrichments are weak and the -log10(Padj) do not exceed 1.3 (= Padj\<0.05). So this result may not be reliable.
+
+## Clonal sharing in Tfh subsets
+
+```{r clonal-sharing-among-tfh}
+
+clonotype_df <- tfh@meta.data %>%
+  select(tfh.subset.annotation, CTstrict) %>% # Use your clonotype column name
+  filter(!is.na(CTstrict))
+
+# 2. Identify clones present in more than one cluster
+shared_clones <- clonotype_df %>% group_by(CTstrict) %>%
+  filter(n_distinct(tfh.subset.annotation) > 1) %>% ungroup()
+
+# 3. Create the adjacency matrix (Sharing counts)
+# This counts how many times Cluster A and Cluster B share the same clone
+sharing_matrix <- table(shared_clones$tfh.subset.annotation, shared_clones$CTstrict)
+adjacency_matrix <- sharing_matrix %*% t(sharing_matrix)
+diag(adjacency_matrix) <- 0 # Remove self-sharing to focus on cross-cluster links
+grid_cols = c("TNFR2 subset"   = "skyblue",           # Closest to #80B1D3
+              "GNG4 subset"   = "mediumaquamarine",  # Closest to #8DD3C7
+              "GPR183 subset" = "thistle",           # Closest to #BEBADA
+              "IL7R subset"   = "salmon",            # Closest to #FB8072
+              "HSP subset"   = "sandybrown",        # Closest to #FDB462
+              "VIM subset"   = "yellowgreen"        # Closest to #B3DE69
+              )
+circos.clear()
+pdf(file = 'Images/Tfh-Circos-subsets-clonalSharing.pdf', width = 7, height = 7)
+circos.par(canvas.xlim = c(-1.5, 1.5), 
+           canvas.ylim = c(-1.5, 1.5),
+           gap.after = c(rep(2, length(grid_cols)-1), 10)) # Small gap for readability
+
+# Draw the Chord Diagram but SUPPRESS the default text and axis ticks
+# (annotationTrack = "grid" draws only the colored rings)
+chordDiagram(adjacency_matrix,
+             grid.col = grid_cols,
+             transparency = 0.4,
+             annotationTrack = "grid", # Only the ring, no default text
+             preAllocateTracks = list(track.height = 0.1)) # Allocate outer space
+
+# Add labels manually outside the grids using low-level functions
+circos.track(track.index = 1, 
+             panel.fun = function(x, y)  {
+    # Get info for current sector (the Tfh subset)
+    xlim = get.cell.meta.data("xlim")
+    xcenter = get.cell.meta.data("xcenter")
+    sector.name = get.cell.meta.data("sector.index")
+    clean_name <- gsub(" subset", "", sector.name)
+    circos.text(
+      xcenter,
+      get.cell.meta.data("ylim")[1] + mm_y(2), # Small offset to push text away
+      labels = clean_name, 
+      facing = "clockwise", 
+      niceFacing = TRUE, 
+      adj = c(0, 0.5), # Anchor at the start of the text
+      cex = 0.8       # Font size
+      )
+    # circos.text(xcenter, 1, # Position at top center of outer track
+    #             sector.name, 
+    #             facing = "clockwise", 
+    #             niceFacing = TRUE, # makes text readable 
+    #             adj = c(0, 0.5), # Anchor text at start of text, vertically centered
+    #             cex = 0.8) # Shrink font slightly
+    }, 
+  bg.border = NA) # No border for text track
+dev.off()
+circos.clear()
+
+print(adjacency_matrix)
+rm(adjacency_matrix, shared_clones, clonotype_df, sharing_matrix)
+```
+
+## Assessing clonal diversity
+
+```{r tfh-clonal-diversity}
+
+md <- as.data.table(tfh@meta.data)
+entropy_results <- md[!is.na(CTstrict), .N, by = .(tfh.subset.annotation, CTstrict)][,
+  .(
+    Unique_Clonotypes = .N,
+    Shannon_H = -sum((N/sum(N)) * log(N/sum(N)))
+  ), 
+  by = tfh.subset.annotation]
+
+setorder(entropy_results, -Shannon_H)
+scale_factor <- max(entropy_results$Unique_Clonotypes) / max(entropy_results$Shannon_H)
+ggplot(entropy_results, aes(x = reorder(tfh.subset.annotation, -Shannon_H))) +
+  geom_bar(aes(y = Shannon_H, fill = tfh.subset.annotation), 
+           stat = "identity", color = "black", alpha = 0.7) +
+  # We divide by the scale_factor to bring the numbers down to the Entropy range
+  geom_path(aes(y = Unique_Clonotypes / scale_factor, group = 1), 
+            color = "black", size = 1, linetype = "dashed") +
+  geom_point(aes(y = Unique_Clonotypes / scale_factor), 
+             size = 3, color = "black") +
+  scale_y_continuous(name = "Shannon entropy (H)",
+    sec.axis = sec_axis(~ . * scale_factor, name = "# unique clonotypes")) +
+  scale_fill_manual(values = subset.cols) +
+  theme_minimal() +
+  labs(title = "Tfh clonal landscape", x="") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    axis.title.y.right = element_text(color = "black", margin = margin(l = 10))  )
+# ggsave(filename = 'Images/Tfh-subsets-Entropy-perSubset.pdf', height=3.5, width=2.5)
+
+
+entropy_results <- md[!is.na(CTstrict), .N, by = .(subject, tfh.subset.annotation, CTstrict)][, .(
+  Shannon_H = -sum((N/sum(N)) * log(N/sum(N)))
+    ), by = .(subject, tfh.subset.annotation)]
+
+ggplot(entropy_results, aes(x = tfh.subset.annotation, y = Shannon_H)) +
+  geom_line(aes(group = subject), color = "lightgrey", size = 0.5, alpha = 0.7) +
+  geom_point(aes(color = tfh.subset.annotation), size = 3) +
+  geom_boxplot(aes(fill = tfh.subset.annotation), alpha = 0.2, outlier.shape = NA) +
+  scale_color_manual(values = subset.cols) +
+  scale_fill_manual(values = subset.cols) +
+  theme_minimal() +
+  labs(title = "Clonal entropy by participant", x="", y = "Shannon's entropy (H)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "none")
+ggsave(filename = 'Images/Tfh-subsets-Entropy-perparticipant.pdf', height=3, width=4)
+rm(entropy_results, scale_factor)
+```
+
+## Slingshot trajectory analysis
+
+```{r slingshot-analysis-tfh}
+
+library(slingshot)
+sce <- as.SingleCellExperiment(tfh)
+sce <- slingshot(sce, clusterLabels = 'tfh.subset.annotation', 
+                 reducedDim = 'UMAP')
+pt_matrix <- slingPseudotime(sce)
+tfh$Pseudotime_Lin1 <- pt_matrix[, 1]
+FeaturePlot(tfh, features = "Pseudotime_Lin1", pt.size = 0.7) +
+  scale_color_viridis_c(option = "viridis", name = "Pseudotime") +
+  labs(title = "Tfh Developmental Trajectory") +
+  theme_classic()
+# ggsave(filename = 'Images/Tfh-UMAP-Slingshot-Pseudotime.pdf', height=4, width=5)
+
+tfh.over100 <- subset(tfh, titer.categ=='Over100' )
+tfh.under100 <- subset(tfh, titer.categ=='Under100' )
+sce.over100 <- as.SingleCellExperiment(tfh.over100)
+sce.under100 <- as.SingleCellExperiment(tfh.under100)
+sce.over100 <- slingshot(sce.over100, clusterLabels = 'tfh.subset.annotation', 
+                         reducedDim = 'UMAP')
+sce.under100 <- slingshot(sce.under100, clusterLabels = 'tfh.subset.annotation', 
+                         reducedDim = 'UMAP')
+tfh.over100$Pseudotime_Lin1 <- slingPseudotime(sce.over100)[, 1]
+tfh.under100$Pseudotime_Lin1 <- slingPseudotime(sce.under100)[, 1]
+x<-FeaturePlot(tfh.over100, features = "Pseudotime_Lin1", pt.size = 0.7) +
+  scale_color_viridis_c(option = "viridis", name = "Pseudotime") +
+  labs(title = "Tfh Developmental Trajectory - Over100") + theme_minimal()
+y<-FeaturePlot(tfh.under100, features = "Pseudotime_Lin1", pt.size = 0.7) +
+  scale_color_viridis_c(option = "viridis", name = "Pseudotime") +
+  labs(title = "Tfh Developmental Trajectory - Under100") + theme_minimal()
+x+y
+
+rm(sce.under100, sce.over100, x, y)
+
+
+md <- as.data.table(tfh@meta.data)
+root_audit <- md[!is.na(Pseudotime_Lin1), .(
+  Mean_PT = mean(Pseudotime_Lin1),
+  Median_PT = median(Pseudotime_Lin1)
+), by = tfh.subset.annotation][order(Mean_PT)]
+
+invisible(
+  md[, tfh.subset.annotation := factor(tfh.subset.annotation, 
+                                       levels = rev(root_audit$tfh.subset.annotation))]
+)
+
+ggplot(md[!is.na(Pseudotime_Lin1)], aes(x = Pseudotime_Lin1, 
+                                        y = tfh.subset.annotation, 
+                                        fill = tfh.subset.annotation)) +
+  geom_violin(alpha = 0.5, color = "black", width = 0.6) +
+  ggbeeswarm::geom_beeswarm(cex = 0.5, alpha = 0.5, color = "grey20", corral='wrap') +
+  scale_fill_viridis_d(option = "mako", direction = -1) + 
+  theme_classic() +
+  labs(title = "Unsupervised Slingshot Trajectory",
+       x = "Pseudotime (0 = Math Root)",
+       y = " ") +
+  theme(legend.position = "none")
+# ggsave(filename = 'Images/Tfh-Slingshot-Pseudotime-subsets.pdf', height=3, width=5)
+
+invisible(md[, TCR_beta := sub(".*_", "", CTaa)])
+top_clones <- md[!is.na(CTstrict), .N, by = .(CTstrict, TCR_beta)][order(-N)][1:10]  # filter out NAs so we are only looking at cells with resolved TCRs
+plot_md <- md[CTstrict %in% top_clones$CTstrict & !is.na(Pseudotime_Lin1)]  # Keep top clones AND cells assigned a Pseudotime score
+invisible(
+  plot_md[, TCR_beta := factor(TCR_beta, levels = top_clones[order(N)]$TCR_beta)]  # This ensures the Y-axis follows the maturation (Pseudotime)  
+)
+ggplot(plot_md, aes(x = Pseudotime_Lin1, y = TCR_beta, fill = TCR_beta)) +
+  ggridges::geom_density_ridges(bandwidth = 0.4, scale = 2.5, alpha = 0.8, 
+                                color = "white") +
+  scale_fill_viridis_d(option = "viridis") +
+  ggridges::theme_ridges() +
+  labs(title = "HBV Clonal Maturation", x = "Slingshot Pseudotime", 
+       y = "TCRBeta CDR3aa Sequence") +
+  theme(legend.position = "none", axis.text.y = element_text(size = 8))
+
+# rm(sce, root_audit, plot_md, top_clones, pt_matrix)
+
+# saveRDS(tfh, "20260407_tfh_slingshot.RDS")
+tfh <- readRDS("20260407_tfh_slingshot.RDS")
+```
+
+## CytoTRACE2 calculation
+
+```{r tfh-cytotrace2-calculate, eval=FALSE}
+library(CytoTRACE2)
+tfh <- cytotrace2(tfh, is_seurat=T, slot_type = "counts", 
+                  species='human', batch_size = 10000)
+
+res.cytotrace <- cytotrace2(tfh, is_seurat=T, slot_type = "counts", 
+                  species='human', parallelize_models = F)
+plots <- plotData(cytotrace2_result = res.cytotrace, 
+                  annotation = res.cytotrace@meta.data, is_seurat = T)
+plots$CytoTRACE2_Relative_UMAP
+
+```
+
+## CytoTRACE2 analysis and plots
+
+```{r tfh-cytotrace2-makePlots, eval=FALSE}
+md <- as.data.table(res.cytotrace@meta.data)
+summary_md <- md[, .(Mean_Score = mean(CytoTRACE2_Score, na.rm = TRUE),
+  SEM = sd(CytoTRACE2_Score, na.rm = TRUE) / sqrt(.N)), by = tfh.subset.annotation]
+ggplot(summary_md, aes(x = reorder(tfh.subset.annotation, -Mean_Score), 
+                       y = Mean_Score, fill = Mean_Score)) +
+  geom_bar(stat = "identity", color = "black", width = 0.7) +
+  geom_errorbar(aes(ymin = Mean_Score - SEM, ymax = Mean_Score + SEM), width = 0.2) +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  theme_classic() +
+  labs(title = "Average Developmental Potential by Subset",
+       x = "Tfh Subset",
+       y = "Mean CytoTRACE2 Score (High = Primitive)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(md, aes(x = nCount_RNA, y = nFeature_RNA, color = tfh.subset.annotation)) +
+    geom_point(alpha = 0.3, size = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
+    scale_x_log10() + scale_y_log10() +
+    theme_minimal() +
+    labs(title = "Transcriptional Diversity vs. Sequencing Depth",
+         x = "Total RNA Counts (log10)",
+         y = "Unique Genes Detected (log10)")
+
+ggplot(md[!is.na(Pseudotime_Lin1)], aes(x = Pseudotime_Lin1, y = nFeature_RNA, color = tfh.subset.annotation)) +
+  geom_point(alpha = 0.4, size = 1) +
+  # Using a GAM (Generalized Additive Model) to see the non-linear trend
+  geom_smooth(method = "gam", color = "black", linewidth = 1.2) +
+  scale_color_brewer(palette = "Set1") +
+  theme_classic() +
+  labs(title = "Trajectory Audit: Pseudotime vs. Transcriptional Diversity",
+       subtitle = "Is the mathematical timeline driven by gene counts?",
+       x = "Slingshot Pseudotime (Maturation)",
+       y = "nFeature_RNA (Unique Genes Detected)") +
+  theme(legend.title = element_blank())
+
+
+
+rm(summary_md, res.cytotrace, plots)
+```
+
+From this, it seems like Cytotrace is unable to find enough meaningful differences to properly call differentiation, as the result will depend on how transcriptionally diverse the subset is. The presumption is that differentiation -\> less transcriptional diversity but whether that's true for Tfh is unknown. Likely these subsets are relatively similar. The plots for \# features detected vs slingshot pseudotime is interesting and worth coming back to later.
+
+## Differential expression by aging
+
+```{r differential-expression-byAging}
+
+DimPlot(tfh, group.by = "age_group",label = F, pt.size = 1) + ggtitle("Tfh, reclustered")
+
+cluster0 <- subset(tfh, idents = "GNG4 subset")
+Idents(cluster0) <- "age_group"
+deg <- FindMarkers(cluster0, ident.1 = "Older", ident.2 = "Younger", test.use = "wilcox")
+deg$gene_label <- rownames(deg)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() +  
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "Tfh cluster 0 by age_group", x = "log2 Fold Change",y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank())
+
+
+# milo_obj <- readRDS(file="20260321_miloR_tfh.RDS")
+
+milo_obj.des.age <- data.frame(colData(milo_obj))[,c("subject", "age_group")]
+milo_obj.des.age <- distinct(milo_obj.des.age)
+rownames(milo_obj.des.age) <- milo_obj.des.age$subject
+milo_obj.des.age <- milo_obj.des.age[colnames(nhoodCounts(milo_obj)), , drop=FALSE] ## Reorder rownames to match col of nhoodCounts()
+da_results <- testNhoods(milo_obj, design = ~ age_group, design.df = milo_obj.des.age)  
+milo_obj <- buildNhoodGraph(milo_obj)
+plotNhoodGraphDA(milo_obj, da_results, alpha=0.05) + 
+  patchwork::plot_layout(guides="collect") + ggtitle("DA testing by age category")
+da_results <- annotateNhoods(milo_obj, da_results, coldata_col = "age_group")
+da_results <- annotateNhoods(milo_obj, da_results, coldata_col = "tfh.subset.annotation")
+plotDAbeeswarm(da_results, group.by='age_group', alpha=0.1) 
+plotDAbeeswarm(da_results, group.by='tfh.subset.annotation', alpha=0.1) 
+
+
+```
+
+## Differential expression by titer
+
+```{r differential-expression-byTiter}
+
+cluster.sub <- subset(tfh, idents = "GNG4 subset")
+Idents(cluster.sub) <- "titer.categ"
+deg <- FindMarkers(cluster.sub, ident.1 = "Over100", ident.2 = "Under100", test.use = "wilcox")
+deg$gene_label <- rownames(deg)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Higher in Over100"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Higher in Under100"
+# top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
+# deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+setDT(deg)
+top_up <- deg[diffexpressed == "Higher in Over100"][order(p_val_adj)][1:12, gene_label]
+top_down <- deg[diffexpressed == "Higher in Under100"][order(p_val_adj)][1:12, gene_label]
+deg$gene_label <- ifelse(deg$gene %in% c(top_up, top_down), deg$gene_label, "")
+
+a <- ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, 
+                       label = gene_label)) +
+  geom_point(alpha = 0.4, size = 2) + theme_minimal() +
+  # ggrepel::geom_text_repel(max.overlaps = 20, box.padding = 0.5) +  
+  ggrepel::geom_text_repel(
+    max.overlaps = Inf,       # Ensure our 30 genes show up
+    force = 12,                # Strength of push between labels
+    box.padding = 0.8,        # Space around the text
+    point.padding = 0.5,      # Space between the point and the start of the line
+    segment.curvature = -0.1, # Adds a subtle curve to the lines
+    segment.ncp = 3,          # Smoother curve
+    segment.angle = 50,      # Angle of the callout
+    segment.alpha = 0.3
+  ) + 
+  scale_color_manual(values = c("Higher in Over100" = "steelblue", 
+                                "Not Significant" = "grey", 
+                                "Higher in Under100" = "firebrick3")) +  
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed", alpha=0.5) +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed", alpha=0.5) +
+  labs(title="GNG4 Tfh by titer", x="log2 Fold Change", y="-log10 Adjusted P-value") +
+  coord_cartesian(clip = "off") +
+  annotate("text", x = 4, y = -1.5, label = "Higher in Over100", color = "steelblue") +
+  annotate("text", x = -4, y = -1.5, label = "Higher in Under100", color = "firebrick3") +
+  theme(legend.position = 'none'); a
+# ggsave(a, filename = 'Images/Tfh-Volcano-GNG4-Hi-v-Lo.pdf', height=5, width=6)
+
+
+# genes_to_plot <- c("PDCD1", 'TXNIP', 'IL16', 'ZFP36L1', 'DENND2D', 
+#                    "BACH2", "RNF19A", 'LMNA', 'YPEL5', 'BICDL1', 
+#                    "CD40LG", "JUN", 'IL21', 'CDK14', 'REL', 
+#                    "IL4", "ZEB1", 'JUNB', 'DUSP6', 'CD44'
+#                   )
+genes_under <- deg[diffexpressed == "Higher in Under100" & gene_label != "", gene_label]
+genes_over  <- deg[diffexpressed == "Higher in Over100" & gene_label != "", gene_label]
+genes_to_plot <- c(genes_under[1:15], genes_over[1:15])
+genes_to_plot <- intersect(na.omit(genes_to_plot), rownames(cluster.sub))
+
+# genes_to_plot <- deg[which(deg$diffexpressed == "Higher in Under100"), 'gene_label'][1:15]
+# genes_to_plot <- c(genes_to_plot, deg[which(deg$diffexpressed == "Higher in Over100"), 'gene_label'][1:15])
+
+cluster.sub <- ScaleData(cluster.sub, features = genes_to_plot)
+mat <- as.matrix(GetAssayData(cluster.sub, slot = "scale.data")[genes_to_plot, ])
+col_annot <- ComplexHeatmap::HeatmapAnnotation(
+  Titer = cluster.sub$titer.categ,
+  col = list(Titer = c("Under100" = "firebrick3", "Over100" = "steelblue")),
+  show_legend = TRUE )
+
+# pdf(file = 'Images/GNG4-diffexp-Hi-v-Lo-Ab.pdf', height=4.5,width=5)
+ComplexHeatmap::Heatmap(mat, 
+  name = "Z-score",
+  top_annotation = col_annot,
+  column_split = cluster.sub$titer.categ, # Groups cells by titer
+  cluster_column_slices = TRUE,           # Clusters cells WITHIN the groups
+  cluster_columns = TRUE,                # Enables the internal clustering
+  column_gap = unit(2, "mm"),             # Adds a visual gap between blocks
+  cluster_rows = TRUE,                    # Keep gene clustering
+  show_row_dend = TRUE,          
+  col = colorRamp2(c(-1.5, 0, 1.5), c("darkorchid4", "moccasin", "darkorange")),
+  row_names_gp = grid::gpar(fontsize = 8, fontface = "italic"),
+  show_column_names = FALSE,   
+  column_title = "GNG4 Tfh: DiffExp genes",
+  row_names_side = "right",
+  row_dend_width = unit(10, "mm")
+  
+)
+# dev.off()
+
+
+cluster.sub <- subset(tfh, idents = "GPR183 subset")
+Idents(cluster.sub) <- "titer.categ"
+deg <- FindMarkers(cluster.sub, ident.1 = "Under100", ident.2 = "Over100", test.use = "wilcox")
+deg$gene_label <- rownames(deg)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Higher in Under100"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Higher in Over100"
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel(max.overlaps = 12, box.padding = 0.5) +  
+  scale_color_manual(values = c("Higher in Over100" = "steelblue", 
+                                "Not Significant" = "grey", 
+                                "Higher in Under100" = "firebrick3")) +  
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "GPR183 Tfh by titer", x = "log2 Fold Change",
+       y = "-log10 Adjusted P-value") +
+  coord_cartesian(clip = "off") +
+  annotate("text", x = -4, y = -1.5,
+           label = "Higher in Over100", color = "steelblue") +
+  annotate("text", x = 4, y = -1.5,
+           label = "Higher in Under100", color = "firebrick3") +
+  theme(legend.position = 'none')
+
+```
+
+## Tfh subset pathway analysis
+
+```{r GNG4-pathway-analysis}
+
+# devtools::install_version("crossmatch", version = "1.3.1", repos = "http://cran.us.r-project.org")
+# devtools::install_version("multicross", version = "2.1.0", repos = "http://cran.us.r-project.org")
+# devtools::install_github("jackbibby1/SCPA")
+
+gng4.cells <- subset(tfh, subset = tfh.subset.annotation == "GNG4 subset")
+over100_mat <- as.matrix( GetAssayData(gng4.cells, assay = "SCT", slot = "data")[, gng4.cells$titer.categ == "Over100"] )
+under100_mat <- as.matrix( GetAssayData(gng4.cells, assay = "SCT", slot = "data")[, gng4.cells$titer.categ == "Under100"] )
+pathways <- msigdbr::msigdbr(species = "Homo sapiens", category = "H") %>%
+  SCPA::format_pathways()
+scpa_results <- SCPA::compare_pathways( samples = list(over100_mat, under100_mat), 
+                                  pathways = pathways)
+scpa_results <- scpa_results %>%  mutate(adjPvalBH = p.adjust(Pval, method = "BH"),
+                                         logP = -log10(adjPvalBH)) %>%
+  arrange(desc(qval))
+
+setDT(scpa_results)
+scpa_results[, direction := ifelse(FC > 0, "Over100", "Under100")]
+scpa_results[, pathway := gsub("HALLMARK_", "", Pathway)]
+plot_data <- scpa_results[order(-qval), head(.SD, 12), by = direction]
+plot_data <- plot_data[order(FC)]
+plot_data[, pathway := factor(pathway, levels = pathway)]
+
+ggplot(plot_data, aes(x = FC, y = pathway)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey70") +
+  geom_segment(aes(x = 0, xend = FC, y = pathway, yend = pathway), 
+               color = "grey60", linewidth = 1) +
+  geom_point(aes(size = logP, fill = FC), shape = 21, color = "black") +
+  scale_fill_gradient2(low = "firebrick4", mid = "grey95", high = "steelblue", 
+                       midpoint = 0, name = "Fold Change") +
+  scale_size_continuous(range = c(1, 9), name = "-log10(adjP)") +
+  theme_classic() +
+  labs(title = "GNG4 Subset: SCPA Differential Pathways",
+       x = "Fold Change (FC)",  y = NULL) +
+  annotate("text", x = -1, y = 0.65, label = "Under100", color = "firebrick4") +
+  annotate("text", x = 1, y = 0.65, label = "Over100", color = "steelblue") +
+  coord_cartesian(clip = "off") +
+  theme(axis.text.y = element_text(size = 10, color = "black"),
+    panel.grid.major.y = element_line(color = "grey92", linewidth = 0.5) ) + 
+  coord_cartesian(xlim = c(-4,3))
+ggsave(filename = "Images/GNG4-SCPA-Lollipop.pdf", height=6, width=7)
+
+
+Idents(gng4.cells) <- "titer.categ"
+deg <- FindMarkers(gng4.cells, ident.1 = "Over100", ident.2 = "Under100", 
+                   test.use = "wilcox")
+deg$gene <- rownames(deg)
+setDT(deg)
+deg[, rank_metric := sign(avg_log2FC) * -log10(p_val)]
+ranks <- deg$rank_metric
+names(ranks) <- deg$gene
+ranks <- sort(ranks, decreasing = TRUE)
+m_df <- msigdbr::msigdbr(species = "Homo sapiens", category = "H")
+pathways_list <- split(m_df$gene_symbol, m_df$gs_name)
+fgsea_res <- fgsea::fgsea(pathways = pathways_list["HALLMARK_TNFA_SIGNALING_VIA_NFKB"], 
+                          stats = ranks, minSize = 15, maxSize = 500)
+stats_text <- paste0("NES: ", round(fgsea_res$NES, 3), "\n",
+                     "q-val: ", format.pval(fgsea_res$padj, digits = 2))
+
+fgsea::plotEnrichment(pathways_list[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]], 
+                               ranks) +
+  labs(title = "GNG4 subset:  TNF/NFkB Signaling",
+       x = "Rank in Ordered Gene List",
+       y = "Enrichment Score (ES)") +
+  theme_classic() +
+  annotate("text", x = length(ranks) * 0.8, y = 0.4, label = stats_text, hjust=0) +
+  annotate("text", x = length(ranks)*0.15, y = -0.1, label = "Over100", 
+           color = "steelblue", size = 5) +
+  annotate("text", x = length(ranks)*0.85, y = -0.1, 
+           label = "Under100", color = "firebrick3",  size = 5) +
+  coord_cartesian(clip = "off") +
+  theme( plot.title = element_text(size = 16),
+    plot.margin = margin(t = 10, r = 10, b = 30, l = 10) )
+# ggsave(filename = "Images/GNG4-GSEA-TNFNFkBsignaling.pdf", width=5, height=4)
+
+fgsea_res <- fgsea::fgsea(pathways = pathways_list["HALLMARK_INTERFERON_ALPHA_RESPONSE"], 
+                          stats = ranks, minSize = 15, maxSize = 500)
+stats_text <- paste0("NES: ", round(fgsea_res$NES, 3), "\n",
+                     "q-val: ", format.pval(fgsea_res$padj, digits = 2))
+fgsea::plotEnrichment(pathways_list[["HALLMARK_INTERFERON_ALPHA_RESPONSE"]], 
+                               ranks) +
+  labs(title = "GNG4 subset:  IFN alpha response",
+       x = "Rank in Ordered Gene List",
+       y = "Enrichment Score (ES)") +
+  theme_classic() +
+  annotate("text", x = length(ranks) * 0.1, y = -0.5, label = stats_text, hjust=0) +
+  annotate("text", x = length(ranks)*0.15, y = 0.1, 
+           label = "Over100", color = "steelblue", size = 5) +
+  annotate("text", x = length(ranks)*0.85, y = 0.1, 
+           label = "Under100", color = "firebrick3",  size = 5) +
+  coord_cartesian(clip = "off") +
+  theme( plot.title = element_text(size = 16),
+    plot.margin = margin(t = 10, r = 10, b = 30, l = 10) )
+# ggsave(filename = "Images/GNG4-GSEA-IFNaResponse.pdf", width=5, height=4)
+
+rm(cluster.sub, deg, top_genes, mat, col_annot, m_df, pathways_list, p_tnf)
+```
+
+```{r nonGNG4-pathway}
+
+
+tnfr2 <- subset(tfh, subset = tfh.subset.annotation == "TNFR2 subset")
+over100_mat <- as.matrix( GetAssayData(tnfr2, assay = "SCT", slot = "data")[, tnfr2$titer.categ == "Over100"] )
+under100_mat <- as.matrix( GetAssayData(tnfr2, assay = "SCT", slot = "data")[, tnfr2$titer.categ == "Under100"] )
+pathways <- msigdbr::msigdbr(species = "Homo sapiens", category = "H") %>%
+  SCPA::format_pathways()
+scpa_results <- SCPA::compare_pathways( samples = list(over100_mat, under100_mat), 
+                                  pathways = pathways)
+scpa_results <- scpa_results %>%  mutate(adjPvalBH = p.adjust(Pval, method = "BH"),
+                                         logP = -log10(adjPvalBH)) %>%
+  arrange(desc(qval))
+
+setDT(scpa_results)
+scpa_results[, direction := ifelse(FC > 0, "Over100", "Under100")]
+scpa_results[, pathway := gsub("HALLMARK_", "", Pathway)]
+plot_data <- scpa_results[order(-qval), head(.SD, 10), by = direction]
+plot_data <- plot_data[order(FC)]
+plot_data[, pathway := factor(pathway, levels = pathway)]
+
+ggplot(plot_data, aes(x = FC, y = pathway)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey70") +
+  geom_segment(aes(x = 0, xend = FC, y = pathway, yend = pathway), 
+               color = "grey60", linewidth = 1) +
+  geom_point(aes(size = logP, fill = FC), shape = 21, color = "black") +
+  scale_fill_gradient2(low = "firebrick4", mid = "grey95", high = "steelblue", 
+                       midpoint = 0, name = "Fold Change") +
+  scale_size_continuous(range = c(1, 9), name = "-log10(adjP)") +
+  theme_classic() +
+  labs(title = "TNFR2 Subset: SCPA Differential Pathways",
+       x = "Fold Change (FC)",  y = NULL) +
+  annotate("text", x = -1, y = 0.65, label = "Under100", color = "firebrick4") +
+  annotate("text", x = 1, y = 0.65, label = "Over100", color = "steelblue") +
+  coord_cartesian(clip = "off") +
+  theme(axis.text.y = element_text(size = 10, color = "black"),
+    panel.grid.major.y = element_line(color = "grey92", linewidth = 0.5) )  
+# ggsave(filename = "Images/TNFR2-SCPA-Lollipop.pdf", height=6, width=7)
+
+
+
+
+gpr183 <- subset(tfh, subset = tfh.subset.annotation == "GPR183 subset")
+over100_mat <- as.matrix( GetAssayData(gpr183, assay = "SCT", slot = "data")[, gpr183$titer.categ == "Over100"] )
+under100_mat <- as.matrix( GetAssayData(gpr183, assay = "SCT", slot = "data")[, gpr183$titer.categ == "Under100"] )
+pathways <- msigdbr::msigdbr(species = "Homo sapiens", category = "H") %>%
+  SCPA::format_pathways()
+scpa_results <- SCPA::compare_pathways( samples = list(over100_mat, under100_mat), 
+                                  pathways = pathways)
+scpa_results <- scpa_results %>%  mutate(adjPvalBH = p.adjust(Pval, method = "BH"),
+                                         logP = -log10(adjPvalBH)) %>%
+  arrange(desc(qval))
+
+setDT(scpa_results)
+scpa_results[, direction := ifelse(FC > 0, "Over100", "Under100")]
+scpa_results[, pathway := gsub("HALLMARK_", "", Pathway)]
+plot_data <- scpa_results[order(-qval), head(.SD, 10), by = direction]
+plot_data <- plot_data[order(FC)]
+plot_data[, pathway := factor(pathway, levels = pathway)]
+
+ggplot(plot_data, aes(x = FC, y = pathway)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey70") +
+  geom_segment(aes(x = 0, xend = FC, y = pathway, yend = pathway), 
+               color = "grey60", linewidth = 1) +
+  geom_point(aes(size = logP, fill = FC), shape = 21, color = "black") +
+  scale_fill_gradient2(low = "firebrick4", mid = "grey95", high = "steelblue", 
+                       midpoint = 0, name = "Fold Change") +
+  scale_size_continuous(range = c(1, 9), name = "-log10(adjP)") +
+  theme_classic() +
+  labs(title = "GPR183 Subset: SCPA Differential Pathways",
+       x = "Fold Change (FC)",  y = NULL) +
+  annotate("text", x = -1, y = 0.65, label = "Under100", color = "firebrick4") +
+  annotate("text", x = 1, y = 0.65, label = "Over100", color = "steelblue") +
+  coord_cartesian(clip = "off") +
+  theme(axis.text.y = element_text(size = 10, color = "black"),
+    panel.grid.major.y = element_line(color = "grey92", linewidth = 0.5) )  
+# ggsave(filename = "Images/GPR183-SCPA-Lollipop.pdf", height=6, width=7)
+
+
+
+```
+
+## GRN analysis using decoupleR
+
+```{r GRN-analysis-decoupleR}
+
+hallmark <- GSEABase::getGmt("h.all.v2026.1.Hs.symbols.gmt")
+genes <- GSEABase::geneIds(hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]])
+
+tfh <- AddModuleScore(object = tfh, features = list(genes),
+                      name = "HALLMARK_TNFA_SIGNALING_VIA_NFKB")
+# 
+# ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = HALLMARK_TNFA_SIGNALING_VIA_NFKB1,
+#                           fill = titer.categ)) +
+#   geom_violin(alpha = 0.5, color = "black", width = 0.7, position = position_dodge(0.8)) +
+#   stat_summary(fun = median, fun.min = median, fun.max = median,
+#                geom = "errorbar", width = 0.5, size = 0.5,
+#                color = "black", position = position_dodge(0.8)) +
+#   ggpubr::stat_compare_means(aes(group = titer.categ), 
+#                      label = "p.format", method = "wilcox.test", hide.ns = FALSE,
+#                      label.y = 0.48) + 
+#   theme_classic() + coord_flip() +
+#   scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
+#   labs(title = "Seurat module scores for TNF/NFkB",
+#        subtitle = "Wilcoxon Rank Sum Test; Median shown",
+#        x = "Tfh Subset", y = "Module Score") +
+#   theme(axis.text = element_text(color = "black"), legend.position = "top", 
+#         axis.title.y = element_blank())
+
+
+md <- as.data.table(tfh@meta.data)
+md <- md[!is.na(Pseudotime_Lin1)] # Remove cells with no PseudoTime
+ggplot(md, aes(x = Pseudotime_Lin1, y = HALLMARK_TNFA_SIGNALING_VIA_NFKB1, 
+               color = titer.categ)) +
+  geom_smooth(method = "gam", se = TRUE) +
+  geom_point(alpha = 0.2, size = 0.5) +
+  scale_color_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
+  theme_classic() +
+  labs(title = "Tfh signaling", x = "Slingshot Pseudotime", y = "TNF/NFkB Score") +
+  theme(legend.position = "top")
+
+
+md$titer.categ <- as.factor(md$titer.categ)
+gam_mod <- mgcv::gam(HALLMARK_TNFA_SIGNALING_VIA_NFKB1 ~ titer.categ + 
+               s(Pseudotime_Lin1, by = titer.categ), data = md)
+summary(gam_mod)
+
+
+library(decoupleR)
+library(OmnipathR)
+
+net <- decoupleR::get_collectri(organism = 'human', split_complexes = FALSE)
+tf_activity.collectri  <- decoupleR::run_ulm(mat = as.matrix(tfh@assays$RNA@data), 
+                                  net = net, .source = 'source', .target = 'target',
+                                  .mor = 'mor', minsize = 5)
+tfh$JUN_Activity <- tf_activity.collectri[tf_activity.collectri$source == "JUN", ]$score
+tfh$FOS_Activity <- tf_activity.collectri[tf_activity.collectri$source == "FOS", ]$score
+
+md <- as.data.table(tfh@meta.data, keep.rownames = "condition")
+setDT(tf_activity.collectri)
+tf_activity.collectri <- merge(tf_activity.collectri, 
+                               md[, .(condition, titer.categ, tfh.subset.annotation)],
+                               by = "condition" )
+
+setDT(tf_activity.collectri)
+tf.stats <- tf_activity.collectri[, .(LFC_Activity = mean(score[titer.categ == "Over100"]) - mean(score[titer.categ == "Under100"]),  
+                    p_val = wilcox.test(score ~ titer.categ)$p.value), by = source]
+tf.stats[, fdr := p.adjust(p_val, method = "BH")]
+setorder(tf.stats, -LFC_Activity)
+subset.tf.stats <- tf_activity.collectri[, .(
+  LFC_Activity = mean(score[titer.categ == "Over100"]) - 
+    mean(score[titer.categ == "Under100"]),
+  p_val = wilcox.test(score ~ titer.categ)$p.value), by = .(source, tfh.subset.annotation)]
+
+gng4.tf.top <- subset.tf.stats[tfh.subset.annotation == "GNG4 subset"][order(-LFC_Activity)]
+plot_tfs <- gng4.tf.top[p_val < 0.05][order(LFC_Activity)]
+plot_tfs <- rbind(head(plot_tfs, 15), tail(plot_tfs, 15))
+
+StrongAb <- c("BACH2", "STAT4", "BCL6", "MAF", "CREM")
+PoorAb <- c("STAT1", "STAT2", "IRF9", "IRF1", "CIITA", "TBX21", "RELA", "REL", "NFKB1", "HSF2", "HSF1")
+gng4.tf.top[, label_group := "Other"]
+gng4.tf.top[source %in% StrongAb, label_group := "Canonical Axis"]
+gng4.tf.top[source %in% PoorAb, label_group := "Inflammatory Axis"]
+ggplot(gng4.tf.top, aes(x = LFC_Activity, y = -log10(p_val), color = label_group)) +
+  geom_point(alpha = 0.4, size = 1.5) +
+  ggrepel::geom_text_repel(data = gng4.tf.top[label_group != "Other"], 
+                           aes(label = source), box.padding = 0.5, 
+                           max.overlaps = Inf, fontface = "bold", 
+                  size = 4, show.legend = FALSE) +
+  scale_color_manual(values = c("Canonical Axis" = "steelblue", 
+                               "Inflammatory Axis" = "firebrick3", 
+                               "Other" = "grey80")) +
+  theme_classic() +
+  labs(title = "GNG4 Regulatory Landscape", x = "← Under100 | Over100 →", 
+       y = "-log10 (p-value)", color = "Regulatory Program") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+  theme(legend.position = "right")
+
+
+ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = JUN_Activity,
+                          fill = titer.categ)) +
+  geom_violin(alpha = 0.5, color = "black", width = 0.7, position = position_dodge(0.8)) +
+  stat_summary(fun = median, fun.min = median, fun.max = median,
+               geom = "errorbar", width = 0.5, size = 0.5,
+               color = "black", position = position_dodge(0.8)) +
+  ggpubr::stat_compare_means(aes(group = titer.categ), 
+                     label = "p.format", method = "wilcox.test", hide.ns = FALSE,
+                     label.y = 15) + 
+  theme_classic() + coord_flip() +
+  scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
+  labs(title = "Module scores for Jun Activity",
+       subtitle = "Wilcoxon Rank Sum Test; Median shown",
+       x = "Tfh Subset", y = "Module Score") +
+  theme(axis.text = element_text(color = "black"), legend.position = "top", 
+        axis.title.y = element_blank())
+
+ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = FOS_Activity,
+                          fill = titer.categ)) +
+  geom_violin(alpha = 0.5, color = "black", width = 0.7, position = position_dodge(0.8)) +
+  stat_summary(fun = median, fun.min = median, fun.max = median,
+               geom = "errorbar", width = 0.5, size = 0.5,
+               color = "black", position = position_dodge(0.8)) +
+  ggpubr::stat_compare_means(aes(group = titer.categ), 
+                     label = "p.format", method = "wilcox.test", hide.ns = FALSE,
+                     label.y = 10.5) + 
+  theme_classic() + coord_flip(ylim = c(0,11)) +
+  scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
+  labs(title = "Module scores for Fos Activity",
+       subtitle = "Wilcoxon Rank Sum Test; Median shown",
+       x = "Tfh Subset", y = "Module Score") + 
+  theme(axis.text = element_text(color = "black"), legend.position = "top", 
+        axis.title.y = element_blank()) 
+
+
+
+rm(gam_mod, StrongAb, PoorAb, gng4.tf.top, tf.stats, subset.tf.stats)
+```
+
+## Visium HD tonsil dataset
+
+```{r import-visiumHD-data-SCtransform, eval=FALSE}
+
+pos <- read_parquet("tissue_positions.parquet")
+write.csv(pos, "tissue_positions.csv", row.names = FALSE)
+
+# 
+# options(future.globals.maxSize = 16000 * 1024^2)
+# data_dir <- "Visium_HD_Human_Tonsil_Fresh_Frozen_IF_binned_outputs/binned_outputs/square_016um"
+# tonsil <- Load10X_Spatial(data.dir = data_dir, filename = "filtered_feature_bc_matrix.h5",
+#   assay = "Spatial")
+# tonsil <- SCTransform(tonsil, assay = "Spatial", verbose = FALSE)
+
+tonsil <- qs2::qs_read(file = "Visium_HD_Human_Tonsil_Fresh_Frozen_IF_binned_outputs/CD4_Tonsil_08um.qs2", nthreads = 5)
+DefaultAssay(tonsil) <- 'SCT'
+SpatialFeaturePlot(tonsil, features = 'BCL6', pt.size.factor = 5, 
+  alpha = c(0.1, 1) )  
+SpatialDimPlot(tonsil, pt.size.factor = 0.5) +  theme_bw() + 
+  theme(axis.title = element_text(size = 12), axis.text = element_text(size = 10))
+markers <- c("MS4A1", "CD19", "CD3D", "CD3E", "LYZ", "KRT8")
+DotPlot(tonsil, features = markers) + RotatedAxis()
+SpatialFeaturePlot(tonsil, features = c("CD4", "CD8A"), 
+                   pt.size.factor = 1.2, ncol = 2, alpha = c(0.1, 1))
+
+t_cell_clusters <- c(2, 7, 22)
+DotPlot(tonsil, idents = c(2, 7, 22), features = c("CD3D", "CD4", "CD8A", "GNG4"))
+VariableFeatures(tonsil, assay = "Spatial") <- VariableFeatures(tonsil[["sketch"]])
+features_to_use <- VariableFeatures(tonsil[["sketch"]])
+tonsil <- NormalizeData(tonsil, assay = "Spatial")
+tonsil <- ScaleData(tonsil, assay = "Spatial", features = features_to_use)
+tonsil <- RunPCA(tonsil, assay = "Spatial", reduction.name = "pca.full", npcs = 50) 
+tonsil <- ProjectData( object = tonsil, assay = "Spatial", dims = 1:50,
+  full.reduction = "pca",  sketched.assay = "sketch", sketched.reduction = "pca")
+
+t_cells <- subset(tonsil, idents = c(2, 7, 22))
+SpatialFeaturePlot(t_cells, features = c("CD4"), pt.size.factor = 5, 
+                   ncol = 2, alpha = c(0.1, 1))
+t_cells <- SCTransform(t_cells, assay = "Spatial", verbose = TRUE)
+t_cells <- RunPCA(t_cells, verbose = FALSE)
+t_cells <- RunUMAP(t_cells, dims = 1:30)
+t_cells <- FindNeighbors(t_cells, dims = 1:30)
+t_cells <- FindClusters(t_cells, resolution = 0.8)
+feats <- c("CD4", "GNG4", "PDCD1", "CXCL13", "ICOS", "MAF", "BCL6")
+DotPlot(t_cells, features = feats) + RotatedAxis() + ggtitle("Tfh Cluster Identification")
+
+
+```
+
+```{r visiumHD-data-PCAcluster, eval=FALSE}
+
+tonsil <- RunPCA(tonsil, assay = "SCT", verbose = FALSE)
+tonsil <- FindNeighbors(tonsil, dims = 1:30)
+tonsil <- FindClusters(tonsil, resolution = 0.5)
+tonsil <- RunUMAP(tonsil, dims = 1:30)
+DimPlot(tonsil, reduction = "umap", label = TRUE)
+
+```
+
+```{r wrap-up}
+sessionInfo()
+```
+
+```{r hotspot-CD4, eval=FALSE}
+
+
+obj1.clean$predicted.celltype.l1 <- obj1.clean$Comments <- obj1.clean$Randomized <- obj1.clean$V2weightkg <- obj1.clean$V3weightkg <- obj1.clean$ImmunizationHx <- 
+  obj1.clean$Notes <- obj1.clean$scDblFinder.class <-   obj1.clean$HBsAb2 <- obj1.clean$HBsAb2date <-  NULL    
+# saveRDS(obj1.clean, "20260311_obj1.clean_subclustered.RDS")
+
+vis.cd4 <- Vision(obj1.clean, signatures = "h.all.v2026.1.Hs.symbols.gmt")
+vis.cd4 <- analyze(vis.cd4)
+vis.cd4 <- runHotspot(vis.cd4, model = "danb") 
+viewResults(vis.cd4)
+saveRDS(vis.cd4, "cd4_vision_hotspot_results.rds")
+obj1.clean <- AddMetaData(obj1.clean, metadata = as.data.frame( vis.cd4@ModuleHotspotScores ))
+VlnPlot2(obj1.clean, features = "HOTSPOT_2", group.by = "titer.categ", pt.size = 0.1, stat.method = "wilcox.test") + theme(plot.title = element_text(hjust = 0.5))
+
+```
