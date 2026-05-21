@@ -1,0 +1,65 @@
+---
+title: "HBV_Integration_StatisticalModel"
+format: html
+editor: visual
+---
+
+```{r load-libraries}
+
+
+# --- Load Libraries ---
+# This section loads all the necessary R packages for data manipulation, visualization, and statistical analysis.
+library(reshape2)     # data reshaping
+library(ggplot2)      # Plotting
+library(dplyr)        # Data manipulation
+library(readr)        # Reading CSV files
+library(readxl)       # Reading Excel files
+library(ggpubr)       # Publication-ready plots
+library(gridExtra)    # Arranging grid layouts
+library(cowplot)      # Arranging plots
+library(rstatix)      # Statistical tests
+library(tidyr)        # Tidy data principles
+# library(GGally)       # Advanced plots
+library(ggbeeswarm)   # Beeswarm plots
+library(plotly)       # Interactive plots
+library(patchwork)    # Combining ggplot plots
+# library(extrafont)    # Using custom fonts
+library(writexl)      # Writing to Excel files
+# library(lubridate)    # Date-time manipulation
+# library(ggnewscale)   # Multiple color scales in ggplot
+library(ggrepel)      # Repel overlapping text labels
+library(data.table)
+library(emmeans)      # Estimated marginal means
+library(lme4)         # Linear mixed-effects models
+library(lmerTest)     # Tests for lme4 models
+library(viridis)
+library(ComplexHeatmap)
+library(stringr)
+library(lme4)
+library(ggnewscale)
+
+
+# --- Custom Theme ---
+# A custom ggplot theme is defined for consistent plot styling.
+ct2 <- theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(color = "black"),
+        axis.text.x = element_text(color = "black", angle = 45, hjust = 1),
+        axis.text.y = element_text(color = "black"),
+        # text = element_text(family = "Arial"),
+        plot.title = element_text(hjust = 0.5), 
+        axis.ticks.x.bottom = element_blank()) +
+  theme(text = element_text(size = 16)) 
+
+sessionInfo()
+```
+
+```{r load-data}
+
+olink.data <- read.csv(file = 'data/PRL_HC_1849_Extended_Report.csv')
+elisa.meta <- readRDS(file = 'outs/elisa_mergeMeta_with_offsetVisitDates.rds')
+
+
+```
