@@ -333,6 +333,9 @@ ggplot(eff.stats, aes(x = effsize, y = tfh.subset.annotation)) +
         panel.grid.minor = element_blank())
 # ggsave(filename = 'Images/Tfh-EffectSize-Lollipop.pdf', height=3, width=4.5)
 
+eff.stats[, log_odds_ratio := effsize * (pi / sqrt(3))]
+eff.stats[, odds_ratio := exp(log_odds_ratio)]
+
 rm(top.genes, top.fc, top.p, genes_to_plot, clone_counts, dark_palette, levels_order, bar.stats, stack.order)
 ```
 
@@ -1294,8 +1297,8 @@ Idents(cluster.sub) <- "titer.categ"
 deg <- FindMarkers(cluster.sub, ident.1 = "Over100", ident.2 = "Under100", test.use = "wilcox")
 deg$gene_label <- rownames(deg)
 deg$diffexpressed <- "Not Significant"
-deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Higher in Over100"
-deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Higher in Under100"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05 & (deg$pct.1 > 0.2 | deg$pct.2 > 0.2)] <- "Higher in Over100"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05 & (deg$pct.1 > 0.2 | deg$pct.2 > 0.2)] <- "Higher in Under100"
 # top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
 # deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
 setDT(deg)
@@ -1329,13 +1332,7 @@ a <- ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexp
   theme(legend.position = 'none'); a
 # ggsave(a, filename = 'Images/Tfh-Volcano-GNG4-Hi-v-Lo.pdf', height=5, width=6)
 
-
-# genes_to_plot <- c("PDCD1", 'TXNIP', 'IL16', 'ZFP36L1', 'DENND2D', 
-#                    "BACH2", "RNF19A", 'LMNA', 'YPEL5', 'BICDL1', 
-#                    "CD40LG", "JUN", 'IL21', 'CDK14', 'REL', 
-#                    "IL4", "ZEB1", 'JUNB', 'DUSP6', 'CD44'
-#                   )
-genes_under <- deg[diffexpressed == "Higher in Under100" & gene_label != "", gene_label]
+genes_under <- deg[diffexpressed == "Higher in Under100" & gene_label != "" , gene_label]
 genes_over  <- deg[diffexpressed == "Higher in Over100" & gene_label != "", gene_label]
 genes_to_plot <- c(genes_under[1:15], genes_over[1:15])
 genes_to_plot <- intersect(na.omit(genes_to_plot), rownames(cluster.sub))
@@ -1350,25 +1347,24 @@ col_annot <- ComplexHeatmap::HeatmapAnnotation(
   col = list(Titer = c("Under100" = "firebrick3", "Over100" = "steelblue")),
   show_legend = TRUE )
 
-# pdf(file = 'Images/GNG4-diffexp-Hi-v-Lo-Ab.pdf', height=4.5,width=5)
+pdf(file = 'Images/GNG4-diffexp-Hi-v-Lo-Ab.pdf', height=4.5,width=5)
 ComplexHeatmap::Heatmap(mat, 
   name = "Z-score",
   top_annotation = col_annot,
-  column_split = cluster.sub$titer.categ, # Groups cells by titer
-  cluster_column_slices = TRUE,           # Clusters cells WITHIN the groups
-  cluster_columns = TRUE,                # Enables the internal clustering
-  column_gap = unit(2, "mm"),             # Adds a visual gap between blocks
-  cluster_rows = TRUE,                    # Keep gene clustering
+  column_split = cluster.sub$titer.categ,  
+  cluster_column_slices = TRUE,            
+  cluster_columns = TRUE,                 
+  column_gap = unit(2, "mm"),            
+  cluster_rows = TRUE,                     
   show_row_dend = TRUE,          
   col = colorRamp2(c(-1.5, 0, 1.5), c("darkorchid4", "moccasin", "darkorange")),
   row_names_gp = grid::gpar(fontsize = 8, fontface = "italic"),
   show_column_names = FALSE,   
-  column_title = "GNG4 Tfh: DiffExp genes",
+  column_title = "GNG4 Tfh gene expression",
   row_names_side = "right",
   row_dend_width = unit(10, "mm")
-  
 )
-# dev.off()
+dev.off()
 
 
 cluster.sub <- subset(tfh, idents = "GPR183 subset")
@@ -1635,8 +1631,8 @@ net <- decoupleR::get_collectri(organism = 'human', split_complexes = FALSE)
 tf_activity.collectri  <- decoupleR::run_ulm(mat = as.matrix(tfh@assays$RNA@data), 
                                   net = net, .source = 'source', .target = 'target',
                                   .mor = 'mor', minsize = 5)
-tfh$JUN_Activity <- tf_activity.collectri[tf_activity.collectri$source == "JUN", ]$score
-tfh$FOS_Activity <- tf_activity.collectri[tf_activity.collectri$source == "FOS", ]$score
+# tfh$JUN_Activity <- tf_activity.collectri[tf_activity.collectri$source == "JUN", ]$score
+# tfh$FOS_Activity <- tf_activity.collectri[tf_activity.collectri$source == "FOS", ]$score
 
 md <- as.data.table(tfh@meta.data, keep.rownames = "condition")
 setDT(tf_activity.collectri)
@@ -1673,45 +1669,45 @@ ggplot(gng4.tf.top, aes(x = LFC_Activity, y = -log10(p_val), color = label_group
                                "Inflammatory Axis" = "firebrick3", 
                                "Other" = "grey80")) +
   theme_classic() +
-  labs(title = "GNG4 Regulatory Landscape", x = "← Under100 | Over100 →", 
+  labs(title = "GNG4 Regulatory Landscape", x = "← Under100                    Over100 →", 
        y = "-log10 (p-value)", color = "Regulatory Program") +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
   theme(legend.position = "right")
+# ggsave(filename = 'Images/Tfh-geneRegulatoryNetwork.pdf', height=5,width=7)
 
-
-ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = JUN_Activity,
-                          fill = titer.categ)) +
-  geom_violin(alpha = 0.5, color = "black", width = 0.7, position = position_dodge(0.8)) +
-  stat_summary(fun = median, fun.min = median, fun.max = median,
-               geom = "errorbar", width = 0.5, size = 0.5,
-               color = "black", position = position_dodge(0.8)) +
-  ggpubr::stat_compare_means(aes(group = titer.categ), 
-                     label = "p.format", method = "wilcox.test", hide.ns = FALSE,
-                     label.y = 15) + 
-  theme_classic() + coord_flip() +
-  scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
-  labs(title = "Module scores for Jun Activity",
-       subtitle = "Wilcoxon Rank Sum Test; Median shown",
-       x = "Tfh Subset", y = "Module Score") +
-  theme(axis.text = element_text(color = "black"), legend.position = "top", 
-        axis.title.y = element_blank())
-
-ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = FOS_Activity,
-                          fill = titer.categ)) +
-  geom_violin(alpha = 0.5, color = "black", width = 0.7, position = position_dodge(0.8)) +
-  stat_summary(fun = median, fun.min = median, fun.max = median,
-               geom = "errorbar", width = 0.5, size = 0.5,
-               color = "black", position = position_dodge(0.8)) +
-  ggpubr::stat_compare_means(aes(group = titer.categ), 
-                     label = "p.format", method = "wilcox.test", hide.ns = FALSE,
-                     label.y = 10.5) + 
-  theme_classic() + coord_flip(ylim = c(0,11)) +
-  scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
-  labs(title = "Module scores for Fos Activity",
-       subtitle = "Wilcoxon Rank Sum Test; Median shown",
-       x = "Tfh Subset", y = "Module Score") + 
-  theme(axis.text = element_text(color = "black"), legend.position = "top", 
-        axis.title.y = element_blank()) 
+# ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = JUN_Activity,
+#                           fill = titer.categ)) +
+#   geom_violin(alpha = 0.5, color = "black", width = 0.7, position = position_dodge(0.8)) +
+#   stat_summary(fun = median, fun.min = median, fun.max = median,
+#                geom = "errorbar", width = 0.5, size = 0.5,
+#                color = "black", position = position_dodge(0.8)) +
+#   ggpubr::stat_compare_means(aes(group = titer.categ), 
+#                      label = "p.format", method = "wilcox.test", hide.ns = FALSE,
+#                      label.y = 15) + 
+#   theme_classic() + coord_flip() +
+#   scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
+#   labs(title = "Module scores for Jun Activity",
+#        subtitle = "Wilcoxon Rank Sum Test; Median shown",
+#        x = "Tfh Subset", y = "Module Score") +
+#   theme(axis.text = element_text(color = "black"), legend.position = "top", 
+#         axis.title.y = element_blank())
+# 
+# ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = FOS_Activity,
+#                           fill = titer.categ)) +
+#   geom_violin(alpha = 0.5, color = "black", width = 0.7, position = position_dodge(0.8)) +
+#   stat_summary(fun = median, fun.min = median, fun.max = median,
+#                geom = "errorbar", width = 0.5, size = 0.5,
+#                color = "black", position = position_dodge(0.8)) +
+#   ggpubr::stat_compare_means(aes(group = titer.categ), 
+#                      label = "p.format", method = "wilcox.test", hide.ns = FALSE,
+#                      label.y = 10.5) + 
+#   theme_classic() + coord_flip(ylim = c(0,11)) +
+#   scale_fill_manual(values = c("Under100" = "firebrick3", "Over100" = "steelblue")) +
+#   labs(title = "Module scores for Fos Activity",
+#        subtitle = "Wilcoxon Rank Sum Test; Median shown",
+#        x = "Tfh Subset", y = "Module Score") + 
+#   theme(axis.text = element_text(color = "black"), legend.position = "top", 
+#         axis.title.y = element_blank()) 
 
 
 
