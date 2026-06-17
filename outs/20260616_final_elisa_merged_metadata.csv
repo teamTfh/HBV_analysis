@@ -1,0 +1,870 @@
+make.unique,Participant,Visit,FirstVisitDate,offset_VisitDate,elisa.HBsAb,Age,Sex,Race,Ethnicity,BMI,StatusAtEnrollment,KnownNR,Product,DateEnrolled,YearsSinceLastVax,HBsAb1.quant,HBsAb1.qual,HBsAb1date,HBcAb.qual,HBcAbdate,SmokingStatus,PackYear,YearsSinceQuit,PastHistory,CurrentMeds,DateLastVaxBeforeBiopsy,Ultrasound,LNBx,Heightcm,V1weightkg,V2weightkg,V3weightkg,Notes,ImmunizationHx,V1W0.laterality,V2W0.laterality,V3W0.laterality,Study.arm,MedsAtEnrollment,DaysFromVaxToUltrasound,AgeSplit50,DaysFromFirstVisit,abs
+hbvx-0001_v1w0,hbvx-0001,v1w0,,,3.206957728,47,M,White/Caucasian,Not Hispanic,29.1,HBVimmune,Y,EngerixB,,25,,"",,"",,Never,,,Anxiety; Gastroesophageal reflux disease,clonazepam; fluoxetine; guafacine,,,"",177.8,91.9,,,"","Covid-19 Vaccine, Moderna:12/26/2020;01/24/2021;10/23/2021; 
+Influenza Vaccine:09/18/2012;09/12/2020;09/24/2021; 
+MMR:07/25/1975;09/01/1991; 
+Tdap:03/01/2008;04/02/2021
+
+",LD,"","",HBVimmune-Alum,clonazepam;  fluoxetine;  guafacine,,<=50,0,
+hbvx-0001_v1w1,hbvx-0001,v1w1,,,5.1952433,47,M,White/Caucasian,Not Hispanic,29.1,HBVimmune,Y,EngerixB,,25,,"",,"",,Never,,,Anxiety; Gastroesophageal reflux disease,clonazepam; fluoxetine; guafacine,,,"",177.8,91.9,,,"","Covid-19 Vaccine, Moderna:12/26/2020;01/24/2021;10/23/2021; 
+Influenza Vaccine:09/18/2012;09/12/2020;09/24/2021; 
+MMR:07/25/1975;09/01/1991; 
+Tdap:03/01/2008;04/02/2021
+
+",LD,"","",HBVimmune-Alum,clonazepam;  fluoxetine;  guafacine,,<=50,7,
+hbvx-0001_v1w4,hbvx-0001,v1w4,,,113.0528636,47,M,White/Caucasian,Not Hispanic,29.1,HBVimmune,Y,EngerixB,,25,,"",,"",,Never,,,Anxiety; Gastroesophageal reflux disease,clonazepam; fluoxetine; guafacine,,,"",177.8,91.9,,,"","Covid-19 Vaccine, Moderna:12/26/2020;01/24/2021;10/23/2021; 
+Influenza Vaccine:09/18/2012;09/12/2020;09/24/2021; 
+MMR:07/25/1975;09/01/1991; 
+Tdap:03/01/2008;04/02/2021
+
+",LD,"","",HBVimmune-Alum,clonazepam;  fluoxetine;  guafacine,,<=50,28,
+hbvx-0003_optional.v1,hbvx-0003,optional.v1,,,,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,2,
+hbvx-0003_v1w0,hbvx-0003,v1w0,,,3.587494073,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,0,
+hbvx-0003_v1w1,hbvx-0003,v1w1,,,10.11053474,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,6,
+hbvx-0003_v2w0,hbvx-0003,v2w0,,,410.030523558339,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,30,
+hbvx-0003_v2w1,hbvx-0003,v2w1,,,411.199127708339,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,35,
+hbvx-0003_v2w4,hbvx-0003,v2w4,,,391.057235358339,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,65,
+hbvx-0003_v3w0,hbvx-0003,v3w0,,,290.26682175,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,191,
+hbvx-0003_v3w1,hbvx-0003,v3w1,,,345.778787921122,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,198,
+hbvx-0003_v3w4,hbvx-0003,v3w4,,,304.958724878688,39,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit,1,10,,pantoprazole; tizanidine,,,"",182.9,85,,84.3,"",,RD,RD,LD,HBVnaive-Alum,,,<=50,212,
+hbvx-0004_v1w0,hbvx-0004,v1w0,,,60.5611112,31,M,Black/AfricanAmerican,Hispanic,38.9,HBVimmune,N,EngerixB,,,154.97,Pos,,"",,Never,,,Depression; Obesity,risperidone; divalproex; sertraline,,,"",185.4,133.6,,,"","Covid-19 Vaccine, Moderna:08/27/2020;09/24/2020; 
+Covid-19 Vaccine, Pfizer:02/09/2021;03/02/2021; 
+Influenza Vaccine:01/14/2013;01/12/2017;11/03/2017;12/17/2018;09/28/2019;09/22/2021; 
+Influenza Vaccine, Trivalent, Nasal:09/28/2019; 
+",LD,"","",HBVimmune-Alum,risperidone;  divalproex;  sertraline,,<=50,0,
+hbvx-0004_v1w1,hbvx-0004,v1w1,,,5.272185433,31,M,Black/AfricanAmerican,Hispanic,38.9,HBVimmune,N,EngerixB,,,154.97,Pos,,"",,Never,,,Depression; Obesity,risperidone; divalproex; sertraline,,,"",185.4,133.6,,,"","Covid-19 Vaccine, Moderna:08/27/2020;09/24/2020; 
+Covid-19 Vaccine, Pfizer:02/09/2021;03/02/2021; 
+Influenza Vaccine:01/14/2013;01/12/2017;11/03/2017;12/17/2018;09/28/2019;09/22/2021; 
+Influenza Vaccine, Trivalent, Nasal:09/28/2019; 
+",LD,"","",HBVimmune-Alum,risperidone;  divalproex;  sertraline,,<=50,12,
+hbvx-0004_v1w4,hbvx-0004,v1w4,,,9.794347993,31,M,Black/AfricanAmerican,Hispanic,38.9,HBVimmune,N,EngerixB,,,154.97,Pos,,"",,Never,,,Depression; Obesity,risperidone; divalproex; sertraline,,,"",185.4,133.6,,,"","Covid-19 Vaccine, Moderna:08/27/2020;09/24/2020; 
+Covid-19 Vaccine, Pfizer:02/09/2021;03/02/2021; 
+Influenza Vaccine:01/14/2013;01/12/2017;11/03/2017;12/17/2018;09/28/2019;09/22/2021; 
+Influenza Vaccine, Trivalent, Nasal:09/28/2019; 
+",LD,"","",HBVimmune-Alum,risperidone;  divalproex;  sertraline,,<=50,21,
+hbvx-0005_v1w0,hbvx-0005,v1w0,,,198.0629508,40,F,White/Caucasian,Not Hispanic,33.7,HBVimmune,N,EngerixB,,25,479,Pos,,"",,Quit,5,11,Alcohol use; Gastroesophageal reflux disease; Prediabetes; Substance use,omeprazole; cholecalciferol; polyethylene glycol,,,"",170.2,97.7,,,HBsAb 1000 on 2/19/2025,,"","","",HBVimmune-Alum,omeprazole;  cholecalciferol;  polyethylene glycol,,<=50,0,
+hbvx-0005_v1w1,hbvx-0005,v1w1,,,244.4910069,40,F,White/Caucasian,Not Hispanic,33.7,HBVimmune,N,EngerixB,,25,479,Pos,,"",,Quit,5,11,Alcohol use; Gastroesophageal reflux disease; Prediabetes; Substance use,omeprazole; cholecalciferol; polyethylene glycol,,,"",170.2,97.7,,,HBsAb 1000 on 2/19/2025,,"","","",HBVimmune-Alum,omeprazole;  cholecalciferol;  polyethylene glycol,,<=50,5,
+hbvx-0005_v1w4,hbvx-0005,v1w4,,,402.104869458339,40,F,White/Caucasian,Not Hispanic,33.7,HBVimmune,N,EngerixB,,25,479,Pos,,"",,Quit,5,11,Alcohol use; Gastroesophageal reflux disease; Prediabetes; Substance use,omeprazole; cholecalciferol; polyethylene glycol,,,"",170.2,97.7,,,HBsAb 1000 on 2/19/2025,,"","","",HBVimmune-Alum,omeprazole;  cholecalciferol;  polyethylene glycol,,<=50,21,
+hbvx-0006_v1w0,hbvx-0006,v1w0,,,2.675667857,76,M,White/Caucasian,Not Hispanic,25.5,HBVimmune,Y,EngerixB,,,,"",,"",,Quit,20,23,Diabetes mellitus; Coronary artery disease; Gastroesophageal reflux disease; Paroxysmal atrial fibrillation,rosuvastatin;finasteride;sitagliptin;tamsulosin,,,"",177.8,80.5,,,"",,"","","",HBVimmune-Alum,rosuvastatin; finasteride; sitagliptin; tamsulosin,,>50,0,
+hbvx-0006_v1w1,hbvx-0006,v1w1,,,5.657417888,76,M,White/Caucasian,Not Hispanic,25.5,HBVimmune,Y,EngerixB,,,,"",,"",,Quit,20,23,Diabetes mellitus; Coronary artery disease; Gastroesophageal reflux disease; Paroxysmal atrial fibrillation,rosuvastatin;finasteride;sitagliptin;tamsulosin,,,"",177.8,80.5,,,"",,"","","",HBVimmune-Alum,rosuvastatin; finasteride; sitagliptin; tamsulosin,,>50,7,
+hbvx-0006_v1w4,hbvx-0006,v1w4,,,3.43174966975992,76,M,White/Caucasian,Not Hispanic,25.5,HBVimmune,Y,EngerixB,,,,"",,"",,Quit,20,23,Diabetes mellitus; Coronary artery disease; Gastroesophageal reflux disease; Paroxysmal atrial fibrillation,rosuvastatin;finasteride;sitagliptin;tamsulosin,,,"",177.8,80.5,,,"",,"","","",HBVimmune-Alum,rosuvastatin; finasteride; sitagliptin; tamsulosin,,>50,28,
+hbvx-0007_v1w0,hbvx-0007,v1w0,,,0.269131,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,Depression; Hypertension; Anxiety; Insomnia; Nephrolithiasis; Allergies,bupropion;cholecalciferol;losartan;amlodipine;melatonin,,,"",167.6,80.6,,82.7,"","Covid-19 Vaccine, Pfizer:12/8/2021;4/18/2022;9/9/2022;9/24/2023; 
+Covid-19 Vaccine, Moderna:3/12/2021;2/12/2021; 
+Influenza Vaccine:11/14/2016;11/24/2017;10/11/2018;11/9/2019;10/1/2020;09/1/2022;09/24/2023; 
+Tdap:04/6/2018
+
+",RD,LD,LD,HBVnaive-Alum,bupropion; cholecalciferol; losartan; amlodipine; melatonin,,>50,0,
+hbvx-0007_v1w1,hbvx-0007,v1w1,,,1.919639137,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,Depression; Hypertension; Anxiety; Insomnia; Nephrolithiasis; Allergies,bupropion;cholecalciferol;losartan;amlodipine;melatonin,,,"",167.6,80.6,,82.7,"","Covid-19 Vaccine, Pfizer:12/8/2021;4/18/2022;9/9/2022;9/24/2023; 
+Covid-19 Vaccine, Moderna:3/12/2021;2/12/2021; 
+Influenza Vaccine:11/14/2016;11/24/2017;10/11/2018;11/9/2019;10/1/2020;09/1/2022;09/24/2023; 
+Tdap:04/6/2018
+
+",RD,LD,LD,HBVnaive-Alum,bupropion; cholecalciferol; losartan; amlodipine; melatonin,,>50,7,
+hbvx-0007_v2w0,hbvx-0007,v2w0,,,0.070833137,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,Depression; Hypertension; Anxiety; Insomnia; Nephrolithiasis; Allergies,bupropion;cholecalciferol;losartan;amlodipine;melatonin,,,"",167.6,80.6,,82.7,"","Covid-19 Vaccine, Pfizer:12/8/2021;4/18/2022;9/9/2022;9/24/2023; 
+Covid-19 Vaccine, Moderna:3/12/2021;2/12/2021; 
+Influenza Vaccine:11/14/2016;11/24/2017;10/11/2018;11/9/2019;10/1/2020;09/1/2022;09/24/2023; 
+Tdap:04/6/2018
+
+",RD,LD,LD,HBVnaive-Alum,bupropion; cholecalciferol; losartan; amlodipine; melatonin,,>50,21,
+hbvx-0007_v2w1,hbvx-0007,v2w1,,,0.488028222,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,Depression; Hypertension; Anxiety; Insomnia; Nephrolithiasis; Allergies,bupropion;cholecalciferol;losartan;amlodipine;melatonin,,,"",167.6,80.6,,82.7,"","Covid-19 Vaccine, Pfizer:12/8/2021;4/18/2022;9/9/2022;9/24/2023; 
+Covid-19 Vaccine, Moderna:3/12/2021;2/12/2021; 
+Influenza Vaccine:11/14/2016;11/24/2017;10/11/2018;11/9/2019;10/1/2020;09/1/2022;09/24/2023; 
+Tdap:04/6/2018
+
+",RD,LD,LD,HBVnaive-Alum,bupropion; cholecalciferol; losartan; amlodipine; melatonin,,>50,28,
+hbvx-0007_v2w4,hbvx-0007,v2w4,,,2.448493988,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,Depression; Hypertension; Anxiety; Insomnia; Nephrolithiasis; Allergies,bupropion;cholecalciferol;losartan;amlodipine;melatonin,,,"",167.6,80.6,,82.7,"","Covid-19 Vaccine, Pfizer:12/8/2021;4/18/2022;9/9/2022;9/24/2023; 
+Covid-19 Vaccine, Moderna:3/12/2021;2/12/2021; 
+Influenza Vaccine:11/14/2016;11/24/2017;10/11/2018;11/9/2019;10/1/2020;09/1/2022;09/24/2023; 
+Tdap:04/6/2018
+
+",RD,LD,LD,HBVnaive-Alum,bupropion; cholecalciferol; losartan; amlodipine; melatonin,,>50,42,
+hbvx-0007_v3w0,hbvx-0007,v3w0,,,3.205308345,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,Depression; Hypertension; Anxiety; Insomnia; Nephrolithiasis; Allergies,bupropion;cholecalciferol;losartan;amlodipine;melatonin,,,"",167.6,80.6,,82.7,"","Covid-19 Vaccine, Pfizer:12/8/2021;4/18/2022;9/9/2022;9/24/2023; 
+Covid-19 Vaccine, Moderna:3/12/2021;2/12/2021; 
+Influenza Vaccine:11/14/2016;11/24/2017;10/11/2018;11/9/2019;10/1/2020;09/1/2022;09/24/2023; 
+Tdap:04/6/2018
+
+",RD,LD,LD,HBVnaive-Alum,bupropion; cholecalciferol; losartan; amlodipine; melatonin,,>50,202,
+hbvx-0007_v3w4,hbvx-0007,v3w4,,,1.208211184,76,M,White/Caucasian,Not Hispanic,28.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,Depression; Hypertension; Anxiety; Insomnia; Nephrolithiasis; Allergies,bupropion;cholecalciferol;losartan;amlodipine;melatonin,,,"",167.6,80.6,,82.7,"","Covid-19 Vaccine, Pfizer:12/8/2021;4/18/2022;9/9/2022;9/24/2023; 
+Covid-19 Vaccine, Moderna:3/12/2021;2/12/2021; 
+Influenza Vaccine:11/14/2016;11/24/2017;10/11/2018;11/9/2019;10/1/2020;09/1/2022;09/24/2023; 
+Tdap:04/6/2018
+
+",RD,LD,LD,HBVnaive-Alum,bupropion; cholecalciferol; losartan; amlodipine; melatonin,,>50,223,
+hbvx-0008_v1w0,hbvx-0008,v1w0,,,367.4677825,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,,,567.22,Pos,,"",,Quit,,57,Irritable bowel syndrome; Osteopenia; Breast cancer; Hypertension,olmesartan;hyoscyamine;mirabegron,,,"",157.5,53.6,,,"","Covid-19 Vaccine, AstraZeneca:11/04/2020;12/02/2020        ; 
+Covid-19 Vaccine, Pfizer:11/04/2021;06/29/2022; 
+Influenza Vaccine:10/10/2012;10/26/2021; 
+Pneumococcal Conjugate Vaccine, 13 Valent:09/22/2017; 
+Pneumococcal Polysaccharide Vaccine:01/06/2012; 
+Tdap:07/16/2021
+
+",LD,LD,"",HBVnaive-CpG,olmesartan; hyoscyamine; mirabegron,,>50,0,
+hbvx-0008_v1w1,hbvx-0008,v1w1,,,110.895777894152,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,,,567.22,Pos,,"",,Quit,,57,Irritable bowel syndrome; Osteopenia; Breast cancer; Hypertension,olmesartan;hyoscyamine;mirabegron,,,"",157.5,53.6,,,"","Covid-19 Vaccine, AstraZeneca:11/04/2020;12/02/2020        ; 
+Covid-19 Vaccine, Pfizer:11/04/2021;06/29/2022; 
+Influenza Vaccine:10/10/2012;10/26/2021; 
+Pneumococcal Conjugate Vaccine, 13 Valent:09/22/2017; 
+Pneumococcal Polysaccharide Vaccine:01/06/2012; 
+Tdap:07/16/2021
+
+",LD,LD,"",HBVnaive-CpG,olmesartan; hyoscyamine; mirabegron,,>50,7,
+hbvx-0008_v1w4,hbvx-0008,v1w4,,,25.87212891,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,,,567.22,Pos,,"",,Quit,,57,Irritable bowel syndrome; Osteopenia; Breast cancer; Hypertension,olmesartan;hyoscyamine;mirabegron,,,"",157.5,53.6,,,"","Covid-19 Vaccine, AstraZeneca:11/04/2020;12/02/2020        ; 
+Covid-19 Vaccine, Pfizer:11/04/2021;06/29/2022; 
+Influenza Vaccine:10/10/2012;10/26/2021; 
+Pneumococcal Conjugate Vaccine, 13 Valent:09/22/2017; 
+Pneumococcal Polysaccharide Vaccine:01/06/2012; 
+Tdap:07/16/2021
+
+",LD,LD,"",HBVnaive-CpG,olmesartan; hyoscyamine; mirabegron,,>50,21,
+hbvx-0008_v2w0,hbvx-0008,v2w0,,,63.51386972,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,,,567.22,Pos,,"",,Quit,,57,Irritable bowel syndrome; Osteopenia; Breast cancer; Hypertension,olmesartan;hyoscyamine;mirabegron,,,"",157.5,53.6,,,"","Covid-19 Vaccine, AstraZeneca:11/04/2020;12/02/2020        ; 
+Covid-19 Vaccine, Pfizer:11/04/2021;06/29/2022; 
+Influenza Vaccine:10/10/2012;10/26/2021; 
+Pneumococcal Conjugate Vaccine, 13 Valent:09/22/2017; 
+Pneumococcal Polysaccharide Vaccine:01/06/2012; 
+Tdap:07/16/2021
+
+",LD,LD,"",HBVnaive-CpG,olmesartan; hyoscyamine; mirabegron,,>50,28,
+hbvx-0008_v2w1,hbvx-0008,v2w1,,,31.5922033,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,,,567.22,Pos,,"",,Quit,,57,Irritable bowel syndrome; Osteopenia; Breast cancer; Hypertension,olmesartan;hyoscyamine;mirabegron,,,"",157.5,53.6,,,"","Covid-19 Vaccine, AstraZeneca:11/04/2020;12/02/2020        ; 
+Covid-19 Vaccine, Pfizer:11/04/2021;06/29/2022; 
+Influenza Vaccine:10/10/2012;10/26/2021; 
+Pneumococcal Conjugate Vaccine, 13 Valent:09/22/2017; 
+Pneumococcal Polysaccharide Vaccine:01/06/2012; 
+Tdap:07/16/2021
+
+",LD,LD,"",HBVnaive-CpG,olmesartan; hyoscyamine; mirabegron,,>50,35,
+hbvx-0008_v2w4,hbvx-0008,v2w4,,,40.0737143580861,85,F,White/Caucasian,Not Hispanic,21.6,HBVnaive,N,Heplisav,,,567.22,Pos,,"",,Quit,,57,Irritable bowel syndrome; Osteopenia; Breast cancer; Hypertension,olmesartan;hyoscyamine;mirabegron,,,"",157.5,53.6,,,"","Covid-19 Vaccine, AstraZeneca:11/04/2020;12/02/2020        ; 
+Covid-19 Vaccine, Pfizer:11/04/2021;06/29/2022; 
+Influenza Vaccine:10/10/2012;10/26/2021; 
+Pneumococcal Conjugate Vaccine, 13 Valent:09/22/2017; 
+Pneumococcal Polysaccharide Vaccine:01/06/2012; 
+Tdap:07/16/2021
+
+",LD,LD,"",HBVnaive-CpG,olmesartan; hyoscyamine; mirabegron,,>50,56,
+hbvx-0009_v1w0,hbvx-0009,v1w0,,,204.2149352,72,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,110,37,Osteoporosis; Depression; Anxiety; Hypothyroidism,denosumab;escitalopram;ondansetron;fexofenadine,,,"",162.6,63.8,,,"","Covid-19 Vaccine, Moderna:02/09/2021;03/12/2021;11/05/2021; 
+Covid-19 Vaccine, Pfizer:1/07/2022; 
+Influenza Vaccine:10/18/2015;10/31/2016;10/17/2018;11/25/2019;10/05/2020;10/11/2021;11/07/2022; 
+Pneumococcal Conjugate Vaccine, 13 Valent	:11/30/2015; 
+Pneumococcal Polysaccharide Vaccine, 23:09/24/2019; 
+Tdap:04/24/2016; 
+Zoster Vaccine Live:04/14/2015; 
+Zoster Vaccine Recombinant:06/25/2020;08/25/2020
+ 
+",LD,"","",HBVnaive-Alum,denosumab; escitalopram; ondansetron; fexofenadine,,>50,,
+hbvx-0010_optional.v1,hbvx-0010,optional.v1,,,,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,2,
+hbvx-0010_optional.v2,hbvx-0010,optional.v2,,,,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,202,
+hbvx-0010_v1w0,hbvx-0010,v1w0,,,1.844227588,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,0,
+hbvx-0010_v1w1,hbvx-0010,v1w1,,,65.34550083,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,9,
+hbvx-0010_v2w0,hbvx-0010,v2w0,,,1.844227588,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,28,
+hbvx-0010_v2w1,hbvx-0010,v2w1,,,6.973713217,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,35,
+hbvx-0010_v2w4,hbvx-0010,v2w4,,,4.121705968,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,49,
+hbvx-0010_v3w0,hbvx-0010,v3w0,,,6.323949493,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,189,
+hbvx-0010_v3w1,hbvx-0010,v3w1,,,98.97134589,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,196,
+hbvx-0010_v3w4,hbvx-0010,v3w4,,,209.7699673,73,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,meloxicam;cholecalciferol;oxycodone;docosahexaenoic acid,,,N,170.8,70.5,,,"",,LD,LD,LD,HBVnaive-Alum,,13,>50,217,
+hbvx-0011_v1w0,hbvx-0011,v1w0,,,51.42384327,48,M,Multiple/NR,Not Hispanic,22.5,HBVimmune,N,EngerixB,,17,31.7,Pos,,"",,Never,,,,truvada,,,"",172.7,67,,,"",,"","","",HBVimmune-Alum,truvada,,<=50,0,
+hbvx-0011_v1w1,hbvx-0011,v1w1,,,35.3017375614669,48,M,Multiple/NR,Not Hispanic,22.5,HBVimmune,N,EngerixB,,17,31.7,Pos,,"",,Never,,,,truvada,,,"",172.7,67,,,"",,"","","",HBVimmune-Alum,truvada,,<=50,7,
+hbvx-0011_v1w4,hbvx-0011,v1w4,,,466.6318826,48,M,Multiple/NR,Not Hispanic,22.5,HBVimmune,N,EngerixB,,17,31.7,Pos,,"",,Never,,,,truvada,,,"",172.7,67,,,"",,"","","",HBVimmune-Alum,truvada,,<=50,35,
+hbvx-0012_v1w0,hbvx-0012,v1w0,,,2.827291033,72,F,White/Caucasian,Not Hispanic,25.6,HBVimmune,Y,EngerixB,,16,1.54,Neg,,"",,Never,,,Osteopenia; Macular degeneration; Bladder atony,solifenacin;cholecalciferol,,,"",157.5,63.5,,,"",,"","","",HBVimmune-Alum,solifenacin; cholecalciferol,,>50,0,
+hbvx-0012_v1w1,hbvx-0012,v1w1,,,5.118335953,72,F,White/Caucasian,Not Hispanic,25.6,HBVimmune,Y,EngerixB,,16,1.54,Neg,,"",,Never,,,Osteopenia; Macular degeneration; Bladder atony,solifenacin;cholecalciferol,,,"",157.5,63.5,,,"",,"","","",HBVimmune-Alum,solifenacin; cholecalciferol,,>50,12,
+hbvx-0012_v1w4,hbvx-0012,v1w4,,,14.75778775,72,F,White/Caucasian,Not Hispanic,25.6,HBVimmune,Y,EngerixB,,16,1.54,Neg,,"",,Never,,,Osteopenia; Macular degeneration; Bladder atony,solifenacin;cholecalciferol,,,"",157.5,63.5,,,"",,"","","",HBVimmune-Alum,solifenacin; cholecalciferol,,>50,33,
+hbvx-0013_optional.v1,hbvx-0013,optional.v1,,,,24,F,Asian,Not Hispanic,22.2,HBVimmune,N,EngerixB,,25,,Pos,,"",,Never,,,,"",,,"",154.9,53.2,,,"",,"","","",HBVimmune-Alum,,,<=50,2,
+hbvx-0013_v1w0,hbvx-0013,v1w0,,,25.77051106,24,F,Asian,Not Hispanic,22.2,HBVimmune,N,EngerixB,,25,,Pos,,"",,Never,,,,"",,,"",154.9,53.2,,,"",,"","","",HBVimmune-Alum,,,<=50,0,
+hbvx-0013_v1w1,hbvx-0013,v1w1,,,174.9039602,24,F,Asian,Not Hispanic,22.2,HBVimmune,N,EngerixB,,25,,Pos,,"",,Never,,,,"",,,"",154.9,53.2,,,"",,"","","",HBVimmune-Alum,,,<=50,7,
+hbvx-0013_v1w4,hbvx-0013,v1w4,,,421.150147116678,24,F,Asian,Not Hispanic,22.2,HBVimmune,N,EngerixB,,25,,Pos,,"",,Never,,,,"",,,"",154.9,53.2,,,"",,"","","",HBVimmune-Alum,,,<=50,30,
+hbvx-0014_v1w0,hbvx-0014,v1w0,,,5.56209645396493,62,F,White/Caucasian,Not Hispanic,23.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,Hyperlipidemia,atorvastatin,,,"",165.1,64.2,,,"",,"","","",HBVimmune-Alum,atorvastatin,,>50,0,
+hbvx-0014_v1w1,hbvx-0014,v1w1,,,250.0729151,62,F,White/Caucasian,Not Hispanic,23.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,Hyperlipidemia,atorvastatin,,,"",165.1,64.2,,,"",,"","","",HBVimmune-Alum,atorvastatin,,>50,7,
+hbvx-0014_v1w4,hbvx-0014,v1w4,,,438.5343219,62,F,White/Caucasian,Not Hispanic,23.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,Hyperlipidemia,atorvastatin,,,"",165.1,64.2,,,"",,"","","",HBVimmune-Alum,atorvastatin,,>50,26,
+hbvx-0015_optional.v1,hbvx-0015,optional.v1,,,,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,35,
+hbvx-0015_optional.v2,hbvx-0015,optional.v2,,,,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,225,
+hbvx-0015_v1w0,hbvx-0015,v1w0,,,1.693508848,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,0,
+hbvx-0015_v1w1,hbvx-0015,v1w1,,,9.0849628,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,5,
+hbvx-0015_v2w0,hbvx-0015,v2w0,,,1.333056437,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,33,
+hbvx-0015_v2w1,hbvx-0015,v2w1,,,2.448493988,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,40,
+hbvx-0015_v2w4,hbvx-0015,v2w4,,,8.194066961,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,54,
+hbvx-0015_v3w0,hbvx-0015,v3w0,,,25.4656028,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,210,
+hbvx-0015_v3w1,hbvx-0015,v3w1,,,354.2436312,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,222,
+hbvx-0015_v3w3,hbvx-0015,v3w4,,,288.583638,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,,
+hbvx-0015_v3w4,hbvx-0015,v3w4,,,338.8716395,63,M,White/Caucasian,Not Hispanic,29.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,atorvastatin;metformin;trazodone;venlafaxine,,,N,182.9,98.2,,96.4,"",,"","","",HBVnaive-Alum,,15,>50,238,
+hbvx-0016_optional.v1,hbvx-0016,optional.v1,,,,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",165.1,53,,,"",,"","","",HBVnaive-CpG,,,>50,2,
+hbvx-0016_v1w0,hbvx-0016,v1w0,,,5.657417888,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",165.1,53,,,"",,"","","",HBVnaive-CpG,,,>50,0,
+hbvx-0016_v1w1,hbvx-0016,v1w1,,,5.580301825,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",165.1,53,,,"",,"","","",HBVnaive-CpG,,,>50,14,
+hbvx-0016_v2w0,hbvx-0016,v2w0,,,9.90800389374315,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",165.1,53,,,"",,"","","",HBVnaive-CpG,,,>50,28,
+hbvx-0016_v2w1,hbvx-0016,v2w1,,,116.623117638679,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",165.1,53,,,"",,"","","",HBVnaive-CpG,,,>50,37,
+hbvx-0016_v2w4,hbvx-0016,v2w4,,,18.19609054,73,F,White/Caucasian,Not Hispanic,19.4,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",165.1,53,,,"",,"","","",HBVnaive-CpG,,,>50,50,
+hbvx-0017_v1w0,hbvx-0017,v1w0,,,385.575073558339,31,M,White/Caucasian,Not Hispanic,21.8,HBVimmune,N,EngerixB,,11,9599,Pos,,"",,Never,,,Impotence,sildenafil,,,"",180.3,71,,,"",,"","","",HBVimmune-Alum,sildenafil,,<=50,0,
+hbvx-0017_v1w1,hbvx-0017,v1w1,,,195.039511424504,31,M,White/Caucasian,Not Hispanic,21.8,HBVimmune,N,EngerixB,,11,9599,Pos,,"",,Never,,,Impotence,sildenafil,,,"",180.3,71,,,"",,"","","",HBVimmune-Alum,sildenafil,,<=50,6,
+hbvx-0017_v1w4,hbvx-0017,v1w4,,,5.22124096849213,31,M,White/Caucasian,Not Hispanic,21.8,HBVimmune,N,EngerixB,,11,9599,Pos,,"",,Never,,,Impotence,sildenafil,,,"",180.3,71,,,"",,"","","",HBVimmune-Alum,sildenafil,,<=50,26,
+hbvx-0018_optional.v1,hbvx-0018,optional.v1,,,,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,2,
+hbvx-0018_v1w0,hbvx-0018,v1w0,,,1.208211184,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0018_v1w1,hbvx-0018,v1w1,,,0.708794597,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,6,
+hbvx-0018_v2w0,hbvx-0018,v2w0,,,237.3068215,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,43,
+hbvx-0018_v2w1,hbvx-0018,v2w1,,,341.4274988,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,55,
+hbvx-0018_v2w4,hbvx-0018,v2w4,,,279.5303419,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,76,
+hbvx-0018_v3w0,hbvx-0018,v3w0,,,129.092058,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,209,
+hbvx-0018_v3w1,hbvx-0018,v3w1,,,525.532255,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,216,
+hbvx-0018_v3w4,hbvx-0018,v3w4,,,376.2139967,55,F,White/Caucasian,Not Hispanic,19.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",154.9,47.8,,46.9,"",,"","","",HBVnaive-Alum,,,>50,237,
+hbvx-0019_optional.v1,hbvx-0019,optional.v1,,,,36,M,White/Caucasian,Not Hispanic,37.8,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cetirizine,,,"",188,133.4,,,"",,"","","",HBVimmune-Alum,,,<=50,2,
+hbvx-0019_v1w0,hbvx-0019,v1w0,,,22.28499917,36,M,White/Caucasian,Not Hispanic,37.8,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cetirizine,,,"",188,133.4,,,"",,"","","",HBVimmune-Alum,,,<=50,0,
+hbvx-0019_v1w1,hbvx-0019,v1w1,,,55.1380595637289,36,M,White/Caucasian,Not Hispanic,37.8,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cetirizine,,,"",188,133.4,,,"",,"","","",HBVimmune-Alum,,,<=50,6,
+hbvx-0019_v1w4,hbvx-0019,v1w4,,,217.390546642595,36,M,White/Caucasian,Not Hispanic,37.8,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cetirizine,,,"",188,133.4,,,"",,"","","",HBVimmune-Alum,,,<=50,21,
+hbvx-0019_v2w4,hbvx-0019,v2w4,,,92.00988135,36,M,White/Caucasian,Not Hispanic,37.8,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cetirizine,,,"",188,133.4,,,"",,"","","",HBVimmune-Alum,,,<=50,,
+hbvx-0020_optional.v1,hbvx-0020,optional.v1,,,,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,223,
+hbvx-0020_optional.v2,hbvx-0020,optional.v2,,,,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,237,
+hbvx-0020_v1w0,hbvx-0020,v1w0,,,195.164677986095,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,0,
+hbvx-0020_v1w1,hbvx-0020,v1w1,,,238.4859225,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,6,
+hbvx-0020_v2w0,hbvx-0020,v2w0,,,337.386629299622,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,34,
+hbvx-0020_v2w1,hbvx-0020,v2w1,,,2.331690395,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,41,
+hbvx-0020_v2w4,hbvx-0020,v2w4,,,350,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,63,
+hbvx-0020_v3w0,hbvx-0020,v3w0,,,344.7102636,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,222,
+hbvx-0020_v3w1,hbvx-0020,v3w1,,,474.4450284,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,230,
+hbvx-0020_v3w4,hbvx-0020,v3w4,,,411.7447544,75,M,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,testosterone,,,N,182.9,97.5,,101.8,"",,LD,LD,LD,HBVnaive-Alum,,15,>50,251,
+hbvx-0021_optional.v1,hbvx-0021,optional.v1,,,,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,231,
+hbvx-0021_optional.v2,hbvx-0021,optional.v2,,,,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,61,
+hbvx-0021_v1w0,hbvx-0021,v1w0,,,2.206873601,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,0,
+hbvx-0021_v1w1,hbvx-0021,v1w1,,,1.083362373,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,12,
+hbvx-0021_v2w0,hbvx-0021,v2w0,,,2.206873601,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,49,
+hbvx-0021_v2w1,hbvx-0021,v2w1,,,2.81601432,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,54,
+hbvx-0021_v2w4,hbvx-0021,v2w4,,,1.832401875,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,77,
+hbvx-0021_v3w0,hbvx-0021,v3w0,,,3.536328128,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,230,
+hbvx-0021_v3w1,hbvx-0021,v3w1,,,3.472757052,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,238,
+hbvx-0021_v3w4,hbvx-0021,v3w4,,,62.88537293,70,M,White/Caucasian,Not Hispanic,26.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,10,,,aspirin;atorvastatin,,,N,185.4,92.2,89.4,92.7,"",,LD,LD,RD,HBVnaive-Alum,,12,>50,264,
+hbvx-0022_optional.v2,hbvx-0022,optional.v2,,,,73,F,White/Caucasian,Not Hispanic,24.6,HBVimmune,N,EngerixB,,19,,"",,"",,Never,,,,minoxidil;atorvastatin;amlodipine;metformin,,,Y,154.9,59.1,,,"",,LD,"","",HBVimmune-Alum,,11,>50,11,
+hbvx-0022_v1w0,hbvx-0022,v1w0,,,0.83365408,73,F,White/Caucasian,Not Hispanic,24.6,HBVimmune,N,EngerixB,,19,,"",,"",,Never,,,,minoxidil;atorvastatin;amlodipine;metformin,,,Y,154.9,59.1,,,"",,LD,"","",HBVimmune-Alum,,11,>50,0,
+hbvx-0022_v1w1,hbvx-0022,v1w1,,,6.822725747,73,F,White/Caucasian,Not Hispanic,24.6,HBVimmune,N,EngerixB,,19,,"",,"",,Never,,,,minoxidil;atorvastatin;amlodipine;metformin,,,Y,154.9,59.1,,,"",,LD,"","",HBVimmune-Alum,,11,>50,7,
+hbvx-0022_v1w4,hbvx-0022,v1w4,,,350,73,F,White/Caucasian,Not Hispanic,24.6,HBVimmune,N,EngerixB,,19,,"",,"",,Never,,,,minoxidil;atorvastatin;amlodipine;metformin,,,Y,154.9,59.1,,,"",,LD,"","",HBVimmune-Alum,,11,>50,28,
+hbvx-0023_v1w0,hbvx-0023,v1w0,,,1.208211184,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,0,
+hbvx-0023_v1w1,hbvx-0023,v1w1,,,1.083362373,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,6,
+hbvx-0023_v2w0,hbvx-0023,v2w0,,,4.952021308,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,63,
+hbvx-0023_v2w1,hbvx-0023,v2w1,,,123.791356,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,70,
+hbvx-0023_v2w4,hbvx-0023,v2w4,,,68.6792663,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,91,
+hbvx-0023_v3w0,hbvx-0023,v3w0,,,44.26737318,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,202,
+hbvx-0023_v3w1,hbvx-0023,v3w1,,,45.87747097,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,210,
+hbvx-0023_v3w4,hbvx-0023,v3w4,,,576.695481,56,M,Black/AfricanAmerican,Not Hispanic,28.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,11,,,"",,,"",182.9,96.2,104.9,97.5,"","Covid-19 Vaccine:12/22/2021; 04/25/2021;03/28/2021; 
+Influenza Vaccine, Quadrivalent, Nasal 2-49:09/18/2018;11/09/2020
+
+",LD,LD,RD,HBVnaive-Alum,,,>50,236,
+hbvx-0024_optional.v1,hbvx-0024,optional.v1,,,,52,F,White/Caucasian,Hispanic,35.5,HBVimmune,N,EngerixB,,10,,"",,"",,Active,15,,,lisinopril;omeprazole;hydrocodone,,,N,160,90.8,,,"",,LD,"","",HBVimmune-Alum,,13,>50,1,
+hbvx-0024_optional.v2,hbvx-0024,optional.v2,,,,52,F,White/Caucasian,Hispanic,35.5,HBVimmune,N,EngerixB,,10,,"",,"",,Active,15,,,lisinopril;omeprazole;hydrocodone,,,N,160,90.8,,,"",,LD,"","",HBVimmune-Alum,,13,>50,15,
+hbvx-0024_v1w0,hbvx-0024,v1w0,,,1.333056437,52,F,White/Caucasian,Hispanic,35.5,HBVimmune,N,EngerixB,,10,,"",,"",,Active,15,,,lisinopril;omeprazole;hydrocodone,,,N,160,90.8,,,"",,LD,"","",HBVimmune-Alum,,13,>50,0,
+hbvx-0024_v1w1,hbvx-0024,v1w1,,,185.4326575,52,F,White/Caucasian,Hispanic,35.5,HBVimmune,N,EngerixB,,10,,"",,"",,Active,15,,,lisinopril;omeprazole;hydrocodone,,,N,160,90.8,,,"",,LD,"","",HBVimmune-Alum,,13,>50,9,
+hbvx-0024_v1w4,hbvx-0024,v1w4,,,350,52,F,White/Caucasian,Hispanic,35.5,HBVimmune,N,EngerixB,,10,,"",,"",,Active,15,,,lisinopril;omeprazole;hydrocodone,,,N,160,90.8,,,"",,LD,"","",HBVimmune-Alum,,13,>50,21,
+hbvx-0025_optional.v2,hbvx-0025,optional.v2,,,,51,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,5,,"",,"",,Never,,,,"",,,N,190.5,106.6,,,"",,LD,"","",HBVimmune-Alum,,19,>50,11,
+hbvx-0025_v1w0,hbvx-0025,v1w0,,,7.446116024,51,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,5,,"",,"",,Never,,,,"",,,N,190.5,106.6,,,"",,LD,"","",HBVimmune-Alum,,19,>50,0,
+hbvx-0025_v1w1,hbvx-0025,v1w1,,,11.369822,51,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,5,,"",,"",,Never,,,,"",,,N,190.5,106.6,,,"",,LD,"","",HBVimmune-Alum,,19,>50,5,
+hbvx-0025_v1w4,hbvx-0025,v1w4,,,65.64770724,51,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,5,,"",,"",,Never,,,,"",,,N,190.5,106.6,,,"",,LD,"","",HBVimmune-Alum,,19,>50,21,
+hbvx-0026_optional.v2,hbvx-0026,optional.v2,,,,29,F,White/Caucasian,Not Hispanic,23.8,HBVimmune,Y,EngerixB,,2,4164,Pos,,"",,Never,,,,levonorgestrel;albuterol,,,N,162.6,62.8,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,12,
+hbvx-0026_v1w0,hbvx-0026,v1w0,,,350,29,F,White/Caucasian,Not Hispanic,23.8,HBVimmune,Y,EngerixB,,2,4164,Pos,,"",,Never,,,,levonorgestrel;albuterol,,,N,162.6,62.8,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,0,
+hbvx-0026_v1w1,hbvx-0026,v1w1,,,77.92963862,29,F,White/Caucasian,Not Hispanic,23.8,HBVimmune,Y,EngerixB,,2,4164,Pos,,"",,Never,,,,levonorgestrel;albuterol,,,N,162.6,62.8,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,7,
+hbvx-0026_v1w4,hbvx-0026,v1w4,,,33.91994965,29,F,White/Caucasian,Not Hispanic,23.8,HBVimmune,Y,EngerixB,,2,4164,Pos,,"",,Never,,,,levonorgestrel;albuterol,,,N,162.6,62.8,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,27,
+hbvx-0027_optional.v1,hbvx-0027,optional.v1,,,,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,190,
+hbvx-0027_v1w0,hbvx-0027,v1w0,,,1.333056437,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0027_v1w1,hbvx-0027,v1w1,,,1.208211184,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,9,
+hbvx-0027_v2w0,hbvx-0027,v2w0,,,0.958510005,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,44,
+hbvx-0027_v2w1,hbvx-0027,v2w1,,,1.195800047,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,55,
+hbvx-0027_v2w4,hbvx-0027,v2w4,,,1.195800047,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,69,
+hbvx-0027_v3w0,hbvx-0027,v3w0,,,1.515454298,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,189,
+hbvx-0027_v3w1,hbvx-0027,v3w1,,,3.472757052,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,197,
+hbvx-0027_v3w4,hbvx-0027,v3w4,,,3.409241472,60,M,Black/AfricanAmerican,Not Hispanic,23.6,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,20,,"",,,"",177.8,74.5,78.4,77.2,"",,"","","",HBVnaive-Alum,,,>50,218,
+hbvx-0028_optional.v1,hbvx-0028,optional.v1,,,,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,1,
+hbvx-0028_optional.v2,hbvx-0028,optional.v2,,,,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,48,
+hbvx-0028_v1w0,hbvx-0028,v1w0,,,1.195800047,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,0,
+hbvx-0028_v1w1,hbvx-0028,v1w1,,,1.195800047,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,8,
+hbvx-0028_v2w0,hbvx-0028,v2w0,,,1.195800047,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,35,
+hbvx-0028_v2w1,hbvx-0028,v2w1,,,1.088427292,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,44,
+hbvx-0028_v2w4,hbvx-0028,v2w4,,,1.195800047,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,64,
+hbvx-0028_v3w0,hbvx-0028,v3w0,,,2.204972602,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,211,
+hbvx-0028_v3w1,hbvx-0028,v3w1,,,15.15004541,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,218,
+hbvx-0028_v3w4,hbvx-0028,v3w4,,,330.1138983,66,M,White/Caucasian,Not Hispanic,24.2,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,30,20,,"",,,N,182.9,80.8,84.9,87.5,"",,"","","",HBVnaive-Alum,,13,>50,239,
+hbvx-0029_optional.v1,hbvx-0029,optional.v1,,,,43,F,Black/AfricanAmerican,Not Hispanic,35.8,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,lisinopril,,,Y,165.1,97.7,,,"",,LD,"","",HBVimmune-Alum,,16,<=50,1,
+hbvx-0029_optional.v2,hbvx-0029,optional.v2,,,,43,F,Black/AfricanAmerican,Not Hispanic,35.8,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,lisinopril,,,Y,165.1,97.7,,,"",,LD,"","",HBVimmune-Alum,,16,<=50,16,
+hbvx-0029_v1w0,hbvx-0029,v1w0,,,295.5355127,43,F,Black/AfricanAmerican,Not Hispanic,35.8,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,lisinopril,,,Y,165.1,97.7,,,"",,LD,"","",HBVimmune-Alum,,16,<=50,0,
+hbvx-0029_v1w1,hbvx-0029,v1w1,,,517.1518292,43,F,Black/AfricanAmerican,Not Hispanic,35.8,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,lisinopril,,,Y,165.1,97.7,,,"",,LD,"","",HBVimmune-Alum,,16,<=50,6,
+hbvx-0029_v1w4,hbvx-0029,v1w4,,,1.195800047,43,F,Black/AfricanAmerican,Not Hispanic,35.8,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,lisinopril,,,Y,165.1,97.7,,,"",,LD,"","",HBVimmune-Alum,,16,<=50,22,
+hbvx-0030_v1w0,hbvx-0030,v1w0,,,1.303213808,43,F,Multiple/NR,Hispanic,28.6,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",160.2,73.2,,,"",,"","","",HBVnaive-CpG,,,<=50,0,
+hbvx-0031_optional.v1,hbvx-0031,optional.v1,,,,58,M,White/Caucasian,Not Hispanic,28.6,HBVnaive,N,Heplisav,,,,"",,"",,Quit,,3,,"",,,"",172.7,85.4,,,"",,"","","",HBVnaive-CpG,,,>50,1,
+hbvx-0031_v1w0,hbvx-0031,v1w0,,,1.303213808,58,M,White/Caucasian,Not Hispanic,28.6,HBVnaive,N,Heplisav,,,,"",,"",,Quit,,3,,"",,,"",172.7,85.4,,,"",,"","","",HBVnaive-CpG,,,>50,0,
+hbvx-0031_v1w1,hbvx-0031,v1w1,,,1.195800047,58,M,White/Caucasian,Not Hispanic,28.6,HBVnaive,N,Heplisav,,,,"",,"",,Quit,,3,,"",,,"",172.7,85.4,,,"",,"","","",HBVnaive-CpG,,,>50,7,
+hbvx-0032_optional.v1,hbvx-0032,optional.v1,,,,35,M,Black/AfricanAmerican,Not Hispanic,18.6,HBVimmune,N,EngerixB,,26,,"",,"",,Active,5,,,"",,,N,193,69.4,,,"",,"","","",HBVimmune-Alum,,16,<=50,2,
+hbvx-0032_optional.v2,hbvx-0032,optional.v2,,,,35,M,Black/AfricanAmerican,Not Hispanic,18.6,HBVimmune,N,EngerixB,,26,,"",,"",,Active,5,,,"",,,N,193,69.4,,,"",,"","","",HBVimmune-Alum,,16,<=50,16,
+hbvx-0032_v1w0,hbvx-0032,v1w0,,,323.1582568,35,M,Black/AfricanAmerican,Not Hispanic,18.6,HBVimmune,N,EngerixB,,26,,"",,"",,Active,5,,,"",,,N,193,69.4,,,"",,"","","",HBVimmune-Alum,,16,<=50,0,
+hbvx-0032_v1w1,hbvx-0032,v1w1,,,76.99119329,35,M,Black/AfricanAmerican,Not Hispanic,18.6,HBVimmune,N,EngerixB,,26,,"",,"",,Active,5,,,"",,,N,193,69.4,,,"",,"","","",HBVimmune-Alum,,16,<=50,9,
+hbvx-0032_v1w4,hbvx-0032,v1w4,,,60.53009213,35,M,Black/AfricanAmerican,Not Hispanic,18.6,HBVimmune,N,EngerixB,,26,,"",,"",,Active,5,,,"",,,N,193,69.4,,,"",,"","","",HBVimmune-Alum,,16,<=50,23,
+hbvx-0033_optional.v1,hbvx-0033,optional.v1,,,,37,M,White/Caucasian,Not Hispanic,31.7,HBVimmune,N,EngerixB,,14,496,Pos,,"",,Quit,10,13,,truvada;valacyclovir,,,Y,181,103.9,,,"",,LD,"","",HBVimmune-Alum,,14,<=50,2,
+hbvx-0033_optional.v2,hbvx-0033,optional.v2,,,,37,M,White/Caucasian,Not Hispanic,31.7,HBVimmune,N,EngerixB,,14,496,Pos,,"",,Quit,10,13,,truvada;valacyclovir,,,Y,181,103.9,,,"",,LD,"","",HBVimmune-Alum,,14,<=50,14,
+hbvx-0033_v1w0,hbvx-0033,v1w0,,,226.8980279,37,M,White/Caucasian,Not Hispanic,31.7,HBVimmune,N,EngerixB,,14,496,Pos,,"",,Quit,10,13,,truvada;valacyclovir,,,Y,181,103.9,,,"",,LD,"","",HBVimmune-Alum,,14,<=50,0,
+hbvx-0033_v1w1,hbvx-0033,v1w1,,,7.574627,37,M,White/Caucasian,Not Hispanic,31.7,HBVimmune,N,EngerixB,,14,496,Pos,,"",,Quit,10,13,,truvada;valacyclovir,,,Y,181,103.9,,,"",,LD,"","",HBVimmune-Alum,,14,<=50,8,
+hbvx-0033_v1w4,hbvx-0033,v1w4,,,27.79851,37,M,White/Caucasian,Not Hispanic,31.7,HBVimmune,N,EngerixB,,14,496,Pos,,"",,Quit,10,13,,truvada;valacyclovir,,,Y,181,103.9,,,"",,LD,"","",HBVimmune-Alum,,14,<=50,23,
+hbvx-0034_v1w0,hbvx-0034,v1w0,,,425.2420508,33,M,Asian,Not Hispanic,23.9,HBVimmune,N,EngerixB,,5,,Pos,,"",,Never,,,Hypothyroidism; Allergic rhinitis; Gastroesophageal reflux disease; Allergic rhinitis,truvada;levothyroxine;escitalopram;levocetirizine,,,"",177.8,75.7,,,"",,"","","",HBVimmune-Alum,truvada; levothyroxine; escitalopram; levocetirizine,,<=50,0,
+hbvx-0034_v1w1,hbvx-0034,v1w1,,,53.02239,33,M,Asian,Not Hispanic,23.9,HBVimmune,N,EngerixB,,5,,Pos,,"",,Never,,,Hypothyroidism; Allergic rhinitis; Gastroesophageal reflux disease; Allergic rhinitis,truvada;levothyroxine;escitalopram;levocetirizine,,,"",177.8,75.7,,,"",,"","","",HBVimmune-Alum,truvada; levothyroxine; escitalopram; levocetirizine,,<=50,7,
+hbvx-0034_v1w4,hbvx-0034,v1w4,,,26.90299,33,M,Asian,Not Hispanic,23.9,HBVimmune,N,EngerixB,,5,,Pos,,"",,Never,,,Hypothyroidism; Allergic rhinitis; Gastroesophageal reflux disease; Allergic rhinitis,truvada;levothyroxine;escitalopram;levocetirizine,,,"",177.8,75.7,,,"",,"","","",HBVimmune-Alum,truvada; levothyroxine; escitalopram; levocetirizine,,<=50,28,
+hbvx-0035_optional.v2,hbvx-0035,optional.v2,,,,25,M,Asian,Not Hispanic,19.7,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cholecalciferol,,,N,180.3,64.2,,,"",,"","","",HBVimmune-Alum,,14,<=50,14,
+hbvx-0035_v1w0,hbvx-0035,v1w0,,,454.6674522,25,M,Asian,Not Hispanic,19.7,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cholecalciferol,,,N,180.3,64.2,,,"",,"","","",HBVimmune-Alum,,14,<=50,0,
+hbvx-0035_v1w1,hbvx-0035,v1w1,,,197.8579712,25,M,Asian,Not Hispanic,19.7,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cholecalciferol,,,N,180.3,64.2,,,"",,"","","",HBVimmune-Alum,,14,<=50,8,
+hbvx-0035_v1w4,hbvx-0035,v1w4,,,44.10604717,25,M,Asian,Not Hispanic,19.7,HBVimmune,N,EngerixB,,24,,"",,"",,Never,,,,cholecalciferol,,,N,180.3,64.2,,,"",,"","","",HBVimmune-Alum,,14,<=50,21,
+hbvx-0036_optional.v1,hbvx-0036,optional.v1,,,,62,M,Black/AfricanAmerican,Not Hispanic,25.3,HBVimmune,N,EngerixB,,1,0,Neg,,"",,Never,,,,rosuvastatin;loratadine;tamsulosin,,,Y,172.7,75.5,,,"",,LD,"","",HBVimmune-Alum,,21,>50,1,
+hbvx-0036_optional.v2,hbvx-0036,optional.v2,,,,62,M,Black/AfricanAmerican,Not Hispanic,25.3,HBVimmune,N,EngerixB,,1,0,Neg,,"",,Never,,,,rosuvastatin;loratadine;tamsulosin,,,Y,172.7,75.5,,,"",,LD,"","",HBVimmune-Alum,,21,>50,21,
+hbvx-0036_v1w0,hbvx-0036,v1w0,,,211.8036834,62,M,Black/AfricanAmerican,Not Hispanic,25.3,HBVimmune,N,EngerixB,,1,0,Neg,,"",,Never,,,,rosuvastatin;loratadine;tamsulosin,,,Y,172.7,75.5,,,"",,LD,"","",HBVimmune-Alum,,21,>50,0,
+hbvx-0036_v1w1,hbvx-0036,v1w1,,,249.9562286,62,M,Black/AfricanAmerican,Not Hispanic,25.3,HBVimmune,N,EngerixB,,1,0,Neg,,"",,Never,,,,rosuvastatin;loratadine;tamsulosin,,,Y,172.7,75.5,,,"",,LD,"","",HBVimmune-Alum,,21,>50,6,
+hbvx-0036_v1w4,hbvx-0036,v1w4,,,10.25068563,62,M,Black/AfricanAmerican,Not Hispanic,25.3,HBVimmune,N,EngerixB,,1,0,Neg,,"",,Never,,,,rosuvastatin;loratadine;tamsulosin,,,Y,172.7,75.5,,,"",,LD,"","",HBVimmune-Alum,,21,>50,22,
+hbvx-0037_optional.v1,hbvx-0037,optional.v1,,,,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,205,
+hbvx-0037_optional.v2,hbvx-0037,optional.v2,,,,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,220,
+hbvx-0037_v1w0,hbvx-0037,v1w0,,,23.37899769,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,0,
+hbvx-0037_v1w1,hbvx-0037,v1w1,,,21.19088369,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,7,
+hbvx-0037_v2w0,hbvx-0037,v2w0,,,75.98199073,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,35,
+hbvx-0037_v2w1,hbvx-0037,v2w1,,,212.0410322,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,42,
+hbvx-0037_v2w4,hbvx-0037,v2w4,,,506.0076827,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,63,
+hbvx-0037_v3w0,hbvx-0037,v3w0,,,135.3662,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,204,
+hbvx-0037_v3w1,hbvx-0037,v3w1,,,378.9380683,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,217,
+hbvx-0037_v3w4,hbvx-0037,v3w4,,,263.9166757,72,M,White/Caucasian,Not Hispanic,21.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine,,,N,157.5,54,54.4,53.3,"",,"","","",HBVnaive-Alum,,16,>50,238,
+hbvx-0038_optional.v1,hbvx-0038,optional.v1,,,,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,1,
+hbvx-0038_optional.v2,hbvx-0038,optional.v2,,,,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,315,
+hbvx-0038_v1w0,hbvx-0038,v1w0,,,22.45588227,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,0,
+hbvx-0038_v1w1,hbvx-0038,v1w1,,,412.6167378,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,7,
+hbvx-0038_v2w0,hbvx-0038,v2w0,,,90.26119,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,43,
+hbvx-0038_v2w1,hbvx-0038,v2w1,,,52.978768125,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,50,
+hbvx-0038_v2w4,hbvx-0038,v2w4,,,55.226587895,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,71,
+hbvx-0038_v3w0,hbvx-0038,v3w0,,,147.3126629,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,301,
+hbvx-0038_v3w1,hbvx-0038,v3w1,,,46.00531163,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,308,
+hbvx-0038_v3w4,hbvx-0038,v3w4,,,47.34649138,41,F,White/Caucasian,Not Hispanic,39.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cholecalciferol;loratadine,,,N,157.5,97.9,96,89.4,"",,"","","",HBVnaive-Alum,,14,<=50,351,
+hbvx-0039_optional.v1,hbvx-0039,optional.v1,,,,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,80,
+hbvx-0039_v1w0,hbvx-0039,v1w0,,,15.95464849,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0039_v1w1,hbvx-0039,v1w1,,,372.7239803,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,8,
+hbvx-0039_v2w0,hbvx-0039,v2w0,,,155.63228435,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,79,
+hbvx-0039_v2w1,hbvx-0039,v2w1,,,144.24070979,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,93,
+hbvx-0039_v2w4,hbvx-0039,v2w4,,,92.30951878,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,101,
+hbvx-0039_v3w0,hbvx-0039,v3w0,,,272.4120223,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,276,
+hbvx-0039_v3w1,hbvx-0039,v3w1,,,188.9588741,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,283,
+hbvx-0039_v3w4,hbvx-0039,v3w4,,,52.166976315,56,F,White/Caucasian,Not Hispanic,23.7,HBVnaive,N,EngerixB,,,1000,Pos,,"",,Never,,,,diclofenac;glycopyrrolate,,,"",175.2,72.7,72.2,69.6,"",,"","","",HBVnaive-Alum,,,>50,309,
+hbvx-0040_optional.v1,hbvx-0040,optional.v1,,,,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,1,
+hbvx-0040_optional.v2,hbvx-0040,optional.v2,,,,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,216,
+hbvx-0040_v1w0,hbvx-0040,v1w0,,,1.410668575,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,0,
+hbvx-0040_v1w1,hbvx-0040,v1w1,,,1.303213808,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,7,
+hbvx-0040_v2w0,hbvx-0040,v2w0,,,3.409241472,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,34,
+hbvx-0040_v2w1,hbvx-0040,v2w1,,,1.515454298,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,40,
+hbvx-0040_v2w4,hbvx-0040,v2w4,,,3.071442842,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,61,
+hbvx-0040_v3w0,hbvx-0040,v3w0,,,4.57536048,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,201,
+hbvx-0040_v3w1,hbvx-0040,v3w1,,,5.803998,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,208,
+hbvx-0040_v3w4,hbvx-0040,v3w4,,,293.3920363,51,M,Black/AfricanAmerican,Not Hispanic,36.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,172.7,109.8,105.8,95.3,"",,"","","",HBVnaive-Alum,,15,>50,229,
+hbvx-0041_optional.v2,hbvx-0041,optional.v2,,,,50,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,22,,"",,"",,Never,,,,gabapentinproxen,,,Y,188,88.6,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,12,
+hbvx-0041_v1w0,hbvx-0041,v1w0,,,71.95817218,50,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,22,,"",,"",,Never,,,,gabapentinproxen,,,Y,188,88.6,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,0,
+hbvx-0041_v1w1,hbvx-0041,v1w1,,,531.9935888,50,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,22,,"",,"",,Never,,,,gabapentinproxen,,,Y,188,88.6,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,7,
+hbvx-0041_v1w4,hbvx-0041,v1w4,,,377.7495387,50,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,22,,"",,"",,Never,,,,gabapentinproxen,,,Y,188,88.6,,,"",,LD,"","",HBVimmune-Alum,,12,<=50,35,
+hbvx-0042_optional.v2,hbvx-0042,optional.v2,,,,23,M,White/Caucasian,Not Hispanic,18.8,HBVimmune,N,EngerixB,,10,,"",,"",,Never,,,,"",,,N,180.3,61.6,,,"",,"","","",HBVimmune-Alum,,14,<=50,14,
+hbvx-0042_v1w0,hbvx-0042,v1w0,,,76.102686225,23,M,White/Caucasian,Not Hispanic,18.8,HBVimmune,N,EngerixB,,10,,"",,"",,Never,,,,"",,,N,180.3,61.6,,,"",,"","","",HBVimmune-Alum,,14,<=50,0,
+hbvx-0042_v1w1,hbvx-0042,v1w1,,,29.871450055,23,M,White/Caucasian,Not Hispanic,18.8,HBVimmune,N,EngerixB,,10,,"",,"",,Never,,,,"",,,N,180.3,61.6,,,"",,"","","",HBVimmune-Alum,,14,<=50,6,
+hbvx-0042_v1w4,hbvx-0042,v1w4,,,8.544776,23,M,White/Caucasian,Not Hispanic,18.8,HBVimmune,N,EngerixB,,10,,"",,"",,Never,,,,"",,,N,180.3,61.6,,,"",,"","","",HBVimmune-Alum,,14,<=50,44,
+hbvx-0043_optional.v1,hbvx-0043,optional.v1,,,,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,252,
+hbvx-0043_optional.v2,hbvx-0043,optional.v2,,,,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,270,
+hbvx-0043_v1w0,hbvx-0043,v1w0,,,8.462322428,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,0,
+hbvx-0043_v1w1,hbvx-0043,v1w1,,,32.2198152,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,6,
+hbvx-0043_v2w0,hbvx-0043,v2w0,,,452.6741769,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,42,
+hbvx-0043_v2w1,hbvx-0043,v2w1,,,525.1627872,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,48,
+hbvx-0043_v2w4,hbvx-0043,v2w4,,,443.1448968,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,63,
+hbvx-0043_v3w0,hbvx-0043,v3w0,,,122.3171499,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,251,
+hbvx-0043_v3w1,hbvx-0043,v3w1,,,261.5877743,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,266,
+hbvx-0043_v3w4,hbvx-0043,v3w4,,,133.456576845,41,F,Black/AfricanAmerican,Hispanic,38.4,HBVnaive,N,EngerixB,,,14.7,Pos,,"",,Never,,,,bupropion;liraglutide;famotidine,,,Y,154.9,92.1,87,84.5,"",,"","","",HBVnaive-Alum,,19,<=50,308,
+hbvx-0044_optional.v1,hbvx-0044,optional.v1,,,,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,2,
+hbvx-0044_v1w0,hbvx-0044,v1w0,,,1.515454298,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,0,
+hbvx-0044_v1w1,hbvx-0044,v1w1,,,1.515454298,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,13,
+hbvx-0044_v2w0,hbvx-0044,v2w0,,,3.791167392,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,70,
+hbvx-0044_v2w1,hbvx-0044,v2w1,,,72.5771858,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,77,
+hbvx-0044_v2w4,hbvx-0044,v2w4,,,186.5080968,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,91,
+hbvx-0044_v3w0,hbvx-0044,v3w0,,,22.45366749,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,301,
+hbvx-0044_v3w1,hbvx-0044,v3w1,,,119.3594964,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,308,
+hbvx-0044_v3w4,hbvx-0044,v3w4,,,226.1313053,46,M,Black/AfricanAmerican,Hispanic,26.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,10,14,,"",,,N,170.2,77.4,75.4,70.6,"",,"","","",HBVnaive-Alum,,15,<=50,331,
+hbvx-0045_optional.v1,hbvx-0045,optional.v1,,,,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,1,
+hbvx-0045_optional.v2,hbvx-0045,optional.v2,,,,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,323,
+hbvx-0045_v1w0,hbvx-0045,v1w0,,,2.118605,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,0,
+hbvx-0045_v1w1,hbvx-0045,v1w1,,,310.6709776,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,9,
+hbvx-0045_v2w0,hbvx-0045,v2w0,,,478.2489528,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,35,
+hbvx-0045_v2w1,hbvx-0045,v2w1,,,484.9982818,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,44,
+hbvx-0045_v2w4,hbvx-0045,v2w4,,,423.8068647,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,70,
+hbvx-0045_v3w0,hbvx-0045,v3w0,,,165.0390943,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,308,
+hbvx-0045_v3w1,hbvx-0045,v3w1,,,204.496171,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,316,
+hbvx-0045_v3w4,hbvx-0045,v3w4,,,12.43642,28,F,White/Caucasian,Not Hispanic,29.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,N,165.1,79.7,80.1,82.5,"",,"","","",HBVnaive-Alum,,15,<=50,338,
+hbvx-0046_optional.v1,hbvx-0046,optional.v1,,,,66,F,White/Caucasian,Not Hispanic,26.4,HBVimmune,N,EngerixB,,2,2160,Pos,,"",,Never,,,,atorvastatin;ezetimibe,,,N,162.6,69.7,,,"",,"","","",HBVimmune-Alum,,13,>50,1,
+hbvx-0046_optional.v2,hbvx-0046,optional.v2,,,,66,F,White/Caucasian,Not Hispanic,26.4,HBVimmune,N,EngerixB,,2,2160,Pos,,"",,Never,,,,atorvastatin;ezetimibe,,,N,162.6,69.7,,,"",,"","","",HBVimmune-Alum,,13,>50,13,
+hbvx-0046_v1w0,hbvx-0046,v1w0,,,37.75313377,66,F,White/Caucasian,Not Hispanic,26.4,HBVimmune,N,EngerixB,,2,2160,Pos,,"",,Never,,,,atorvastatin;ezetimibe,,,N,162.6,69.7,,,"",,"","","",HBVimmune-Alum,,13,>50,0,
+hbvx-0046_v1w1,hbvx-0046,v1w1,,,39.82660417,66,F,White/Caucasian,Not Hispanic,26.4,HBVimmune,N,EngerixB,,2,2160,Pos,,"",,Never,,,,atorvastatin;ezetimibe,,,N,162.6,69.7,,,"",,"","","",HBVimmune-Alum,,13,>50,7,
+hbvx-0046_v1w4,hbvx-0046,v1w4,,,483.9814774,66,F,White/Caucasian,Not Hispanic,26.4,HBVimmune,N,EngerixB,,2,2160,Pos,,"",,Never,,,,atorvastatin;ezetimibe,,,N,162.6,69.7,,,"",,"","","",HBVimmune-Alum,,13,>50,35,
+hbvx-0047_optional.v1,hbvx-0047,optional.v1,,,,40,F,White/Caucasian,Not Hispanic,21.1,HBVimmune,Y,EngerixB,,8,,"",,"",,Never,,,,alprazolam;hydroxyzine;ondansetron,,,N,160,54,,,"",,"","","",HBVimmune-Alum,,17,<=50,2,
+hbvx-0047_optional.v2,hbvx-0047,optional.v2,,,,40,F,White/Caucasian,Not Hispanic,21.1,HBVimmune,Y,EngerixB,,8,,"",,"",,Never,,,,alprazolam;hydroxyzine;ondansetron,,,N,160,54,,,"",,"","","",HBVimmune-Alum,,17,<=50,17,
+hbvx-0047_v1w0,hbvx-0047,v1w0,,,313.6315927,40,F,White/Caucasian,Not Hispanic,21.1,HBVimmune,Y,EngerixB,,8,,"",,"",,Never,,,,alprazolam;hydroxyzine;ondansetron,,,N,160,54,,,"",,"","","",HBVimmune-Alum,,17,<=50,0,
+hbvx-0047_v1w1,hbvx-0047,v1w1,,,410.1952776,40,F,White/Caucasian,Not Hispanic,21.1,HBVimmune,Y,EngerixB,,8,,"",,"",,Never,,,,alprazolam;hydroxyzine;ondansetron,,,N,160,54,,,"",,"","","",HBVimmune-Alum,,17,<=50,8,
+hbvx-0047_v1w4,hbvx-0047,v1w4,,,152.43467345,40,F,White/Caucasian,Not Hispanic,21.1,HBVimmune,Y,EngerixB,,8,,"",,"",,Never,,,,alprazolam;hydroxyzine;ondansetron,,,N,160,54,,,"",,"","","",HBVimmune-Alum,,17,<=50,23,
+hbvx-0048_optional.v1,hbvx-0048,optional.v1,,,,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,rosuvastatin;meclizine,,,N,160,74.3,74.7,,"",,"","","",HBVnaive-CpG,,14,>50,49,
+hbvx-0048_optional.v2,hbvx-0048,optional.v2,,,,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,rosuvastatin;meclizine,,,N,160,74.3,74.7,,"",,"","","",HBVnaive-CpG,,14,>50,62,
+hbvx-0048_v1w0,hbvx-0048,v1w0,,,3.472757052,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,rosuvastatin;meclizine,,,N,160,74.3,74.7,,"",,"","","",HBVnaive-CpG,,14,>50,0,
+hbvx-0048_v1w1,hbvx-0048,v1w1,,,4.754722812,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,rosuvastatin;meclizine,,,N,160,74.3,74.7,,"",,"","","",HBVnaive-CpG,,14,>50,8,
+hbvx-0048_v2w0,hbvx-0048,v2w0,,,137.6186765,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,rosuvastatin;meclizine,,,N,160,74.3,74.7,,"",,"","","",HBVnaive-CpG,,14,>50,48,
+hbvx-0048_v2w1,hbvx-0048,v2w1,,,329.9131966,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,rosuvastatin;meclizine,,,N,160,74.3,74.7,,"",,"","","",HBVnaive-CpG,,14,>50,54,
+hbvx-0048_v2w4,hbvx-0048,v2w4,,,474.8225109,63,F,White/Caucasian,Not Hispanic,29,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,rosuvastatin;meclizine,,,N,160,74.3,74.7,,"",,"","","",HBVnaive-CpG,,14,>50,83,
+hbvx-0049_optional.v1,hbvx-0049,optional.v1,,,,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,42,
+hbvx-0049_v1w0,hbvx-0049,v1w0,,,3.409241472,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0049_v1w1,hbvx-0049,v1w1,,,,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,6,
+hbvx-0049_v2w0,hbvx-0049,v2w0,,,3.472757052,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,41,
+hbvx-0049_v2w1,hbvx-0049,v2w1,,,1.515454298,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,49,
+hbvx-0049_v2w4,hbvx-0049,v2w4,,,3.536328128,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,70,
+hbvx-0049_v3w0,hbvx-0049,v3w0,,,4.03209072,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,209,
+hbvx-0049_v3w1,hbvx-0049,v3w1,,,2.297218672,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,217,
+hbvx-0049_v3w4,hbvx-0049,v3w4,,,56.05127847,74,M,White/Caucasian,Not Hispanic,25.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,escitalopram,,,"",177.8,80.2,79.2,79.8,"",,"","","",HBVnaive-Alum,,,>50,251,
+hbvx-0050_optional.v1,hbvx-0050,optional.v1,,,,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,1,
+hbvx-0050_optional.v2,hbvx-0050,optional.v2,,,,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,259,
+hbvx-0050_v1w0,hbvx-0050,v1w0,,,3.409241472,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,0,
+hbvx-0050_v1w1,hbvx-0050,v1w1,,,1.601466272,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,9,
+hbvx-0050_v2w0,hbvx-0050,v2w0,,,1.429493128,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,37,
+hbvx-0050_v2w1,hbvx-0050,v2w1,,,3.727374332,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,44,
+hbvx-0050_v2w4,hbvx-0050,v2w4,,,11.55629507,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,65,
+hbvx-0050_v3w0,hbvx-0050,v3w0,,,11.62002251,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,246,
+hbvx-0050_v3w1,hbvx-0050,v3w1,,,109.3634653,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,259,
+hbvx-0050_v3w4,hbvx-0050,v3w4,,,67.5651313,48,F,Black/AfricanAmerican,Not Hispanic,34.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,cetirizine;venlafaxine;risperidone;buspirone,,,N,160,89.2,91.4,94.1,"",,"","","",HBVnaive-Alum,,13,<=50,274,
+hbvx-0051_optional.v1,hbvx-0051,optional.v1,,,,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,2,
+hbvx-0051_v1w0,hbvx-0051,v1w0,,,35.2295163,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,0,
+hbvx-0051_v1w1,hbvx-0051,v1w1,,,332.7280704,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,9,
+hbvx-0051_v2w0,hbvx-0051,v2w0,,,419.7528146,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,37,
+hbvx-0051_v2w1,hbvx-0051,v2w1,,,559.1039002,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,50,
+hbvx-0051_v2w4,hbvx-0051,v2w4,,,542.8120243,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,71,
+hbvx-0051_v3w0,hbvx-0051,v3w0,,,300.8239229,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,233,
+hbvx-0051_v3w1,hbvx-0051,v3w1,,,197.3681229,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,239,
+hbvx-0051_v3w4,hbvx-0051,v3w4,,,87.54315887,40,F,White/Caucasian,Hispanic,22.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",172.7,66.4,66.2,66.2,"",,"","","",HBVnaive-Alum,,,<=50,268,
+hbvx-0052_optional.v1,hbvx-0052,optional.v1,,,,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",162.6,55.4,54.7,,"",,"","","",HBVnaive-CpG,,,>50,78,
+hbvx-0052_v1w0,hbvx-0052,v1w0,,,1.515454298,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",162.6,55.4,54.7,,"",,"","","",HBVnaive-CpG,,,>50,0,
+hbvx-0052_v1w1,hbvx-0052,v1w1,,,3.663636768,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",162.6,55.4,54.7,,"",,"","","",HBVnaive-CpG,,,>50,6,
+hbvx-0052_v2w0,hbvx-0052,v2w0,,,24.47309021,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",162.6,55.4,54.7,,"",,"","","",HBVnaive-CpG,,,>50,76,
+hbvx-0052_v2w1,hbvx-0052,v2w1,,,273.239628,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",162.6,55.4,54.7,,"",,"","","",HBVnaive-CpG,,,>50,83,
+hbvx-0052_v2w4,hbvx-0052,v2w4,,,223.7552357,69,M,White/Caucasian,Not Hispanic,21,HBVnaive,N,Heplisav,,,,"",,"",,Never,,,,"",,,"",162.6,55.4,54.7,,"",,"","","",HBVnaive-CpG,,,>50,104,
+hbvx-0053_optional.v1,hbvx-0053,optional.v1,,,,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,57,
+hbvx-0053_optional.v2,hbvx-0053,optional.v2,,,,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,231,
+hbvx-0053_v1w0,hbvx-0053,v1w0,,,3.345781388,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,0,
+hbvx-0053_v1w1,hbvx-0053,v1w1,,,1.429493128,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,7,
+hbvx-0053_v2w0,hbvx-0053,v2w0,,,3.22040688,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,56,
+hbvx-0053_v2w1,hbvx-0053,v2w1,,,3.085502,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,63,
+hbvx-0053_v2w4,hbvx-0053,v2w4,,,0.1,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,78,
+hbvx-0053_v3w0,hbvx-0053,v3w0,,,2.827291033,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,217,
+hbvx-0053_v3w1,hbvx-0053,v3w1,,,2.297218672,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,231,
+hbvx-0053_v3w4,hbvx-0053,v3w4,,,2.95070448,53,F,White/Caucasian,Not Hispanic,24.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,bupropion;quetiapine;acyclovir;tramadol,,,N,175.3,73.9,72.7,68.3,"",,"","","",HBVnaive-Alum,,15,>50,251,
+hbvx-0054_v1w0,hbvx-0054,v1w0,,,154.99954156,62,M,White/Caucasian,Not Hispanic,28.8,HBVimmune,N,EngerixB,,,96,Pos,,"",,Quit,0.5,28,Anxiety; Gastroesophageal reflux disease; Herpes simplex; Insomnia,bupropion;tirzepatide;atorvastatin;descovy,,,"",172.7,86,,,"",,"","","",HBVimmune-Alum,bupropion; tirzepatide; atorvastatin; descovy,,>50,0,
+hbvx-0054_v1w1,hbvx-0054,v1w1,,,393.9176352,62,M,White/Caucasian,Not Hispanic,28.8,HBVimmune,N,EngerixB,,,96,Pos,,"",,Quit,0.5,28,Anxiety; Gastroesophageal reflux disease; Herpes simplex; Insomnia,bupropion;tirzepatide;atorvastatin;descovy,,,"",172.7,86,,,"",,"","","",HBVimmune-Alum,bupropion; tirzepatide; atorvastatin; descovy,,>50,7,
+hbvx-0054_v1w4,hbvx-0054,v1w4,,,19.73881,62,M,White/Caucasian,Not Hispanic,28.8,HBVimmune,N,EngerixB,,,96,Pos,,"",,Quit,0.5,28,Anxiety; Gastroesophageal reflux disease; Herpes simplex; Insomnia,bupropion;tirzepatide;atorvastatin;descovy,,,"",172.7,86,,,"",,"","","",HBVimmune-Alum,bupropion; tirzepatide; atorvastatin; descovy,,>50,35,
+hbvx-0055_optional.v1,hbvx-0055,optional.v1,,,,61,M,Black/AfricanAmerican,Not Hispanic,37.5,HBVimmune,N,EngerixB,,17,,"",,"",,Never,,,,atorvastatin;lisinopril,,,N,165.1,102.2,,,"",,"","","",HBVimmune-Alum,,13,>50,1,
+hbvx-0055_optional.v2,hbvx-0055,optional.v2,,,,61,M,Black/AfricanAmerican,Not Hispanic,37.5,HBVimmune,N,EngerixB,,17,,"",,"",,Never,,,,atorvastatin;lisinopril,,,N,165.1,102.2,,,"",,"","","",HBVimmune-Alum,,13,>50,13,
+hbvx-0055_v1w0,hbvx-0055,v1w0,,,64.82672945,61,M,Black/AfricanAmerican,Not Hispanic,37.5,HBVimmune,N,EngerixB,,17,,"",,"",,Never,,,,atorvastatin;lisinopril,,,N,165.1,102.2,,,"",,"","","",HBVimmune-Alum,,13,>50,0,
+hbvx-0055_v1w1,hbvx-0055,v1w1,,,413.0748588,61,M,Black/AfricanAmerican,Not Hispanic,37.5,HBVimmune,N,EngerixB,,17,,"",,"",,Never,,,,atorvastatin;lisinopril,,,N,165.1,102.2,,,"",,"","","",HBVimmune-Alum,,13,>50,7,
+hbvx-0055_v1w4,hbvx-0055,v1w4,,,511.1559164,61,M,Black/AfricanAmerican,Not Hispanic,37.5,HBVimmune,N,EngerixB,,17,,"",,"",,Never,,,,atorvastatin;lisinopril,,,N,165.1,102.2,,,"",,"","","",HBVimmune-Alum,,13,>50,29,
+hbvx-0056_optional.v1,hbvx-0056,optional.v1,,,,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,226,
+hbvx-0056_optional.v2,hbvx-0056,optional.v2,,,,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,239,
+hbvx-0056_v1w0,hbvx-0056,v1w0,,,178.4873668,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,0,
+hbvx-0056_v1w1,hbvx-0056,v1w1,,,178.3280955,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,7,
+hbvx-0056_v2w0,hbvx-0056,v2w0,,,375.7987915,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,36,
+hbvx-0056_v2w1,hbvx-0056,v2w1,,,383.0351785,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,42,
+hbvx-0056_v2w4,hbvx-0056,v2w4,,,247.2355013,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,63,
+hbvx-0056_v3w0,hbvx-0056,v3w0,,,117.9492564,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,224,
+hbvx-0056_v3w1,hbvx-0056,v3w1,,,205.6225057,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,237,
+hbvx-0056_v3w4,hbvx-0056,v3w4,,,196.5354774,72,M,Black/AfricanAmerican,Not Hispanic,25,HBVnaive,N,EngerixB,,,,Pos,,"",,Quit,15,19,,etravirine;darunavir;atorvastatin;bupropion,,,N,180.3,81.3,81.6,77.1,? resolved HBV,,"","","",HBVnaive-Alum,,15,>50,253,
+hbvx-0057_optional.v1,hbvx-0057,optional.v1,,,,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,226,
+hbvx-0057_optional.v2,hbvx-0057,optional.v2,,,,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,238,
+hbvx-0057_v1w0,hbvx-0057,v1w0,,,4.367802252,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,0,
+hbvx-0057_v1w1,hbvx-0057,v1w1,,,171.4811829,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,8,
+hbvx-0057_v2w0,hbvx-0057,v2w0,,,75.00528312,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,35,
+hbvx-0057_v2w1,hbvx-0057,v2w1,,,103.321022,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,44,
+hbvx-0057_v2w4,hbvx-0057,v2w4,,,92.13719792,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,65,
+hbvx-0057_v3w0,hbvx-0057,v3w0,,,79.12610237,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,225,
+hbvx-0057_v3w1,hbvx-0057,v3w1,,,69.80159819,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,233,
+hbvx-0057_v3w4,hbvx-0057,v3w4,,,31.24025655,62,M,Black/AfricanAmerican,Not Hispanic,29.5,HBVnaive,N,EngerixB,,,0,Neg,,"",,Quit,,15,,atorvastatin;gabapentin,,,N,188,104.2,102.4,99.9,"",,"","","",HBVnaive-Alum,,15,>50,254,
+hbvx-0058_optional.v1,hbvx-0058,optional.v1,,,,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,36,
+hbvx-0058_optional.v2,hbvx-0058,optional.v2,,,,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,286,
+hbvx-0058_v1w0,hbvx-0058,v1w0,,,1.773642632,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,0,
+hbvx-0058_v1w1,hbvx-0058,v1w1,,,5.524587242,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,7,
+hbvx-0058_v2w0,hbvx-0058,v2w0,,,53.77292472,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,34,
+hbvx-0058_v2w1,hbvx-0058,v2w1,,,55.31172528,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,41,
+hbvx-0058_v2w4,hbvx-0058,v2w4,,,143.3393573,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,62,
+hbvx-0058_v3w0,hbvx-0058,v3w0,,,39.20264983,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,265,
+hbvx-0058_v3w1,hbvx-0058,v3w1,,,51.61505291,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,272,
+hbvx-0058_v3w4,hbvx-0058,v3w4,,,476.1468,35,M,Black/AfricanAmerican,Not Hispanic,29.1,HBVnaive,N,EngerixB,,,3.2,Neg,,"",,Never,,,,"",,,Y,175.3,88.3,87,86.7,"",,"","","",HBVnaive-Alum,,21,<=50,295,
+hbvx-0059_optional.v1,hbvx-0059,optional.v1,,,,26,M,Multiple/NR,Hispanic,27.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,"",,,N,180.3,89.9,,,"",,"","","",HBVimmune-Alum,,14,<=50,1,
+hbvx-0059_optional.v2,hbvx-0059,optional.v2,,,,26,M,Multiple/NR,Hispanic,27.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,"",,,N,180.3,89.9,,,"",,"","","",HBVimmune-Alum,,14,<=50,14,
+hbvx-0059_v1w0,hbvx-0059,v1w0,,,3.35541912,26,M,Multiple/NR,Hispanic,27.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,"",,,N,180.3,89.9,,,"",,"","","",HBVimmune-Alum,,14,<=50,0,
+hbvx-0059_v1w1,hbvx-0059,v1w1,,,16.23583128,26,M,Multiple/NR,Hispanic,27.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,"",,,N,180.3,89.9,,,"",,"","","",HBVimmune-Alum,,14,<=50,6,
+hbvx-0059_v1w4,hbvx-0059,v1w4,,,98.036103505,26,M,Multiple/NR,Hispanic,27.6,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,"",,,N,180.3,89.9,,,"",,"","","",HBVimmune-Alum,,14,<=50,28,
+hbvx-0060_optional.v1,hbvx-0060,optional.v1,,,,65,F,White/Caucasian,Not Hispanic,18.7,HBVimmune,N,EngerixB,,4,,"",,"",,Quit,20,14,,donepezil;losartan;mesalamine;bupropion,,,N,177.8,59,,,"",,"","","",HBVimmune-Alum,,16,>50,2,
+hbvx-0060_optional.v2,hbvx-0060,optional.v2,,,,65,F,White/Caucasian,Not Hispanic,18.7,HBVimmune,N,EngerixB,,4,,"",,"",,Quit,20,14,,donepezil;losartan;mesalamine;bupropion,,,N,177.8,59,,,"",,"","","",HBVimmune-Alum,,16,>50,16,
+hbvx-0060_v1w0,hbvx-0060,v1w0,,,3.89654168,65,F,White/Caucasian,Not Hispanic,18.7,HBVimmune,N,EngerixB,,4,,"",,"",,Quit,20,14,,donepezil;losartan;mesalamine;bupropion,,,N,177.8,59,,,"",,"","","",HBVimmune-Alum,,16,>50,0,
+hbvx-0060_v1w1,hbvx-0060,v1w1,,,14.42967441,65,F,White/Caucasian,Not Hispanic,18.7,HBVimmune,N,EngerixB,,4,,"",,"",,Quit,20,14,,donepezil;losartan;mesalamine;bupropion,,,N,177.8,59,,,"",,"","","",HBVimmune-Alum,,16,>50,8,
+hbvx-0060_v1w4,hbvx-0060,v1w4,,,205.0590601,65,F,White/Caucasian,Not Hispanic,18.7,HBVimmune,N,EngerixB,,4,,"",,"",,Quit,20,14,,donepezil;losartan;mesalamine;bupropion,,,N,177.8,59,,,"",,"","","",HBVimmune-Alum,,16,>50,78,
+hbvx-0061_optional.v2,hbvx-0061,optional.v2,,,,25,F,White/Caucasian,Not Hispanic,22,HBVimmune,N,EngerixB,,6,,"",,"",,Never,,,,sertraline;propanolol;trazodone;spironolactone,,,N,165.1,59.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,15,
+hbvx-0061_v1w0,hbvx-0061,v1w0,,,361.79212655,25,F,White/Caucasian,Not Hispanic,22,HBVimmune,N,EngerixB,,6,,"",,"",,Never,,,,sertraline;propanolol;trazodone;spironolactone,,,N,165.1,59.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,0,
+hbvx-0061_v1w1,hbvx-0061,v1w1,,,88.702482095,25,F,White/Caucasian,Not Hispanic,22,HBVimmune,N,EngerixB,,6,,"",,"",,Never,,,,sertraline;propanolol;trazodone;spironolactone,,,N,165.1,59.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,12,
+hbvx-0061_v1w4,hbvx-0061,v1w4,,,123.0258013,25,F,White/Caucasian,Not Hispanic,22,HBVimmune,N,EngerixB,,6,,"",,"",,Never,,,,sertraline;propanolol;trazodone;spironolactone,,,N,165.1,59.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,54,
+hbvx-0062_optional.v1,hbvx-0062,optional.v1,,,,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,218,
+hbvx-0062_optional.v2,hbvx-0062,optional.v2,,,,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,-135,
+hbvx-0062_v1w0,hbvx-0062,v1w0,,,12.63641564,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,0,
+hbvx-0062_v2w0,hbvx-0062,v2w0,,,245.6938708,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,71,
+hbvx-0062_v2w1,hbvx-0062,v2w1,,,512.7563,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,78,
+hbvx-0062_v2w4,hbvx-0062,v2w4,,,253.1958623,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,99,
+hbvx-0062_v3w0,hbvx-0062,v3w0,,,412.0705,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,216,
+hbvx-0062_v3w1,hbvx-0062,v3w1,,,318.3195,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,223,
+hbvx-0062_v3w4,hbvx-0062,v3w4,,,168.3779,47,F,White/Caucasian,Not Hispanic,27.4,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,metformin;methylphenidate;;,,,N,,,,,"",,"","","",HBVnaive-Alum,,14,<=50,253,
+hbvx-0063_optional.v1,hbvx-0063,optional.v1,,,,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,2,
+hbvx-0063_optional.v2,hbvx-0063,optional.v2,,,,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,210,
+hbvx-0063_v1w0,hbvx-0063,v1w0,,,249.9214266,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,0,
+hbvx-0063_v1w1,hbvx-0063,v1w1,,,19.77167171,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,9,
+hbvx-0063_v2w0,hbvx-0063,v2w0,,,38.83887583,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,51,
+hbvx-0063_v2w1,hbvx-0063,v2w1,,,14.92012502,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,58,
+hbvx-0063_v2w4,hbvx-0063,v2w4,,,21.02442202,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,79,
+hbvx-0063_v3w0,hbvx-0063,v3w0,,,125.6343,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,197,
+hbvx-0063_v3w1,hbvx-0063,v3w1,,,58.09701,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,,
+hbvx-0063_v3w4,hbvx-0063,v3w4,,,55.41045,54,F,Black/AfricanAmerican,Not Hispanic,21.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,loratadine;amlodipine;losartan;hydrochlorothiazide,,,Y,165.1,58.1,58.1,55.3,"",,RD,RD,LD,HBVnaive-Alum,,13,>50,226,
+hbvx-0064_optional.v1,hbvx-0064,optional.v1,,,,36,F,Black/AfricanAmerican,Not Hispanic,20.4,HBVnaive,N,Heplisav,,,,"",,"",,Active,2,,,"",,,"",160,52.2,,,"",,"","","",HBVnaive-CpG,,,<=50,2,
+hbvx-0064_v1w0,hbvx-0064,v1w0,,,476.1468,36,F,Black/AfricanAmerican,Not Hispanic,20.4,HBVnaive,N,Heplisav,,,,"",,"",,Active,2,,,"",,,"",160,52.2,,,"",,"","","",HBVnaive-CpG,,,<=50,0,
+hbvx-0064_v1w1,hbvx-0064,v1w1,,,268.5040852,36,F,Black/AfricanAmerican,Not Hispanic,20.4,HBVnaive,N,Heplisav,,,,"",,"",,Active,2,,,"",,,"",160,52.2,,,"",,"","","",HBVnaive-CpG,,,<=50,9,
+hbvx-0065_optional.v1,hbvx-0065,optional.v1,,,,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,35,
+hbvx-0065_optional.v2,hbvx-0065,optional.v2,,,,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,250,
+hbvx-0065_v1w0,hbvx-0065,v1w0,,,4.734321008,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,0,
+hbvx-0065_v1w1,hbvx-0065,v1w1,,,1.768850825,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,7,
+hbvx-0065_v2w0,hbvx-0065,v2w0,,,2.448493988,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,34,
+hbvx-0065_v2w1,hbvx-0065,v2w1,,,2.751462052,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,41,
+hbvx-0065_v2w4,hbvx-0065,v2w4,,,0.576776,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,62,
+hbvx-0065_v3w0,hbvx-0065,v3w0,,,18.47015,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,237,
+hbvx-0065_v3w1,hbvx-0065,v3w1,,,44.81343,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,245,
+hbvx-0065_v3w4,hbvx-0065,v3w4,,,533.5592,70,F,White/Caucasian,Not Hispanic,25.5,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,estradiol;cholecalciferol,,,N,165.1,69.4,68,,"",,"","","",HBVnaive-Alum,,13,>50,266,
+hbvx-0066_optional.v1,hbvx-0066,optional.v1,,,,39,F,Black/AfricanAmerican,Hispanic,19.6,HBVimmune,N,EngerixB,,,11.1,Pos,,"",,Quit,5,2,,"",,,N,162.6,51.9,,,"",,"","","",HBVimmune-Alum,,13,<=50,1,
+hbvx-0066_optional.v2,hbvx-0066,optional.v2,,,,39,F,Black/AfricanAmerican,Hispanic,19.6,HBVimmune,N,EngerixB,,,11.1,Pos,,"",,Quit,5,2,,"",,,N,162.6,51.9,,,"",,"","","",HBVimmune-Alum,,13,<=50,13,
+hbvx-0066_v1w0,hbvx-0066,v1w0,,,6.120844772,39,F,Black/AfricanAmerican,Hispanic,19.6,HBVimmune,N,EngerixB,,,11.1,Pos,,"",,Quit,5,2,,"",,,N,162.6,51.9,,,"",,"","","",HBVimmune-Alum,,13,<=50,0,
+hbvx-0066_v1w1,hbvx-0066,v1w1,,,192.2534255,39,F,Black/AfricanAmerican,Hispanic,19.6,HBVimmune,N,EngerixB,,,11.1,Pos,,"",,Quit,5,2,,"",,,N,162.6,51.9,,,"",,"","","",HBVimmune-Alum,,13,<=50,8,
+hbvx-0066_v1w4,hbvx-0066,v1w4,,,176.6604227,39,F,Black/AfricanAmerican,Hispanic,19.6,HBVimmune,N,EngerixB,,,11.1,Pos,,"",,Quit,5,2,,"",,,N,162.6,51.9,,,"",,"","","",HBVimmune-Alum,,13,<=50,22,
+hbvx-0067_optional.v1,hbvx-0067,optional.v1,,,,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,244,
+hbvx-0067_v1w0,hbvx-0067,v1w0,,,7.051455428,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0067_v1w1,hbvx-0067,v1w1,,,14.35255335,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,7,
+hbvx-0067_v2w0,hbvx-0067,v2w0,,,431.9525,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,33,
+hbvx-0067_v2w1,hbvx-0067,v2w1,,,490.6739,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,39,
+hbvx-0067_v2w4,hbvx-0067,v2w4,,,317.8278,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,69,
+hbvx-0067_v3w0,hbvx-0067,v3w0,,,453.0397,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,243,
+hbvx-0067_v3w1,hbvx-0067,v3w1,,,400.6653,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,251,
+hbvx-0067_v3w4,hbvx-0067,v3w4,,,119.9627,76,M,White/Caucasian,Not Hispanic,22.8,HBVnaive,N,EngerixB,,,,"",,"",,Active,28.6,,,aspirin;ramelteon,,,"",165.1,62.1,62.1,,"",,"","","",HBVnaive-Alum,,,>50,270,
+hbvx-0068_optional.v1,hbvx-0068,optional.v1,,,,74,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,,40.52,Pos,,"",,Quit,2.5,22,,chlorthalidone;rosuvastatin,,,N,175.3,77.1,,,"Core negative, 2024",,"","","",HBVimmune-Alum,,17,>50,2,
+hbvx-0068_optional.v2,hbvx-0068,optional.v2,,,,74,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,,40.52,Pos,,"",,Quit,2.5,22,,chlorthalidone;rosuvastatin,,,N,175.3,77.1,,,"Core negative, 2024",,"","","",HBVimmune-Alum,,17,>50,17,
+hbvx-0068_v1w0,hbvx-0068,v1w0,,,24.0629563,74,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,,40.52,Pos,,"",,Quit,2.5,22,,chlorthalidone;rosuvastatin,,,N,175.3,77.1,,,"Core negative, 2024",,"","","",HBVimmune-Alum,,17,>50,0,
+hbvx-0068_v1w1,hbvx-0068,v1w1,,,15.89707063,74,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,,40.52,Pos,,"",,Quit,2.5,22,,chlorthalidone;rosuvastatin,,,N,175.3,77.1,,,"Core negative, 2024",,"","","",HBVimmune-Alum,,17,>50,0,
+hbvx-0068_v1w4,hbvx-0068,v1w4,,,486.9541,74,M,Black/AfricanAmerican,Not Hispanic,25.1,HBVimmune,N,EngerixB,,,40.52,Pos,,"",,Quit,2.5,22,,chlorthalidone;rosuvastatin,,,N,175.3,77.1,,,"Core negative, 2024",,"","","",HBVimmune-Alum,,17,>50,28,
+hbvx-0069_optional.v1,hbvx-0069,optional.v1,,,,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,,,,"",,"",,Quit,10,2,,"",,,Y,167.6,77.1,77.1,,"",,LD,LD,"",HBVnaive-CpG,,14,>50,2,
+hbvx-0069_optional.v2,hbvx-0069,optional.v2,,,,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,,,,"",,"",,Quit,10,2,,"",,,Y,167.6,77.1,77.1,,"",,LD,LD,"",HBVnaive-CpG,,14,>50,49,
+hbvx-0069_v1w0,hbvx-0069,v1w0,,,3.435175177,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,,,,"",,"",,Quit,10,2,,"",,,Y,167.6,77.1,77.1,,"",,LD,LD,"",HBVnaive-CpG,,14,>50,0,
+hbvx-0069_v1w1,hbvx-0069,v1w1,,,2.675667857,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,,,,"",,"",,Quit,10,2,,"",,,Y,167.6,77.1,77.1,,"",,LD,LD,"",HBVnaive-CpG,,14,>50,8,
+hbvx-0069_v2w0,hbvx-0069,v2w0,,,1.807554,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,,,,"",,"",,Quit,10,2,,"",,,Y,167.6,77.1,77.1,,"",,LD,LD,"",HBVnaive-CpG,,14,>50,35,
+hbvx-0069_v2w1,hbvx-0069,v2w1,,,278.3116,51,F,Black/AfricanAmerican,Not Hispanic,27.5,HBVnaive,N,Heplisav,,,,"",,"",,Quit,10,2,,"",,,Y,167.6,77.1,77.1,,"",,LD,LD,"",HBVnaive-CpG,,14,>50,43,
+hbvx-0070_optional.v1,hbvx-0070,optional.v1,,,,74,F,White/Caucasian,Not Hispanic,33.1,HBVimmune,N,EngerixB,,20,2.7,Neg,,"",,Quit,2,43,,levothyroxine;ramipril;hydrochlorothiazide;atorvastatin,,,N,154.9,79.4,,,"Core negative, 2015",,"","","",HBVimmune-Alum,,14,>50,2,
+hbvx-0070_optional.v2,hbvx-0070,optional.v2,,,,74,F,White/Caucasian,Not Hispanic,33.1,HBVimmune,N,EngerixB,,20,2.7,Neg,,"",,Quit,2,43,,levothyroxine;ramipril;hydrochlorothiazide;atorvastatin,,,N,154.9,79.4,,,"Core negative, 2015",,"","","",HBVimmune-Alum,,14,>50,14,
+hbvx-0070_v1w0,hbvx-0070,v1w0,,,1.768850825,74,F,White/Caucasian,Not Hispanic,33.1,HBVimmune,N,EngerixB,,20,2.7,Neg,,"",,Quit,2,43,,levothyroxine;ramipril;hydrochlorothiazide;atorvastatin,,,N,154.9,79.4,,,"Core negative, 2015",,"","","",HBVimmune-Alum,,14,>50,0,
+hbvx-0070_v1w1,hbvx-0070,v1w1,,,3.6637057,74,F,White/Caucasian,Not Hispanic,33.1,HBVimmune,N,EngerixB,,20,2.7,Neg,,"",,Quit,2,43,,levothyroxine;ramipril;hydrochlorothiazide;atorvastatin,,,N,154.9,79.4,,,"Core negative, 2015",,"","","",HBVimmune-Alum,,14,>50,7,
+hbvx-0070_v1w4,hbvx-0070,v1w4,,,386.1148,74,F,White/Caucasian,Not Hispanic,33.1,HBVimmune,N,EngerixB,,20,2.7,Neg,,"",,Quit,2,43,,levothyroxine;ramipril;hydrochlorothiazide;atorvastatin,,,N,154.9,79.4,,,"Core negative, 2015",,"","","",HBVimmune-Alum,,14,>50,34,
+hbvx-0071_optional.v1,hbvx-0071,optional.v1,,,,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,36,
+hbvx-0071_optional.v2,hbvx-0071,optional.v2,,,,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,231,
+hbvx-0071_v1w0,hbvx-0071,v1w0,,,1.693508848,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,0,
+hbvx-0071_v1w1,hbvx-0071,v1w1,,,2.9031548,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,5,
+hbvx-0071_v2w0,hbvx-0071,v2w0,,,0.1,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,35,
+hbvx-0071_v2w1,hbvx-0071,v2w1,,,25.25369,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,49,
+hbvx-0071_v2w4,hbvx-0071,v2w4,,,15.21312,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,64,
+hbvx-0071_v3w0,hbvx-0071,v3w0,,,5.261194,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,217,
+hbvx-0071_v3w1,hbvx-0071,v3w1,,,6.753731,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,224,
+hbvx-0071_v3w4,hbvx-0071,v3w4,,,272.6493,78,F,White/Caucasian,Not Hispanic,22.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,5,45,,"",,,N,152.4,52.2,,,"",,"","","",HBVnaive-Alum,,14,>50,245,
+hbvx-0072_optional.v1,hbvx-0072,optional.v1,,,,58,F,Black/AfricanAmerican,Not Hispanic,24.6,HBVimmune,N,EngerixB,,,,Pos,,"",,Active,20,,,lisinopril;bupropion;budesonide-formoterol;quetiapine,,,"",170.2,71.2,,,Core positive,,"","","",HBVimmune-Alum,,,>50,1,
+hbvx-0072_v1w0,hbvx-0072,v1w0,,,46.17528,58,F,Black/AfricanAmerican,Not Hispanic,24.6,HBVimmune,N,EngerixB,,,,Pos,,"",,Active,20,,,lisinopril;bupropion;budesonide-formoterol;quetiapine,,,"",170.2,71.2,,,Core positive,,"","","",HBVimmune-Alum,,,>50,0,
+hbvx-0072_v1w1,hbvx-0072,v1w1,,,38.41582,58,F,Black/AfricanAmerican,Not Hispanic,24.6,HBVimmune,N,EngerixB,,,,Pos,,"",,Active,20,,,lisinopril;bupropion;budesonide-formoterol;quetiapine,,,"",170.2,71.2,,,Core positive,,"","","",HBVimmune-Alum,,,>50,7,
+hbvx-0072_v1w4,hbvx-0072,v1w4,,,25.09906,58,F,Black/AfricanAmerican,Not Hispanic,24.6,HBVimmune,N,EngerixB,,,,Pos,,"",,Active,20,,,lisinopril;bupropion;budesonide-formoterol;quetiapine,,,"",170.2,71.2,,,Core positive,,"","","",HBVimmune-Alum,,,>50,29,
+hbvx-0073_optional.v2,hbvx-0073,optional.v2,,,,31,F,White/Caucasian,Not Hispanic,25.2,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,escitalopram,,,N,,70.8,,,"",,"","","",HBVimmune-Alum,,14,<=50,14,
+hbvx-0073_v1w0,hbvx-0073,v1w0,,,36.40043,31,F,White/Caucasian,Not Hispanic,25.2,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,escitalopram,,,N,,70.8,,,"",,"","","",HBVimmune-Alum,,14,<=50,0,
+hbvx-0073_v1w1,hbvx-0073,v1w1,,,44.46711,31,F,White/Caucasian,Not Hispanic,25.2,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,escitalopram,,,N,,70.8,,,"",,"","","",HBVimmune-Alum,,14,<=50,6,
+hbvx-0073_v1w4,hbvx-0073,v1w4,,,488.4755,31,F,White/Caucasian,Not Hispanic,25.2,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,escitalopram,,,N,,70.8,,,"",,"","","",HBVimmune-Alum,,14,<=50,34,
+hbvx-0074_optional.v1,hbvx-0074,optional.v1,,,,19,F,White/Caucasian,Not Hispanic,20.8,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,methylphenidate;sertraline,,,N,162.6,54.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,2,
+hbvx-0074_optional.v2,hbvx-0074,optional.v2,,,,19,F,White/Caucasian,Not Hispanic,20.8,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,methylphenidate;sertraline,,,N,162.6,54.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,15,
+hbvx-0074_v1w0,hbvx-0074,v1w0,,,1.345974,19,F,White/Caucasian,Not Hispanic,20.8,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,methylphenidate;sertraline,,,N,162.6,54.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,0,
+hbvx-0074_v1w1,hbvx-0074,v1w1,,,366.5633,19,F,White/Caucasian,Not Hispanic,20.8,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,methylphenidate;sertraline,,,N,162.6,54.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,,
+hbvx-0074_v1w4,hbvx-0074,v1w4,,,355.4932,19,F,White/Caucasian,Not Hispanic,20.8,HBVimmune,N,EngerixB,,18,,"",,"",,Never,,,,methylphenidate;sertraline,,,N,162.6,54.9,,,"",,"","","",HBVimmune-Alum,,15,<=50,30,
+hbvx-0075_optional.v1,hbvx-0075,optional.v1,,,,82,M,White/Caucasian,Not Hispanic,29.4,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,aspirin;atorvastatin;valsartan;semaglutide,,,"",177.8,93,,,"",,"","","",HBVimmune-Alum,,,>50,2,
+hbvx-0075_v1w0,hbvx-0075,v1w0,,,2.115299,82,M,White/Caucasian,Not Hispanic,29.4,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,aspirin;atorvastatin;valsartan;semaglutide,,,"",177.8,93,,,"",,"","","",HBVimmune-Alum,,,>50,0,
+hbvx-0075_v1w1,hbvx-0075,v1w1,,,5.809815,82,M,White/Caucasian,Not Hispanic,29.4,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,aspirin;atorvastatin;valsartan;semaglutide,,,"",177.8,93,,,"",,"","","",HBVimmune-Alum,,,>50,8,
+hbvx-0075_v1w4,hbvx-0075,v1w4,,,143.2818,82,M,White/Caucasian,Not Hispanic,29.4,HBVimmune,N,EngerixB,,8,,"",,"",,Never,,,,aspirin;atorvastatin;valsartan;semaglutide,,,"",177.8,93,,,"",,"","","",HBVimmune-Alum,,,>50,,
+hbvx-0076_optional.v1,hbvx-0076,optional.v1,,,,58,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,metformin;empaglifozin;biktarvy;atorvastatin,,,Y,180.3,95.7,,,"Core negative, 2018;  CD4 count 409 (2022); ",,RD,"","",HBVimmune-Alum,,15,>50,1,
+hbvx-0076_optional.v2,hbvx-0076,optional.v2,,,,58,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,metformin;empaglifozin;biktarvy;atorvastatin,,,Y,180.3,95.7,,,"Core negative, 2018;  CD4 count 409 (2022); ",,RD,"","",HBVimmune-Alum,,15,>50,15,
+hbvx-0076_v1w0,hbvx-0076,v1w0,,,36.24543,58,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,metformin;empaglifozin;biktarvy;atorvastatin,,,Y,180.3,95.7,,,"Core negative, 2018;  CD4 count 409 (2022); ",,RD,"","",HBVimmune-Alum,,15,>50,0,
+hbvx-0076_v1w1,hbvx-0076,v1w1,,,456.275,58,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,metformin;empaglifozin;biktarvy;atorvastatin,,,Y,180.3,95.7,,,"Core negative, 2018;  CD4 count 409 (2022); ",,RD,"","",HBVimmune-Alum,,15,>50,13,
+hbvx-0076_v1w4,hbvx-0076,v1w4,,,443.3457,58,M,Black/AfricanAmerican,Not Hispanic,29.4,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,metformin;empaglifozin;biktarvy;atorvastatin,,,Y,180.3,95.7,,,"Core negative, 2018;  CD4 count 409 (2022); ",,RD,"","",HBVimmune-Alum,,15,>50,28,
+hbvx-0077_optional.v1,hbvx-0077,optional.v1,,,,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,1,
+hbvx-0077_optional.v2,hbvx-0077,optional.v2,,,,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,208,
+hbvx-0077_v1w0,hbvx-0077,v1w0,,,0.422951,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,0,
+hbvx-0077_v1w1,hbvx-0077,v1w1,,,0.576776,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,8,
+hbvx-0077_v2w0,hbvx-0077,v2w0,,,1.03828,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,35,
+hbvx-0077_v2w1,hbvx-0077,v2w1,,,2.884751,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,42,
+hbvx-0077_v2w4,hbvx-0077,v2w4,,,8.582608,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,70,
+hbvx-0077_v3w0,hbvx-0077,v3w0,,,9.813433,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,195,
+hbvx-0077_v3w1,hbvx-0077,v3w1,,,4.291045,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,202,
+hbvx-0077_v3w4,hbvx-0077,v3w4,,,100.1119,59,F,Black/AfricanAmerican,Not Hispanic,31.8,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,amlodipine,,,N,167.6,89.3,,,Diagnosed covid on same day as v2w4 visit,,"","","",HBVnaive-Alum,,13,>50,232,
+hbvx-0078_optional.v1,hbvx-0078,optional.v1,,,,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,189,
+hbvx-0078_v1w0,hbvx-0078,v1w0,,,180.0154,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0078_v1w1,hbvx-0078,v1w1,,,422.7544,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,12,
+hbvx-0078_v2w0,hbvx-0078,v2w0,,,364.083,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,63,
+hbvx-0078_v2w1,hbvx-0078,v2w1,,,337.5322,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,70,
+hbvx-0078_v2w4,hbvx-0078,v2w4,,,488.7717,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,,
+hbvx-0078_v3w0,hbvx-0078,v3w0,,,560.2358,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,188,
+hbvx-0078_v3w1,hbvx-0078,v3w1,,,550.9357,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,194,
+hbvx-0078_v3w4,hbvx-0078,v3w4,,,496.8482,82,F,Multiple/NR,Not Hispanic,17.7,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,aspirin;atorvastatin;gabapentin;valsartan,,,"",162.6,46.7,,,"",,"","","",HBVnaive-Alum,,,>50,236,
+hbvx-0079_optional.v1,hbvx-0079,optional.v1,,,,31,F,Black/AfricanAmerican,Not Hispanic,25.5,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,medroxyprogesterone,,,"",,67.4,,,"",,"","","",HBVimmune-Alum,,,<=50,2,
+hbvx-0079_v1w0,hbvx-0079,v1w0,,,293.9521,31,F,Black/AfricanAmerican,Not Hispanic,25.5,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,medroxyprogesterone,,,"",,67.4,,,"",,"","","",HBVimmune-Alum,,,<=50,0,
+hbvx-0079_v1w1,hbvx-0079,v1w1,,,428.4387,31,F,Black/AfricanAmerican,Not Hispanic,25.5,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,medroxyprogesterone,,,"",,67.4,,,"",,"","","",HBVimmune-Alum,,,<=50,7,
+hbvx-0079_v1w4,hbvx-0079,v1w4,,,407.4027,31,F,Black/AfricanAmerican,Not Hispanic,25.5,HBVimmune,N,EngerixB,,,,Pos,,"",,Never,,,,medroxyprogesterone,,,"",,67.4,,,"",,"","","",HBVimmune-Alum,,,<=50,29,
+hbvx-0080_optional.v1,hbvx-0080,optional.v1,,,,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,2,
+hbvx-0080_v1w0,hbvx-0080,v1w0,,,275.059,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,0,
+hbvx-0080_v1w1,hbvx-0080,v1w1,,,487.2921,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,8,
+hbvx-0080_v2w0,hbvx-0080,v2w0,,,399.7429,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,42,
+hbvx-0080_v2w1,hbvx-0080,v2w1,,,514.2325,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,49,
+hbvx-0080_v2w4,hbvx-0080,v2w4,,,563.9069,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,77,
+hbvx-0080_v3w0,hbvx-0080,v3w0,,,498.8061,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,224,
+hbvx-0080_v3w1,hbvx-0080,v3w1,,,,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,230,
+hbvx-0080_v3w4,hbvx-0080,v3w4,,,567.8228,33,F,Asian,Not Hispanic,23.9,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,paroxetine,,,"",160,61.2,,,"",,"","","",HBVnaive-Alum,,,<=50,252,
+hbvx-0081_optional.v1,hbvx-0081,optional.v1,,,,56,M,White/Caucasian,Not Hispanic,26.3,HBVimmune,N,EngerixB,,0.1,,"",,"",,Never,,,,"",,,N,177.8,83.1,,,"",,"","","",HBVimmune-Alum,,13,>50,1,
+hbvx-0081_optional.v2,hbvx-0081,optional.v2,,,,56,M,White/Caucasian,Not Hispanic,26.3,HBVimmune,N,EngerixB,,0.1,,"",,"",,Never,,,,"",,,N,177.8,83.1,,,"",,"","","",HBVimmune-Alum,,13,>50,13,
+hbvx-0081_v1w0,hbvx-0081,v1w0,,,452.9139,56,M,White/Caucasian,Not Hispanic,26.3,HBVimmune,N,EngerixB,,0.1,,"",,"",,Never,,,,"",,,N,177.8,83.1,,,"",,"","","",HBVimmune-Alum,,13,>50,0,
+hbvx-0081_v1w1,hbvx-0081,v1w1,,,412.0705,56,M,White/Caucasian,Not Hispanic,26.3,HBVimmune,N,EngerixB,,0.1,,"",,"",,Never,,,,"",,,N,177.8,83.1,,,"",,"","","",HBVimmune-Alum,,13,>50,14,
+hbvx-0081_v1w4,hbvx-0081,v1w4,,,369.0448,56,M,White/Caucasian,Not Hispanic,26.3,HBVimmune,N,EngerixB,,0.1,,"",,"",,Never,,,,"",,,N,177.8,83.1,,,"",,"","","",HBVimmune-Alum,,13,>50,28,
+hbvx-0082_optional.v1,hbvx-0082,optional.v1,,,,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,1,
+hbvx-0082_optional.v2,hbvx-0082,optional.v2,,,,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,216,
+hbvx-0082_v1w0,hbvx-0082,v1w0,,,0.1,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0082_v1w1,hbvx-0082,v1w1,,,0.88444,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,8,
+hbvx-0082_v2w0,hbvx-0082,v2w0,,,0.1,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,36,
+hbvx-0082_v2w1,hbvx-0082,v2w1,,,0.115317,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,43,
+hbvx-0082_v2w4,hbvx-0082,v2w4,,,0.1,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,71,
+hbvx-0082_v3w0,hbvx-0082,v3w0,,,0.1,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,204,
+hbvx-0082_v3w1,hbvx-0082,v3w1,,,8.619403,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,216,
+hbvx-0082_v3w4,hbvx-0082,v3w4,,,2.052239,90,M,White/Caucasian,Not Hispanic,25.1,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,semaglutide;atorvastatin;finasteride;lisinopril,,,"",175.3,77.1,,,"",,"","","",HBVnaive-Alum,,,>50,233,
+hbvx-0083_optional.v1,hbvx-0083,optional.v1,,,,56,M,Black/AfricanAmerican,Not Hispanic,19.9,HBVimmune,N,EngerixB,,30,,"",,"",,Active,15,,,"",,,N,188,64.5,,,"",,RD,"","",HBVimmune-Alum,,6,>50,2,
+hbvx-0083_optional.v2,hbvx-0083,optional.v2,,,,56,M,Black/AfricanAmerican,Not Hispanic,19.9,HBVimmune,N,EngerixB,,30,,"",,"",,Active,15,,,"",,,N,188,64.5,,,"",,RD,"","",HBVimmune-Alum,,6,>50,6,
+hbvx-0083_v1w0,hbvx-0083,v1w0,,,0.1,56,M,Black/AfricanAmerican,Not Hispanic,19.9,HBVimmune,N,EngerixB,,30,,"",,"",,Active,15,,,"",,,N,188,64.5,,,"",,RD,"","",HBVimmune-Alum,,6,>50,0,
+hbvx-0083_v1w1,hbvx-0083,v1w1,,,1.03828,56,M,Black/AfricanAmerican,Not Hispanic,19.9,HBVimmune,N,EngerixB,,30,,"",,"",,Active,15,,,"",,,N,188,64.5,,,"",,RD,"","",HBVimmune-Alum,,6,>50,9,
+hbvx-0083_v1w4,hbvx-0083,v1w4,,,0.576776,56,M,Black/AfricanAmerican,Not Hispanic,19.9,HBVimmune,N,EngerixB,,30,,"",,"",,Active,15,,,"",,,N,188,64.5,,,"",,RD,"","",HBVimmune-Alum,,6,>50,28,
+hbvx-0084_optional.v1,hbvx-0084,optional.v1,,,,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,190,
+hbvx-0084_optional.v2,hbvx-0084,optional.v2,,,,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,202,
+hbvx-0084_v1w0,hbvx-0084,v1w0,,,464.6867,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0084_v1w1,hbvx-0084,v1w1,,,274.7338,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,7,
+hbvx-0084_v2w0,hbvx-0084,v2w0,,,139.1641,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,36,
+hbvx-0084_v2w1,hbvx-0084,v2w1,,,178.9309,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,42,
+hbvx-0084_v2w4,hbvx-0084,v2w4,,,102.0825,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,63,
+hbvx-0084_v3w0,hbvx-0084,v3w0,,,200.9575,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,189,
+hbvx-0084_v3w1,hbvx-0084,v3w1,,,151.2753,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,204,
+hbvx-0084_v3w4,hbvx-0084,v3w4,,,137.0804,67,M,White/Caucasian,Not Hispanic,30.4,HBVnaive,N,EngerixB,,,,"",,"",,Quit	,15,3,,bupropion;truvada;acyclovir,,,"",180.3,98.7,,,"",,"","","",HBVnaive-Alum,,,>50,218,
+hbvx-0085_optional.v1,hbvx-0085,optional.v1,,,,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,37,
+hbvx-0085_optional.v2,hbvx-0085,optional.v2,,,,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,212,
+hbvx-0085_v1w0,hbvx-0085,v1w0,,,0.115317,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,0,
+hbvx-0085_v1w1,hbvx-0085,v1w1,,,0.422951,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,9,
+hbvx-0085_v2w0,hbvx-0085,v2w0,,,9.08134,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,35,
+hbvx-0085_v2w1,hbvx-0085,v2w1,,,42.61072,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,43,
+hbvx-0085_v2w4,hbvx-0085,v2w4,,,21.0736,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,65,
+hbvx-0085_v3w0,hbvx-0085,v3w0,,,38.2054,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,198,
+hbvx-0085_v3w1,hbvx-0085,v3w1,,,84.706,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,"",,"",,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,"",169.5,70.4,70.3,,"",,LD,LD,"",HBVnaive-Alum,,,>50,205,
+hbvx-0086_optional.v1,hbvx-0086,optional.v1,,,,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,"",157.5,77.7,,,"",,"","","",HBVnaive-Alum,,,<=50,44,
+hbvx-0086_v1w0,hbvx-0086,v1w0,,,30.66898,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,"",157.5,77.7,,,"",,"","","",HBVnaive-Alum,,,<=50,0,
+hbvx-0086_v1w1,hbvx-0086,v1w1,,,31.28826,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,"",157.5,77.7,,,"",,"","","",HBVnaive-Alum,,,<=50,14,
+hbvx-0086_v2w0,hbvx-0086,v2w0,,,182.1125,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,"",157.5,77.7,,,"",,"","","",HBVnaive-Alum,,,<=50,43,
+hbvx-0086_v2w1,hbvx-0086,v2w1,,,206.5865,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,"",157.5,77.7,,,"",,"","","",HBVnaive-Alum,,,<=50,51,
+hbvx-0086_v2w4,hbvx-0086,v2w4,,,262.632,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,"",157.5,77.7,,,"",,"","","",HBVnaive-Alum,,,<=50,70,
+hbvx-0086_v3w0,hbvx-0086,v3w0,,,306.4404,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,"",157.5,77.7,,,"",,"","","",HBVnaive-Alum,,,<=50,233,
+hbvx-0087_optional.v1,hbvx-0087,optional.v1,,,,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,,,,"",,"",,Active,12.5,,,semaglutide;gabapentin;metformin;sertraline,,,N,165.1,102.1,,,"",,"","","",HBVnaive-CpG,,13,>50,1,
+hbvx-0087_optional.v2,hbvx-0087,optional.v2,,,,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,,,,"",,"",,Active,12.5,,,semaglutide;gabapentin;metformin;sertraline,,,N,165.1,102.1,,,"",,"","","",HBVnaive-CpG,,13,>50,55,
+hbvx-0087_v1w0,hbvx-0087,v1w0,,,0.115317,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,,,,"",,"",,Active,12.5,,,semaglutide;gabapentin;metformin;sertraline,,,N,165.1,102.1,,,"",,"","","",HBVnaive-CpG,,13,>50,0,
+hbvx-0087_v1w1,hbvx-0087,v1w1,,,8.890797,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,,,,"",,"",,Active,12.5,,,semaglutide;gabapentin;metformin;sertraline,,,N,165.1,102.1,,,"",,"","","",HBVnaive-CpG,,13,>50,14,
+hbvx-0087_v2w0,hbvx-0087,v2w0,,,,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,,,,"",,"",,Active,12.5,,,semaglutide;gabapentin;metformin;sertraline,,,N,165.1,102.1,,,"",,"","","",HBVnaive-CpG,,13,>50,42,
+hbvx-0087_v2w1,hbvx-0087,v2w1,,,89.11132,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,,,,"",,"",,Active,12.5,,,semaglutide;gabapentin;metformin;sertraline,,,N,165.1,102.1,,,"",,"","","",HBVnaive-CpG,,13,>50,50,
+hbvx-0087_v2w4,hbvx-0087,v2w4,,,375.2124,54,F,White/Caucasian,Not Hispanic,37.5,HBVnaive,N,Heplisav,,,,"",,"",,Active,12.5,,,semaglutide;gabapentin;metformin;sertraline,,,N,165.1,102.1,,,"",,"","","",HBVnaive-CpG,,13,>50,71,
+hbvx-0088_optional.v1,hbvx-0088,optional.v1,,,,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,44,
+hbvx-0088_v1w0,hbvx-0088,v1w0,,,0.269131,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0088_v1w1,hbvx-0088,v1w1,,,0.269131,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,8,
+hbvx-0088_v2w0,hbvx-0088,v2w0,,,4.18654,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,43,
+hbvx-0088_v2w1,hbvx-0088,v2w1,,,6.14446,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,51,
+hbvx-0088_v2w4,hbvx-0088,v2w4,,,2.7181,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,70,
+hbvx-0088_v3w0,hbvx-0088,v3w0,,,287.106,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,226,
+hbvx-0088_v3w1,hbvx-0088,v3w1,,,3.9418,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,"",,"",,Quit,8,4,,metformin,,,"",190.5,140.6,,,"",,"","","",HBVnaive-Alum,,,>50,232,
+hbvx-0089_optional.v1,hbvx-0089,optional.v1,,,,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",162.6,61.2,,,"",,"","","",HBVnaive-Alum,,,>50,34,
+hbvx-0089_v1w0,hbvx-0089,v1w0,,,0.576776,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",162.6,61.2,,,"",,"","","",HBVnaive-Alum,,,>50,0,
+hbvx-0089_v1w1,hbvx-0089,v1w1,,,0.1,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",162.6,61.2,,,"",,"","","",HBVnaive-Alum,,,>50,7,
+hbvx-0089_v2w0,hbvx-0089,v2w0,,,5.65498,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",162.6,61.2,,,"",,"","","",HBVnaive-Alum,,,>50,33,
+hbvx-0089_v2w1,hbvx-0089,v2w1,,,175.0151,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",162.6,61.2,,,"",,"","","",HBVnaive-Alum,,,>50,40,
+hbvx-0089_v2w4,hbvx-0089,v2w4,,,171.5887,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,"",,"",,Never,,,,"",,,"",162.6,61.2,,,"",,"","","",HBVnaive-Alum,,,>50,68,
+hbvx-0090_optional.v1,hbvx-0090,optional.v1,,,,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,10,,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,,,N,177.8,170.9,167.8,,"",,LD,LD,"",HBVnaive-CpG,,13,<=50,2,
+hbvx-0090_optional.v2,hbvx-0090,optional.v2,,,,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,10,,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,,,N,177.8,170.9,167.8,,"",,LD,LD,"",HBVnaive-CpG,,13,<=50,49,
+hbvx-0090_v1w0,hbvx-0090,v1w0,,,481.5478,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,10,,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,,,N,177.8,170.9,167.8,,"",,LD,LD,"",HBVnaive-CpG,,13,<=50,0,
+hbvx-0090_v1w1,hbvx-0090,v1w1,,,45.79234,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,10,,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,,,N,177.8,170.9,167.8,,"",,LD,LD,"",HBVnaive-CpG,,13,<=50,16,
+hbvx-0090_v2w0,hbvx-0090,v2w0,,,,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,10,,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,,,N,177.8,170.9,167.8,,"",,LD,LD,"",HBVnaive-CpG,,13,<=50,36,
+hbvx-0090_v2w1,hbvx-0090,v2w1,,,38.45014,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,10,,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,,,N,177.8,170.9,167.8,,"",,LD,LD,"",HBVnaive-CpG,,13,<=50,44,
+hbvx-0090_v2w4,hbvx-0090,v2w4,,,121.1723,37,M,Multiple/NR,Not Hispanic,53.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,10,,,trazodone;clonazepam;lamotrigine;lurasidone;prazosin;promethazine,,,N,177.8,170.9,167.8,,"",,LD,LD,"",HBVnaive-CpG,,13,<=50,63,
+hbvx-0091_v1w0,hbvx-0091,v1w0,,,202.4259,41,F,White/Caucasian,Not Hispanic,22.6,HBVimmune,N,EngerixB,,23,62.3,Pos,,"",,Never,,,Hypothyroidism; Migraines; Hyperlipidemia; Vitamin B12 deficiency;  Vitamin D deficiency,levothyroxine;cyanocobalamin;cholecalciferol;norethindrone-ethinyl estradiol,,,"",167.6,63.5,,,"","Covid-19 Vaccine, Pfizer:12/23/2020;01/11/2021;11/15/2021 LD;10/07/2022 RD;10/10/2023; 
+Hepatitis B Vaccine:08/28/2001;10/04/2001;02/14/2002; 
+Influenza Vaccine:09/17/2019 LD, 09/15/2020 LD, 09/24/2021 LD;09/13/2022 RD;09/21/2023 ; 
+MMR:10/16/1985;05/13/1996;05/15/2013; 
+Tdap:10/26/2010;04/02/2018
+ ",RD,"","",HBVimmune-Alum,levothyroxine; cyanocobalamin; cholecalciferol; norethindrone-ethinyl estradiol,,<=50,0,
+hbvx-0091_v1w1,hbvx-0091,v1w1,,,548.9778,41,F,White/Caucasian,Not Hispanic,22.6,HBVimmune,N,EngerixB,,23,62.3,Pos,,"",,Never,,,Hypothyroidism; Migraines; Hyperlipidemia; Vitamin B12 deficiency;  Vitamin D deficiency,levothyroxine;cyanocobalamin;cholecalciferol;norethindrone-ethinyl estradiol,,,"",167.6,63.5,,,"","Covid-19 Vaccine, Pfizer:12/23/2020;01/11/2021;11/15/2021 LD;10/07/2022 RD;10/10/2023; 
+Hepatitis B Vaccine:08/28/2001;10/04/2001;02/14/2002; 
+Influenza Vaccine:09/17/2019 LD, 09/15/2020 LD, 09/24/2021 LD;09/13/2022 RD;09/21/2023 ; 
+MMR:10/16/1985;05/13/1996;05/15/2013; 
+Tdap:10/26/2010;04/02/2018
+ ",RD,"","",HBVimmune-Alum,levothyroxine; cyanocobalamin; cholecalciferol; norethindrone-ethinyl estradiol,,<=50,7,
+hbvx-0091_v1w4,hbvx-0091,v1w4,,,221.5157,41,F,White/Caucasian,Not Hispanic,22.6,HBVimmune,N,EngerixB,,23,62.3,Pos,,"",,Never,,,Hypothyroidism; Migraines; Hyperlipidemia; Vitamin B12 deficiency;  Vitamin D deficiency,levothyroxine;cyanocobalamin;cholecalciferol;norethindrone-ethinyl estradiol,,,"",167.6,63.5,,,"","Covid-19 Vaccine, Pfizer:12/23/2020;01/11/2021;11/15/2021 LD;10/07/2022 RD;10/10/2023; 
+Hepatitis B Vaccine:08/28/2001;10/04/2001;02/14/2002; 
+Influenza Vaccine:09/17/2019 LD, 09/15/2020 LD, 09/24/2021 LD;09/13/2022 RD;09/21/2023 ; 
+MMR:10/16/1985;05/13/1996;05/15/2013; 
+Tdap:10/26/2010;04/02/2018
+ ",RD,"","",HBVimmune-Alum,levothyroxine; cyanocobalamin; cholecalciferol; norethindrone-ethinyl estradiol,,<=50,28,
+hbvx-0092_optional.v1,hbvx-0092,optional.v1,,,,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,"",185.4,79.3,80.2,,"",,LD,LD,"",HBVnaive-Alum,,,>50,1,
+hbvx-0092_v1w0,hbvx-0092,v1w0,,,6.3892,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,"",185.4,79.3,80.2,,"",,LD,LD,"",HBVnaive-Alum,,,>50,0,
+hbvx-0092_v1w1,hbvx-0092,v1w1,,,5.89972,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,"",185.4,79.3,80.2,,"",,LD,LD,"",HBVnaive-Alum,,,>50,7,
+hbvx-0092_v2w0,hbvx-0092,v2w0,,,4.43128,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,"",185.4,79.3,80.2,,"",,LD,LD,"",HBVnaive-Alum,,,>50,41,
+hbvx-0092_v2w1,hbvx-0092,v2w1,,,216.6209,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,"",185.4,79.3,80.2,,"",,LD,LD,"",HBVnaive-Alum,,,>50,49,
+hbvx-0092_v2w4,hbvx-0092,v2w4,,,124.8434,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,"",185.4,79.3,80.2,,"",,LD,LD,"",HBVnaive-Alum,,,>50,69,
+hbvx-0093_optional.v1,hbvx-0093,optional.v1,,,,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,"",,"",,Active,25.4,,,"",,,"",172.7,82.5,,,"",,LD,LD,"",HBVnaive-Alum,,,>50,42,
+hbvx-0093_v1w0,hbvx-0093,v1w0,,,9.57082,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,"",,"",,Active,25.4,,,"",,,"",172.7,82.5,,,"",,LD,LD,"",HBVnaive-Alum,,,>50,0,
+hbvx-0093_v1w1,hbvx-0093,v1w1,,,320.1459,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,"",,"",,Active,25.4,,,"",,,"",172.7,82.5,,,"",,LD,LD,"",HBVnaive-Alum,,,>50,13,
+hbvx-0093_v2w0,hbvx-0093,v2w0,,,383.7783,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,"",,"",,Active,25.4,,,"",,,"",172.7,82.5,,,"",,LD,LD,"",HBVnaive-Alum,,,>50,41,
+hbvx-0093_v2w1,hbvx-0093,v2w1,,,368.8491,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,"",,"",,Active,25.4,,,"",,,"",172.7,82.5,,,"",,LD,LD,"",HBVnaive-Alum,,,>50,54,
+hbvx-0093_v2w4,hbvx-0093,v2w4,,,424.6499,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,"",,"",,Active,25.4,,,"",,,"",172.7,82.5,,,"",,LD,LD,"",HBVnaive-Alum,,,>50,77,
+hbvx-0094_optional.v1,hbvx-0094,optional.v1,,,,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,,,0,Neg,,"",,Never,,,,fluticasone,,,N,170.2,100.7,,,"",,"","","",HBVnaive-CpG,,16,<=50,2,
+hbvx-0094_optional.v2,hbvx-0094,optional.v2,,,,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,,,0,Neg,,"",,Never,,,,fluticasone,,,N,170.2,100.7,,,"",,"","","",HBVnaive-CpG,,16,<=50,58,
+hbvx-0094_v1w0,hbvx-0094,v1w0,,,3.9418,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,,,0,Neg,,"",,Never,,,,fluticasone,,,N,170.2,100.7,,,"",,"","","",HBVnaive-CpG,,16,<=50,0,
+hbvx-0094_v1w1,hbvx-0094,v1w1,,,4.67602,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,,,0,Neg,,"",,Never,,,,fluticasone,,,N,170.2,100.7,,,"",,"","","",HBVnaive-CpG,,16,<=50,8,
+hbvx-0094_v2w0,hbvx-0094,v2w0,,,,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,,,0,Neg,,"",,Never,,,,fluticasone,,,N,170.2,100.7,,,"",,"","","",HBVnaive-CpG,,16,<=50,42,
+hbvx-0094_v2w1,hbvx-0094,v2w1,,,59.74252,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,,,0,Neg,,"",,Never,,,,fluticasone,,,N,170.2,100.7,,,"",,"","","",HBVnaive-CpG,,16,<=50,49,
+hbvx-0094_v2w4,hbvx-0094,v2w4,,,42.85546,49,F,White/Caucasian,Not Hispanic,34.8,HBVnaive,N,Heplisav,,,0,Neg,,"",,Never,,,,fluticasone,,,N,170.2,100.7,,,"",,"","","",HBVnaive-CpG,,16,<=50,72,
+hbvx-0095_optional.v1,hbvx-0095,optional.v1,,,,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,,,,"",,"",,Quit,19,1,,"",,,N,180.3,67.5,,,"",,"","","",HBVnaive-CpG,,20,>50,42,
+hbvx-0095_optional.v2,hbvx-0095,optional.v2,,,,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,,,,"",,"",,Quit,19,1,,"",,,N,180.3,67.5,,,"",,"","","",HBVnaive-CpG,,20,>50,61,
+hbvx-0095_v1w0,hbvx-0095,v1w0,,,542.6145,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,,,,"",,"",,Quit,19,1,,"",,,N,180.3,67.5,,,"",,"","","",HBVnaive-CpG,,20,>50,0,
+hbvx-0095_v1w1,hbvx-0095,v1w1,,,106.2431,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,,,,"",,"",,Quit,19,1,,"",,,N,180.3,67.5,,,"",,"","","",HBVnaive-CpG,,20,>50,7,
+hbvx-0095_v2w0,hbvx-0095,v2w0,,,,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,,,,"",,"",,Quit,19,1,,"",,,N,180.3,67.5,,,"",,"","","",HBVnaive-CpG,,20,>50,41,
+hbvx-0095_v2w1,hbvx-0095,v2w1,,,256.5135,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,,,,"",,"",,Quit,19,1,,"",,,N,180.3,67.5,,,"",,"","","",HBVnaive-CpG,,20,>50,48,
+hbvx-0095_v2w4,hbvx-0095,v2w4,,,212.2155,67,M,Black/AfricanAmerican,Not Hispanic,20.8,HBVnaive,N,Heplisav,,,,"",,"",,Quit,19,1,,"",,,N,180.3,67.5,,,"",,"","","",HBVnaive-CpG,,20,>50,69,
+hbvx-0096_v1w0,hbvx-0096,v1w0,,,4.43128,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,,,0,Neg,,"",,Never,,,Monoclonal gammopathy of undetermined significance; Osteoporosis; Gilbert's disease,alendronate,,,"",167.6,50.3,,,"","Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024; 
+Zoster Vaccine Recombinant:09/30/2022;11/28/2022",LD,"","",HBVnaive-Alum,alendronate,,>50,0,
+hbvx-0096_v1w1,hbvx-0096,v1w1,,,4.18654,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,,,0,Neg,,"",,Never,,,Monoclonal gammopathy of undetermined significance; Osteoporosis; Gilbert's disease,alendronate,,,"",167.6,50.3,,,"","Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024; 
+Zoster Vaccine Recombinant:09/30/2022;11/28/2022",LD,"","",HBVnaive-Alum,alendronate,,>50,7,
+hbvx-0096_v2w0,hbvx-0096,v2w0,,,3.20758,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,,,0,Neg,,"",,Never,,,Monoclonal gammopathy of undetermined significance; Osteoporosis; Gilbert's disease,alendronate,,,"",167.6,50.3,,,"","Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024; 
+Zoster Vaccine Recombinant:09/30/2022;11/28/2022",LD,"","",HBVnaive-Alum,alendronate,,>50,35,
+hbvx-0096_v2w1,hbvx-0096,v2w1,,,5.65498,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,,,0,Neg,,"",,Never,,,Monoclonal gammopathy of undetermined significance; Osteoporosis; Gilbert's disease,alendronate,,,"",167.6,50.3,,,"","Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024; 
+Zoster Vaccine Recombinant:09/30/2022;11/28/2022",LD,"","",HBVnaive-Alum,alendronate,,>50,49,
+hbvx-0096_v2w4,hbvx-0096,v2w4,,,18.38146,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,,,0,Neg,,"",,Never,,,Monoclonal gammopathy of undetermined significance; Osteoporosis; Gilbert's disease,alendronate,,,"",167.6,50.3,,,"","Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024; 
+Zoster Vaccine Recombinant:09/30/2022;11/28/2022",LD,"","",HBVnaive-Alum,alendronate,,>50,63,
+hbvx-0097_optional.v1,hbvx-0097,optional.v1,,,,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,20,,,"",,,"",177.8,82.55,,,"",,LD,"","",HBVnaive-CpG,,,>50,1,
+hbvx-0097_optional.v2,hbvx-0097,optional.v2,,,,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,20,,,"",,,"",177.8,82.55,,,"",,LD,"","",HBVnaive-CpG,,,>50,47,
+hbvx-0097_v1w0,hbvx-0097,v1w0,,,57.29512,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,20,,,"",,,"",177.8,82.55,,,"",,LD,"","",HBVnaive-CpG,,,>50,0,
+hbvx-0097_v1w1,hbvx-0097,v1w1,,,398.2179,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,20,,,"",,,"",177.8,82.55,,,"",,LD,"","",HBVnaive-CpG,,,>50,7,
+hbvx-0097_v2w0,hbvx-0097,v2w0,,,,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,20,,,"",,,"",177.8,82.55,,,"",,LD,"","",HBVnaive-CpG,,,>50,35,
+hbvx-0097_v2w1,hbvx-0097,v2w1,,,,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,20,,,"",,,"",177.8,82.55,,,"",,LD,"","",HBVnaive-CpG,,,>50,42,
+hbvx-0097_v2w4,hbvx-0097,v2w4,,,82.2586,59,M,White/Caucasian,Not Hispanic,26.1,HBVnaive,N,Heplisav,,,,"",,"",,Active,20,,,"",,,"",177.8,82.55,,,"",,LD,"","",HBVnaive-CpG,,,>50,56,
+hbvx-0098_v1w0,hbvx-0098,v1w0,,,10.79452,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,,,,"",,"",,"",,,Allergic rhinitis,"",,,"",160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003;  
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999; 
+MMR:06/22/2000;08/19/2003; 
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003; 
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024; 
+Influenza Vaccine:12/05/2023;10/30/2024; 
+Tdap:02/12/2024; 
+Varicella:01/04/1999;08/04/2011 
+",LD,"","",HBVnaive-Alum,,,<=50,0,
+hbvx-0098_v1w1,hbvx-0098,v1w1,,,323.0828,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,,,,"",,"",,"",,,Allergic rhinitis,"",,,"",160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003;  
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999; 
+MMR:06/22/2000;08/19/2003; 
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003; 
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024; 
+Influenza Vaccine:12/05/2023;10/30/2024; 
+Tdap:02/12/2024; 
+Varicella:01/04/1999;08/04/2011 
+",LD,"","",HBVnaive-Alum,,,<=50,7,
+hbvx-0098_v2w0,hbvx-0098,v2w0,,,466.9899,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,,,,"",,"",,"",,,Allergic rhinitis,"",,,"",160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003;  
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999; 
+MMR:06/22/2000;08/19/2003; 
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003; 
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024; 
+Influenza Vaccine:12/05/2023;10/30/2024; 
+Tdap:02/12/2024; 
+Varicella:01/04/1999;08/04/2011 
+",LD,"","",HBVnaive-Alum,,,<=50,63,
+hbvx-0098_v2w1,hbvx-0098,v2w1,,,473.1084,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,,,,"",,"",,"",,,Allergic rhinitis,"",,,"",160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003;  
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999; 
+MMR:06/22/2000;08/19/2003; 
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003; 
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024; 
+Influenza Vaccine:12/05/2023;10/30/2024; 
+Tdap:02/12/2024; 
+Varicella:01/04/1999;08/04/2011 
+",LD,"","",HBVnaive-Alum,,,<=50,69,
+hbvx-0098_v2w4,hbvx-0098,v2w4,,,482.898,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,,,,"",,"",,"",,,Allergic rhinitis,"",,,"",160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003;  
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999; 
+MMR:06/22/2000;08/19/2003; 
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003; 
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024; 
+Influenza Vaccine:12/05/2023;10/30/2024; 
+Tdap:02/12/2024; 
+Varicella:01/04/1999;08/04/2011 
+",LD,"","",HBVnaive-Alum,,,<=50,96,
+hbvx-0099_optional.v1,hbvx-0099,optional.v1,,,,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,"",182.9,109.5,,,"",,LD,"","",HBVnaive-Alum,,,>50,1,
+hbvx-0099_v1w0,hbvx-0099,v1w0,,,9.32608,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,"",182.9,109.5,,,"",,LD,"","",HBVnaive-Alum,,,>50,0,
+hbvx-0099_v1w1,hbvx-0099,v1w1,,,46.52656,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,"",182.9,109.5,,,"",,LD,"","",HBVnaive-Alum,,,>50,7,
+hbvx-0099_v2w0,hbvx-0099,v2w0,,,269.4847,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,"",182.9,109.5,,,"",,LD,"","",HBVnaive-Alum,,,>50,35,
+hbvx-0099_v2w1,hbvx-0099,v2w1,,,337.5224,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,"",182.9,109.5,,,"",,LD,"","",HBVnaive-Alum,,,>50,43,
+hbvx-0099_v2w4,hbvx-0099,v2w4,,,417.5524,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,"",182.9,109.5,,,"",,LD,"","",HBVnaive-Alum,,,>50,57,
+hbvx-0100_optional.v1,hbvx-0100,optional.v1,,,,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,,,,"",,"",,Active,26,,,"",,,"",157.5,48,,,"",,LD,"","",HBVnaive-Alum,,,>50,34,
+hbvx-0100_v1w0,hbvx-0100,v1w0,,,2.96284,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,,,,"",,"",,Active,26,,,"",,,"",157.5,48,,,"",,LD,"","",HBVnaive-Alum,,,>50,0,
+hbvx-0100_v1w1,hbvx-0100,v1w1,,,3.45232,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,,,,"",,"",,Active,26,,,"",,,"",157.5,48,,,"",,LD,"","",HBVnaive-Alum,,,>50,7,
+hbvx-0100_v2w0,hbvx-0100,v2w0,,,7.6129,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,,,,"",,"",,Active,26,,,"",,,"",157.5,48,,,"",,LD,"","",HBVnaive-Alum,,,>50,33,
+hbvx-0100_v2w1,hbvx-0100,v2w1,,,17.89198,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,,,,"",,"",,Active,26,,,"",,,"",157.5,48,,,"",,LD,"","",HBVnaive-Alum,,,>50,41,
+hbvx-0100_v2w4,hbvx-0100,v2w4,,,11.52874,62,F,White/Caucasian,Not Hispanic,19.3,HBVnaive,N,EngerixB,,,,"",,"",,Active,26,,,"",,,"",157.5,48,,,"",,LD,"","",HBVnaive-Alum,,,>50,68,
+hbvx-0101_optional.v2,hbvx-0101,optional.v2,,,,74,F,White/Caucasian,Not Hispanic,26.2,HBVimmune,N,EngerixB,,,16.31,Pos,,Neg,,"",,,,aspirin;losartan;atorvastatin,,,N,188,92.7,,,Unknown date of HBV vaccination,,RD,"","",HBVimmune-Alum,,11,>50,11,
+hbvx-0101_v1w0,hbvx-0101,v1w0,,,77.85328,74,F,White/Caucasian,Not Hispanic,26.2,HBVimmune,N,EngerixB,,,16.31,Pos,,Neg,,"",,,,aspirin;losartan;atorvastatin,,,N,188,92.7,,,Unknown date of HBV vaccination,,RD,"","",HBVimmune-Alum,,11,>50,0,
+hbvx-0101_v1w1,hbvx-0101,v1w1,,,80.05594,74,F,White/Caucasian,Not Hispanic,26.2,HBVimmune,N,EngerixB,,,16.31,Pos,,Neg,,"",,,,aspirin;losartan;atorvastatin,,,N,188,92.7,,,Unknown date of HBV vaccination,,RD,"","",HBVimmune-Alum,,11,>50,7,
+hbvx-0101_v1w4,hbvx-0101,v1w4,,,541.6356,74,F,White/Caucasian,Not Hispanic,26.2,HBVimmune,N,EngerixB,,,16.31,Pos,,Neg,,"",,,,aspirin;losartan;atorvastatin,,,N,188,92.7,,,Unknown date of HBV vaccination,,RD,"","",HBVimmune-Alum,,11,>50,33,
+hbvx-0085_v3w4,hbvx-0085,v3w4,,,612.6842,79,M,White/Caucasian,Not Hispanic,24.5,HBVnaive,N,EngerixB,,,,,,,,Quit,9,53,,amlodipine;lisinopril;dextroamphetamine;metoprolol;acetylcarnitine;tadalafil;evolocumab,,,,169.5,70.4,70.3,,,,LD,LD,,HBVnaive-Alum,,,>50,,2.407
+hbvx-0086_v3w1,hbvx-0086,v3w1,,,386.744,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,,,,,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,,157.5,77.7,,,,,,,,HBVnaive-Alum,,,<=50,,1.54
+hbvx-0086_v3w4,hbvx-0086,v3w4,,,421.6644,49,F,Black/AfricanAmerican,Not Hispanic,31.3,HBVnaive,N,EngerixB,,,,,,,,Never,,,,duloxetine;buspirone;pyridostigmine;eplontersen,,,,157.5,77.7,,,,,,,,HBVnaive-Alum,,,<=50,,1.674
+hbvx-0088_v3w4,hbvx-0088,v3w4,,,25.813,53,M,White/Caucasian,Not Hispanic,38.7,HBVnaive,N,EngerixB,,,,,,,,Quit,8,4,,metformin,,,,190.5,140.6,,,,,,,,HBVnaive-Alum,,,>50,,0.155
+hbvx-0089_v3w1,hbvx-0089,v3w1,,,648.1258,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,,,,,Never,,,,,,,,162.6,61.2,,,,,,,,HBVnaive-Alum,,,>50,,2.543
+hbvx-0089_v3w4,hbvx-0089,v3w4,,,317.685,52,F,Asian,Not Hispanic,23.2,HBVnaive,N,EngerixB,,,,,,,,Never,,,,,,,,162.6,61.2,,,,,,,,HBVnaive-Alum,,,>50,,1.275
+hbvx-0092_v3w1,hbvx-0092,v3w1,,,699.7246,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,,185.4,79.3,80.2,,,,LD,LD,,HBVnaive-Alum,,,>50,,2.741
+hbvx-0092_v3w4,hbvx-0092,v3w4,,,717.1848,73,M,White/Caucasian,Not Hispanic,23.1,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Never,,,,aspirin;atorvastatin;famotidine;losartan,,,,185.4,79.3,80.2,,,,LD,LD,,HBVnaive-Alum,,,>50,,2.808
+hbvx-0093_v3w1,hbvx-0093,v3w1,,,588.4484,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,,,,,Active,25.4,,,,,,,172.7,82.5,,,,,LD,LD,,HBVnaive-Alum,,,>50,,2.314
+hbvx-0093_v3w4,hbvx-0093,v3w4,,,532.4194,63,F,Black/AfricanAmerican,Not Hispanic,27.7,HBVnaive,N,EngerixB,,,,,,,,Active,25.4,,,,,,,172.7,82.5,,,,,LD,LD,,HBVnaive-Alum,,,>50,,2.099
+hbvx-0096_v3w1,hbvx-0096,v3w1,,,652.556,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,,,0,Neg,,,,Never,,,Monoclonal gammopathy of undetermined significance; Osteoporosis; Gilbert's disease,alendronate,,,,167.6,50.3,,,,"Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024; 
+Zoster Vaccine Recombinant:09/30/2022;11/28/2022",LD,,,HBVnaive-Alum,alendronate,,>50,,2.56
+hbvx-0096_v3w4,hbvx-0096,v3w4,,,656.7256,64,F,White/Caucasian,Not Hispanic,17.9,HBVnaive,N,EngerixB,,,0,Neg,,,,Never,,,Monoclonal gammopathy of undetermined significance; Osteoporosis; Gilbert's disease,alendronate,,,,167.6,50.3,,,,"Covid-19 Vaccine, Pfizer:08/03/2022;10/09/2024; 
+Zoster Vaccine Recombinant:09/30/2022;11/28/2022",LD,,,HBVnaive-Alum,alendronate,,>50,,2.576
+hbvx-0098_v3w1,hbvx-0098,v3w1,,,662.7194,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,,,,,,,,,,,Allergic rhinitis,,,,,160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003;  
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999; 
+MMR:06/22/2000;08/19/2003; 
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003; 
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024; 
+Influenza Vaccine:12/05/2023;10/30/2024; 
+Tdap:02/12/2024; 
+Varicella:01/04/1999;08/04/2011 
+",LD,,,HBVnaive-Alum,,,<=50,,2.599
+hbvx-0098_v3w4,hbvx-0098,v3w4,,,639.2654,26,F,Multiple/NR,Not Hispanic,21.9,HBVnaive,N,EngerixB,,,,,,,,,,,Allergic rhinitis,,,,,160,56,,,Parents declined hbv vax as infant,"DTaP:01/14/1999;03/19/1999;05/20/1999;06/20/2000;08/19/2003;  
+HiB:01/14/1999;03/19/1999;05/20/1999;11/14/1999; 
+MMR:06/22/2000;08/19/2003; 
+OPV:01/14/1999;03/19/1999;06/22/2000;08/19/2003; 
+Human papillomavirus (HPV9-Gardasil):12/05/2023;02/12/2024; 
+Influenza Vaccine:12/05/2023;10/30/2024; 
+Tdap:02/12/2024; 
+Varicella:01/04/1999;08/04/2011 
+",LD,,,HBVnaive-Alum,,,<=50,,2.509
+hbvx-0099_v3w1,hbvx-0099,v3w1,,,543.6252,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,,182.9,109.5,,,,,LD,,,HBVnaive-Alum,,,>50,,2.142
+hbvx-0099_v3w4,hbvx-0099,v3w4,,,490.4628,53,M,Black/AfricanAmerican,Not Hispanic,32.7,HBVnaive,N,EngerixB,,,0,Neg,,Neg,,Active,13,,,lisinopril,,,,182.9,109.5,,,,,LD,,,HBVnaive-Alum,,,>50,,1.938

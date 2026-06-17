@@ -1,0 +1,267 @@
+---
+title: "20260612_final_elisa_integration"
+author: "Han Chen"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+#0. libraries
+```{r}
+library(data.table)
+library(ggplot2)
+library(ggbeeswarm)
+library(patchwork)
+library(lme4)
+library(lmerTest)
+library(rstatix)
+library(ggpubr)
+library(reshape2)     # data reshaping
+library(ggplot2)      # Plotting
+library(dplyr)        # Data manipulation
+library(readr)        # Reading CSV files
+library(readxl)       # Reading Excel files
+library(ggpubr)       # Publication-ready plots
+library(gridExtra)    # Arranging grid layouts
+library(cowplot)      # Arranging plots
+library(rstatix)      # Statistical tests
+library(tidyr)        # Tidy data principles
+# library(GGally)       # Advanced plots
+library(ggbeeswarm)   # Beeswarm plots
+library(plotly)       # Interactive plots
+library(patchwork)    # Combining ggplot plots
+# library(extrafont)    # Using custom fonts
+library(writexl)      # Writing to Excel files
+# library(lubridate)    # Date-time manipulation
+# library(ggnewscale)   # Multiple color scales in ggplot
+library(ggrepel)      # Repel overlapping text labels
+library(data.table)
+library(emmeans)      # Estimated marginal means
+library(lme4)         # Linear mixed-effects models
+library(lmerTest)     # Tests for lme4 models
+library(viridis)
+library(ComplexHeatmap)
+library(stringr)
+library(lme4)
+library(ggnewscale)
+library(ggsci)
+```
+
+
+
+#1. evaluate which samples need to run for final elisa
+```{r}
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta_with_offsetVisitDates.rds")
+meta <- read_xlsx("./data/20260612_HBV_metadata.xlsx")
+dim(elisa_mergeMeta)
+elisa_optional <- elisa_mergeMeta[make.unique %like% "optional"]
+print(elisa_optional)
+elisa_sub <- elisa_mergeMeta[!make.unique %like% "optional"]
+table(elisa_sub$Participant)
+table(elisa_sub$Visit)
+#elisa_sub  <- elisa_sub[!make.unique == "hbvx-0019_v2w4"]
+
+glimpse(elisa_sub)
+table(elisa_sub$Study.arm)
+
+expected_visits <- rbind(
+  data.table(Study.arm = "HBVimmune-Alum", ExpectedVisit = c("v1w0", "v1w1", "v1w4")),
+  data.table(Study.arm = "HBVnaive-Alum",  ExpectedVisit = c("v1w0", "v1w1", "v2w0", "v2w1", "v2w4", "v3w1", "v3w4")),
+  data.table(Study.arm = "HBVnaive-CpG",   ExpectedVisit = c("v1w0", "v1w1", "v2w0", "v2w4"))
+)
+participants <- unique(elisa_sub[, .(Participant, Study.arm)])
+master_grid <- merge(participants, expected_visits, by = "Study.arm", allow.cartesian = TRUE)
+missing_timepoints <- master_grid[!elisa_sub, on = .(Participant, ExpectedVisit = Visit)]
+missing_timepoints[, .(Missing_Visits = paste(ExpectedVisit, collapse = ", ")), 
+                   by = .(Participant, Study.arm)]
+
+missing_long_dt <- missing_timepoints[, .(
+  make.unique = paste0(Participant, "_", ExpectedVisit),
+  Participant,
+  Study.arm,
+  Visit = ExpectedVisit,
+  Status = "Missing"
+)]
+
+print(missing_long_dt)
+
+fwrite(missing_long_dt, "./outs/20260612_missing_timepoints_for_final_elisa.csv")
+
+elisa_sub$Participant
+
+#lv location
+lv <- read_xls("./data/AdhocExcelExport_CHENH31_Jun-12-2026-12-53-01.xls")
+setDT(lv)
+glimpse(lv)
+lv[, Visit := tolower(`Eventdef Label`)]
+lv[, Participant := tolower(gsub("^NLV-", "", `Study Linked ID`))]
+lv[, make.unique := paste0(Participant, "_", Visit)]
+#concat serum locations
+lv[, ShortLoc := gsub(".*/HBVx Serum (\\d+)/([A-Z]\\d+)", "S_\\1_\\2", `Storage Location`)]
+glimpse(lv)
+
+# location for missing_long_dt
+torun_location <- merge(missing_long_dt, lv[, .(make.unique, ShortLoc)], by = "make.unique", all.x = FALSE)
+torun_location <- merge(
+  missing_long_dt, 
+  lv[, .(ShortLoc = paste(sort(unique(ShortLoc)), collapse = ", ")), by = make.unique], 
+  by = "make.unique", 
+  all.x = FALSE
+)
+fwrite(torun_location, "./outs/20260612_missing_timepoints_for_final_elisa_with_location.csv")
+
+
+
+```
+
+#2. integrate new data 
+```{r}
+toadd <- fread("./data/20260616_final hbv elisa.csv")
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta_with_offsetVisitDates.rds")
+
+str(elisa_mergeMeta)
+#glimpse(elisa_mergeMeta)
+glimpse(toadd)
+toadd[, Participant := substr(sample, 1, 9)]
+setnames(toadd, "sample", "make.unique")
+toadd[, Visit := sub("^.{9}_", "", make.unique)]
+
+exclude_cols <- c("make.unique", "Visit", "Participant", "elisa.HBsAb")
+cols_to_check <- setdiff(names(elisa_mergeMeta), exclude_cols)
+
+is_list_col   <- sapply(elisa_mergeMeta[, ..cols_to_check], is.list)
+atomic_cols   <- cols_to_check[!is_list_col]
+list_cols     <- cols_to_check[is_list_col]
+
+
+## ---------------------------------------------------------------------
+## 3. Helper: get the single consistent value for an atomic vector
+##    (returns NA if it varies, or if it's all missing)
+## ---------------------------------------------------------------------
+get_consistent_value <- function(x) {
+  ux <- unique(x[!is.na(x) & x != ""])
+  if (length(ux) == 1) return(ux)
+  return(NA)
+}
+
+## ---------------------------------------------------------------------
+## 4. Helper: get the single consistent value for a list-column entry
+##    (returns list(NULL) if it varies, or if it's all missing)
+## ---------------------------------------------------------------------
+get_consistent_value <- function(x) {
+  ux <- unique(x[!is.na(x) & x != ""])
+  if (length(ux) == 1) return(ux)
+  return(x[NA_integer_])  # NA of the same type/class as x
+}
+
+## ---------------------------------------------------------------------
+## 5. Build per-participant lookup tables
+## ---------------------------------------------------------------------
+participant_meta_atomic <- elisa_mergeMeta[
+  , lapply(.SD, get_consistent_value),
+  by = Participant, .SDcols = atomic_cols
+]
+
+participant_meta_list <- elisa_mergeMeta[
+  , lapply(.SD, get_consistent_list),
+  by = Participant, .SDcols = list_cols
+]
+
+participant_meta <- merge(participant_meta_atomic, participant_meta_list, by = "Participant")
+
+## ---------------------------------------------------------------------
+## 6. (Optional) Inspect which columns actually vary within a participant
+##    -- review this before trusting full automatic transfer
+## ---------------------------------------------------------------------
+# varies_within_participant <- sapply(atomic_cols, function(col) {
+#   any(is.na(participant_meta_atomic[[col]]) &
+#         elisa_mergeMeta[, any(!is.na(get(col)) & get(col) != ""), by = Participant]$V1)
+# })
+# print(varies_within_participant)
+
+## ---------------------------------------------------------------------
+## 7. Merge participant-level metadata into the new rows
+## ---------------------------------------------------------------------
+toadd_full <- merge(toadd, participant_meta, by = "Participant", all.x = TRUE)
+
+## ---------------------------------------------------------------------
+## 8. (Optional) Backfill NAs in the existing table from sibling rows,
+##    only where that column is consistent for that participant
+## ---------------------------------------------------------------------
+impute_consistent_meta <- function(dt, id_col = "Participant", cols) {
+  dt <- copy(dt)
+  for (col in cols) {
+    dt[, (col) := {
+      vals <- get(col)
+      ux <- unique(vals[!is.na(vals) & vals != ""])
+      if (length(ux) == 1) {
+        fifelse(is.na(vals) | vals == "", ux, vals)
+      } else {
+        vals
+      }
+    }, by = id_col]
+  }
+  dt
+}
+
+elisa_mergeMeta <- impute_consistent_meta(elisa_mergeMeta, cols = atomic_cols)
+
+## ---------------------------------------------------------------------
+## 9. Combine new rows into the main table (fill = TRUE for any
+##    columns toadd_full doesn't have, e.g. truly visit-specific ones)
+## ---------------------------------------------------------------------
+elisa_mergeMeta <- rbindlist(list(elisa_mergeMeta, toadd_full), fill = TRUE)
+table(elisa_mergeMeta$Participant, elisa_mergeMeta$Visit)
+
+elisa_mergeMeta[Participant == "hbvx-0085", .(make.unique, BMI, Sex, Race, Product, elisa.HBsAb)]
+names(elisa_mergeMeta)
+#elisa_mergeMeta[, elisa.HBsAb := fcoalesce(elisa.HBsAb.x, elisa.HBsAb.y)]
+#elisa_mergeMeta[, c("elisa.HBsAb.x", "elisa.HBsAb.y") := NULL]
+elisa_mergeMeta[Participant == "hbvx-0099", .(make.unique, BMI, Sex, Race, Product, elisa.HBsAb)]
+elisa_mergeMeta[make.unique %like% "optional", .(make.unique, BMI, Sex, Race, Product, elisa.HBsAb)]
+
+list_col_check <- sapply(elisa_export, is.list)
+names(list_col_check)[list_col_check]
+list_cols <- c("PastHistory", "ImmunizationHx", "MedsAtEnrollment")
+
+elisa_export <- copy(elisa_mergeMeta)
+
+for (col in list_cols) {
+  elisa_export[, (col) := sapply(get(col), function(x) {
+    if (is.null(x) || length(x) == 0) return(NA_character_)
+    paste(x, collapse = "; ")
+  })]
+}
+
+# confirm conversion worked BEFORE writing
+sapply(elisa_export, is.list)
+glimpse(elisa_export)
+#elisa_export <- copy(elisa_mergeMeta)
+fwrite(elisa_export, "./outs/20260616_final_elisa_merged_metadata.csv")
+
+
+
+```
+

@@ -1,0 +1,1717 @@
+---
+title: "HBV_CNBx_serology_plots"
+author: "Han Chen"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## HBVx Study — Serology Time Course Analysis
+
+```{r}
+# Sections:
+#   0. Setup & Data Loading
+#   1. Data Preparation & Derived Variables
+#   2. Final Timepoint Titer Summary Plot (by Study Arm + CNBx)
+#   3. HBVnaive-Alum: Kinetics & Age Effects
+#   4. HBVimmune-Alum: Booster Response Kinetics
+#   5. HBVnaive-CpG: Kinetics
+#   6. Age-Titer Correlations (All Arms)
+#   7. Laterality Analysis (HBVnaive-Alum)
+#   8. Response Rate Barplot (HBVnaive-Alum)
+
+```
+
+## 0. Setup & Data Loading
+
+```{r}
+library(data.table)
+library(ggplot2)
+library(ggbeeswarm)
+library(patchwork)
+library(lme4)
+library(lmerTest)
+library(rstatix)
+library(ggpubr)
+library(reshape2)     # data reshaping
+library(ggplot2)      # Plotting
+library(dplyr)        # Data manipulation
+library(readr)        # Reading CSV files
+library(readxl)       # Reading Excel files
+library(ggpubr)       # Publication-ready plots
+library(gridExtra)    # Arranging grid layouts
+library(cowplot)      # Arranging plots
+library(rstatix)      # Statistical tests
+library(tidyr)        # Tidy data principles
+# library(GGally)       # Advanced plots
+library(ggbeeswarm)   # Beeswarm plots
+library(plotly)       # Interactive plots
+library(patchwork)    # Combining ggplot plots
+# library(extrafont)    # Using custom fonts
+library(writexl)      # Writing to Excel files
+# library(lubridate)    # Date-time manipulation
+# library(ggnewscale)   # Multiple color scales in ggplot
+library(ggrepel)      # Repel overlapping text labels
+library(data.table)
+library(emmeans)      # Estimated marginal means
+library(lme4)         # Linear mixed-effects models
+library(lmerTest)     # Tests for lme4 models
+library(viridis)
+library(ComplexHeatmap)
+library(stringr)
+library(lme4)
+library(ggnewscale)
+library(ggsci)
+
+
+elisa_mergeMeta <- readRDS("./outs/elisa_mergeMeta_with_offsetVisitDates.rds")
+
+# Remove optional visits and one known duplicate
+elisa_sub <- elisa_mergeMeta[!make.unique %like% "optional"]
+elisa_sub  <- elisa_sub[!make.unique == "hbvx-0019_v2w4"]
+
+tc <- function() {
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.line = element_line(color = "black"),
+    legend.position = "right"
+  )}
+
+```
+
+## 1. Data Preparation & Derived Variables
+
+```{r}
+# --- Approximate time variables ---
+# HBVnaive-Alum / HBVnaive-CpG: months post first vaccination
+elisa_sub[, approxMonths := fcase(
+  Visit == "v1w0", 0,
+  Visit == "v1w1", 0.25,
+  Visit == "v1w4", 1.00,
+  Visit == "v2w0", 1.00,
+  Visit == "v2w1", 1.25,
+  Visit == "v2w4", 2,
+  Visit == "v3w0", 6,
+  Visit == "v3w1", 6.25,
+  Visit == "v3w4", 7,
+  default = NA_real_
+)]
+
+# HBVimmune-Alum: weeks post booster
+elisa_sub[, approxWeeks := fcase(
+  Visit == "v1w0", 0,
+  Visit == "v1w1", 1,
+  Visit == "v1w4", 4,
+  Visit == "v2w0", 4,
+  Visit == "v2w1", 5,
+  Visit == "v2w4", 8,
+  Visit == "v3w0", 24,
+  Visit == "v3w1", 25,
+  Visit == "v3w4", 28,
+  default = NA_real_
+)]
+
+elisa_sub[, approxWeeks_fromDAYS := DaysFromFirstVisit / 7]
+
+
+# --- Final-timepoint titer (study-arm-specific visit) ---
+elisa_sub[, final.timepoint.hbsab := fcase(
+  Study.arm == "HBVnaive-CpG"   & Visit == "v2w4", elisa.HBsAb,
+  Study.arm == "HBVnaive-Alum"  & Visit == "v3w4", elisa.HBsAb,
+  Study.arm == "HBVimmune-Alum" & Visit == "v1w4", elisa.HBsAb,
+  default = NA_real_
+)]
+
+# hbvx-0069 missing v2w1 final visit — patch with v2w1 titer
+missing_ln <- elisa_sub[Participant == "hbvx-0069" & Visit == "v2w1"]
+missing_ln[, final.timepoint.hbsab := elisa.HBsAb]
+
+final_timepoint_elisa <- rbind(
+  elisa_sub[!is.na(final.timepoint.hbsab)],
+  missing_ln
+)
+
+# --- Arm-specific subsets ---
+elisa_naivealum  <- elisa_sub[Study.arm == "HBVnaive-Alum"]
+elisa_immunealum <- elisa_sub[Study.arm == "HBVimmune-Alum"]
+elisa_naivecpg   <- elisa_sub[Study.arm == "HBVnaive-CpG"]
+
+# --- Flag participants with v1w0 HBsAb > 100 (pre-existing immunity screen) ---
+pre_immune_ids <- elisa_sub[
+  Study.arm == "HBVnaive-Alum" & Visit == "v1w0" & elisa.HBsAb > 100,
+  Participant
+]
+
+elisa_sub[, v1w0_greater_100 := Participant %in% pre_immune_ids]
+
+# --- Responder classification by final timepoint titer ---
+# HBVnaive-Alum: classified at v3w4
+elisa_naivealum[
+  elisa_naivealum[Visit == "v3w4"],
+  on = .(Participant),
+  final_tmp_titer := fcase(
+    i.elisa.HBsAb >  100, "Over100",
+    i.elisa.HBsAb <= 100, "Under100",
+    default = NA_character_
+  )
+]
+
+# HBVimmune-Alum: classified at v1w4
+elisa_immunealum[
+  elisa_immunealum[Visit == "v1w4"],
+  on = .(Participant),
+  final_tmp_titer := fcase(
+    i.elisa.HBsAb >  100, "Over100",
+    i.elisa.HBsAb <= 100, "Under100",
+    default = NA_character_
+  )
+]
+
+# --- Ipsi/contra laterality (even/odd participant number) ---
+elisa_naivealum[,
+  Laterality := ifelse(
+    as.numeric(sub(".*(\\d)$", "\\1", Participant)) %% 2 == 0,
+    "even", "odd"
+  )
+]
+
+# --- Titer response group (>= 100 vs < 100) for barplot ---
+elisa_naivealum[, HBsAb_group := ifelse(elisa.HBsAb >= 100, ">= 100", "< 100")]
+
+# Save for downstream use
+saveRDS(elisa_sub, "./outs/elisa_sub_with_approxMonthsWeeks.rds")
+
+```
+
+## 2. Final Timepoint Titer Summary Plot (by Study Arm + CNBx subset)
+```{r}
+# Build long table: one row per participant per plotgroup
+toplot <- final_timepoint_elisa[
+  , .(Participant, final.timepoint.hbsab, Age, Study.arm)
+][!is.na(final.timepoint.hbsab)]
+
+toadd        <- copy(toplot)
+toadd[,  plotgroup := "Aggregate"]
+toplot[, plotgroup := Study.arm]
+
+# CNBx participants (lymph node biopsy subset)
+cnbx_ids <- c(
+  "hbvx-0022", "hbvx-0029", "hbvx-0033", "hbvx-0036",
+  "hbvx-0041", "hbvx-0043", "hbvx-0058", "hbvx-0063",
+  "hbvx-0069", "hbvx-0076"
+)
+cnbx <- toplot[Participant %in% cnbx_ids]
+cnbx[, plotgroup := "CNBx"]
+
+toplot_all <- rbind(cnbx, toplot, toadd)
+toplot_all[, plotgroup := factor(
+  plotgroup,
+  levels = c("Aggregate", "HBVimmune-Alum", "HBVnaive-Alum", "HBVnaive-CpG", "CNBx")
+)]
+
+
+# Geometric means per plotgroup
+gmeans <- toplot_all[, .(
+  geomean = 10^mean(log10(final.timepoint.hbsab), na.rm = TRUE)
+), by = plotgroup]
+
+# Log scale
+toplot_all %>%
+  ggplot(aes(x = plotgroup, y = final.timepoint.hbsab)) +
+  geom_crossbar(
+    data    = gmeans,
+    aes(y = geomean, ymin = geomean, ymax = geomean),
+    width   = 0.75, fatten = 2, linewidth = 0.5, color = "black"
+  ) +
+  geom_quasirandom(
+    #aes(fill = Study.arm),
+    shape = 21, size = 1.5, width = 0.3
+  ) +
+  scale_y_log10(limits = c(1, 1000)) +
+  annotation_logticks(sides = "l") +
+  tc() + xlab("") + ylab("mIU/mL") +
+  ggtitle("Final Visit HBsAb") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  coord_cartesian(clip = "off") +
+  scale_x_discrete(expand = expansion(mult = c(0.3, 0.2))) 
+
+ggsave("./figs/finalvisit_hbsab_byarm.pdf", width = 2, height = 3)
+
+# Linear scale version
+toplot_all %>%
+  ggplot(aes(x = plotgroup, y = final.timepoint.hbsab)) +
+  geom_crossbar(
+    data  = gmeans,
+    aes(y = geomean, ymin = geomean, ymax = geomean),
+    width = 0.6, fatten = 1.5, linewidth = 0.5, color = "black"
+  ) +
+  geom_quasirandom(
+    shape = 21, size = 2, #alpha = 0.85, 
+    width = 0.3
+  ) +
+  tc() + xlab("") + ylab("mIU/mL") +
+  ggtitle("Final Visit HBsAb") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_y_continuous(expand = c(0, 0))+
+  coord_cartesian(clip = "off")
+
+ggsave("./figs/finalvisit_hbsab_byarm_linearscale.pdf", width = 2, height = 3)
+
+
+```
+
+## 3. HBVnaive-Alum: Kinetics & Age Effects
+```{r}
+# =============================================================================
+
+# --- 3a. Spaghetti -----
+p1 <- elisa_naivealum %>%
+  ggplot(aes(x = approxWeeks_fromDAYS, y = elisa.HBsAb)) +
+  geom_line(aes(group = Participant), alpha = 0.2) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(limits = c(1, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("mIU/mL") + xlab("Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.1,0.1))) 
+p1
+
+elisa_naivealum[, vx_visit := fifelse(endsWith(Visit, "0"), "yes", "no")]
+
+
+p2 <- elisa_naivealum %>%
+  ggplot(aes(x = approxWeeks_fromDAYS, y = elisa.HBsAb, fill = vx_visit)) +
+  geom_line(aes(group = Participant), alpha = 0.2
+            ) +
+  geom_point(#alpha = 0.5, 
+    shape = 21) +
+  scale_y_log10(limits = c(1, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("mIU/mL") + xlab("Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  scale_fill_manual(values = c("white","red")) +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.1,0.1))) 
+p2
+
+p2 + theme(legend.position = "none")
+
+ggsave("./figs/naivealum_timecourse_vxvisit.pdf", width = 4, height = 3)
+
+
+# --- 3b. Geometric mean ± SEM over time (complete cases only) -----
+complete_naivealum <- copy(elisa_naivealum)
+complete_naivealum<- complete_naivealum[Study.arm == "HBVnaive-Alum"][
+  Visit %in% c("v1w0","v1w1","v2w0","v2w1","v2w4","v3w0","v3w1","v3w4")
+][, if (.N == 8) .SD, by = Participant]
+
+naive_summary <- complete_naivealum[, .(
+  mean_log = mean(log10(elisa.HBsAb), na.rm = TRUE),
+  sem_log  = sd(log10(elisa.HBsAb),   na.rm = TRUE) / sqrt(.N)
+), by = approxWeeks][, `:=`(
+  mean_val = 10^mean_log,
+  ymin_sem = 10^(mean_log - sem_log),
+  ymax_sem = 10^(mean_log + sem_log),
+  ymin_ci  = 10^(mean_log - 1.96 * sem_log),
+  ymax_ci  = 10^(mean_log + 1.96 * sem_log)
+)]
+
+p2 <- ggplot() +
+  geom_errorbar(data = naive_summary,
+                aes(x = approxWeeks, ymin = ymin_sem, ymax = ymax_sem), width = 0.1) +
+  geom_line(data  = naive_summary, aes(x = approxWeeks, y = mean_val)) +
+  geom_point(data = naive_summary, aes(x = approxWeeks, y = mean_val)) +
+  scale_y_log10(limits = c(1, 1000), breaks = c(1, 10, 100, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("") + xlab("Approx. Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.2,0.1))) +
+  theme(
+  axis.title.y = element_blank()) #,
+  #axis.text.y  = element_blank())
+
+(p1 | p2) + plot_layout(widths = c(3, 1.5))+
+  plot_annotation(
+    title = "HBVnaive-Alum HBsAb",
+    #subtitle = "This subtitle applies to the whole assembly",
+    #caption = "Source: Your Data Study 2026"
+    theme = theme(
+      plot.title = element_text(#size = 18, face = "bold", 
+        hjust = 0.5)
+    )
+  ) #& theme(plot.margin = margin(t = 5, r = 5, b = 0, l = 5))
+
+ggsave("./figs/naivealum_timecourse_sem.pdf", width = 6, height = 3)
+
+# --- 3c. Age split (<=50 vs >50): GM ± SEM on log scale ----
+age_model <- lmer(
+  log10(elisa.HBsAb + 1) ~ approxMonths * AgeSplit50 + (1 | Participant),
+  data = elisa_naivealum
+)
+summary(age_model)
+
+age_p_val <- summary(age_model)$coefficients["AgeSplit50>50", "Pr(>|t|)"]
+p_label   <- paste0("Global Age Effect: p = ", round(age_p_val, 3))
+
+age_summary <- elisa_naivealum[, .(
+  mean_log = mean(log10(elisa.HBsAb), na.rm = TRUE),
+  sem_log  = sd(log10(elisa.HBsAb),   na.rm = TRUE) / sqrt(.N)
+), by = .(approxMonths, AgeSplit50)][, `:=`(
+  geom_mean = 10^mean_log,
+  lower_sem = 10^(mean_log - sem_log),
+  upper_sem = 10^(mean_log + sem_log)
+)]
+
+ggplot(age_summary, aes(x = approxMonths, y = geom_mean, color = AgeSplit50)) +
+  geom_line(position = position_dodge(0.2)) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(
+    aes(ymin = lower_sem, ymax = upper_sem),
+    width = 0.1, position = position_dodge(0.2)
+  ) +
+  scale_color_manual(values = c("#E66100", "#5D3A9B")) +
+  scale_y_log10(breaks = c(1, 10, 100, 1000)) +
+  scale_x_continuous(breaks = seq(0, 10, by = 1)) +
+  annotation_logticks(sides = "l") +
+  annotate("text", x = 4, y = max(elisa_naivealum$elisa.HBsAb, na.rm = TRUE),
+           label = p_label, size = 5, fontface = "italic") +
+  ylab("HBsAb GM ± SEM") + xlab("Approx. Months") +
+  tsp()
+#ggsave("./figs/agesplit50_95CI.pdf", width = 5, height = 3)
+
+# --- 3d. Responder trajectory: final v3w4 titer > vs <= 100 ----
+interaction_p <- summary(
+  lmer(log10(elisa.HBsAb + 1) ~ approxWeeks * final_tmp_titer + (1 | Participant),
+       data = complete_naivealum)
+)$coefficients["approxWeeks:final_tmp_titerUnder100", "Pr(>|t|)"]
+
+p_label_int <- paste0("p = ", format(interaction_p, digits = 3, scientific = TRUE))
+
+responder_summary <- complete_naivealum[!is.na(final_tmp_titer), .(
+  mean_log = mean(log10(elisa.HBsAb + 1), na.rm = TRUE),
+  sem_log  = sd(log10(elisa.HBsAb + 1),   na.rm = TRUE) / sqrt(.N)
+), by = .(approxWeeks, final_tmp_titer)][, `:=`(
+  mean_val = 10^mean_log - 1,
+  ymin_val = 10^(mean_log - sem_log) - 1,
+  ymax_val = 10^(mean_log + sem_log) - 1
+)]
+p_naivealum_resp <- ggplot(
+  responder_summary,
+  aes(x = approxWeeks, y = mean_val, color = final_tmp_titer)
+) +
+  geom_line(position = position_dodge(1)) +
+  geom_point(position = position_dodge(1)) +
+  geom_errorbar(
+    aes(ymin = ymin_val, ymax = ymax_val),
+    width = 1.5, position = position_dodge(1)
+  ) +
+  scale_color_manual(values = c("Over100" = "steelblue", "Under100" = "firebrick3")) +
+  scale_y_log10(limits = c(1, 1000), breaks = c(1, 10, 100, 1000)) +
+  annotation_logticks(sides = "l") +
+  labs(
+    y        = "HBsAb mIU/mL",
+    x        = "Approx. Weeks",
+    color    = "v3w4 Response",
+   # subtitle = paste0("Trajectory interaction:\n", p_label_int)
+    subtitle = paste0(#"Trajectory interaction:\n", 
+                      p_label_int)
+
+  ) +
+  ggtitle("HBVnaive-Alum") +
+  ct1 + tc() +
+  theme(
+    plot.title    = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5, size = 10),
+    legend.position = "none"
+  ) + scale_x_continuous(expand = expansion(mult = c(0.2,0.1))) 
+p_naivealum_resp
+ggsave("./figs/titersplit100_SEM_by_finalv3w4response.pdf", width = 4, height = 3)
+
+# Age comparison between responder groups (Wilcoxon)
+stat_age_naivealum <- elisa_naivealum[!is.na(final_tmp_titer)] %>%
+  unique(by = c("Participant", "Age", "final_tmp_titer")) %>%
+  wilcox_test(elisa.HBsAb ~ final_tmp_titer) %>%
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj")
+
+naive_alum_age <- elisa_naivealum[!is.na(final_tmp_titer)] %>%
+  unique(by = c("Participant", "Age", "final_tmp_titer")) %>%
+  ggplot(aes(x = final_tmp_titer, y = Age, fill = final_tmp_titer)) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.6, linewidth = 0.3, color = "black") +
+  geom_quasirandom(shape = 21) +
+  scale_fill_manual(values = c("Over100" = "steelblue", "Under100" = "firebrick3")) +
+  scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0.05))) +
+  annotate("text", x = 1.5, y = 15,
+           label = paste0("p = ", round(stat_age_naivealum$p.adj, 3)),
+           #size = 4, 
+           fontface = "italic") +
+  tc() + labs(x = "") + theme(legend.position = "none") + ggtitle("HBVnaive-Alum") + theme(plot.title = element_text(hjust = 0.5, size = 12))
+naive_alum_age
+ggsave("./figs/age_by_finalv3w4response.pdf", width = 2, height = 2.5)
+
+# Visit-level Wilcoxon (v1w0, v2w0, v3w0) by age group
+visits_key <- c("v1w0", "v2w0", "v3w0")
+elisa_select <- elisa_naivealum[Visit %in% visits_key]
+
+stat_visit_age <- elisa_select %>%
+  group_by(Visit) %>%
+  wilcox_test(elisa.HBsAb ~ AgeSplit50) %>%
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "Visit", dodge = 0.8) %>%
+  filter(p.adj.signif != "ns") %>%
+  mutate(y.position = c(2.8, 3)[seq_len(n())])
+
+geomData_visit <- elisa_select[, .(
+  geo_mean.elisa = 10^mean(log10(elisa.HBsAb[elisa.HBsAb > 0]), na.rm = TRUE)
+), by = .(Visit, Study.arm, AgeSplit50)]
+
+elisa_select %>%
+  ggplot(aes(y = elisa.HBsAb, x = Visit, color = AgeSplit50)) +
+  geom_line(aes(group = Participant), alpha = 0.2) +
+  geom_point(size = 2, alpha = 0.2) +
+  geom_line(
+    data = geomData_visit[Study.arm == "HBVnaive-Alum"],
+    aes(y = geo_mean.elisa, group = AgeSplit50),
+    linewidth = 2
+  ) +
+  scale_color_manual(values = c("#E66100", "#5D3A9B")) +
+  scale_y_log10(breaks = c(1, 10, 100, 1000)) +
+  annotation_logticks(sides = "l") +
+  stat_pvalue_manual(stat_visit_age, label = "p.adj.signif",
+                     tip.length = 0.01, size = 8) +
+  labs(y = "HBsAb mIU/mL", x = "", color = "Age Group") +
+  tsp()
+
+#ggsave("./figs/v1w0.v2w0.v3w0_agesplit50_geo_mean.pdf", width = 5, height = 5)
+
+```
+
+
+## 4. HBVimmune-Alum: Booster Response Kinetics
+```{r}
+# --- 4a. Spaghetti ----
+p1 <- elisa_immunealum %>%
+  ggplot(aes(x = approxWeeks_fromDAYS, y = elisa.HBsAb)) +
+  geom_line(aes(group = Participant), alpha = 0.2) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(limits = c(1, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("mIU/mL") + xlab("Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.1,0.1))) 
+
+# --- 4b. Geometric mean ± SEM (complete cases v1w0/v1w1/v1w4) ----
+# complete_immunealum <- copy(elisa_immunealum)
+# keep_participants <- complete_immunealum[
+#   Study.arm == "HBVimmune-Alum" & Visit %in% c("v1w0", "v1w1", "v1w4") & !is.na(elisa.HBsAb),
+#   .(n_tp = .N), 
+#   by = Participant
+# ][n_tp == 3, .(Participant)] # Only keep the ID column
+# 
+# complete_immunealum <- complete_immunealum[keep_participants, on = "Participant", nomatch = 0]
+# glimpse(complete_immunealum)
+# 
+# immune_summary <- complete_immunealum[, .(
+#   mean_log = mean(log10(elisa.HBsAb), na.rm = TRUE),
+#   sem_log  = sd(log10(elisa.HBsAb),   na.rm = TRUE) / sqrt(.N)
+# ), by = approxWeeks][, `:=`(
+#   mean_val = 10^mean_log,
+#   ymin_sem = 10^(mean_log - sem_log),
+#   ymax_sem = 10^(mean_log + sem_log),
+#   ymin_ci  = 10^(mean_log - 1.96 * sem_log),
+#   ymax_ci  = 10^(mean_log + 1.96 * sem_log)
+# )]
+# 
+# # # Fold change annotation
+# # gm_first <- immune_summary[approxWeeks == min(approxWeeks), mean_val]
+# # gm_last  <- immune_summary[approxWeeks == max(approxWeeks), mean_val]
+# # fc       <- round(gm_last / gm_first, 1)
+# # x_start  <- immune_summary[, min(approxWeeks)]
+# # x_end    <- immune_summary[, max(approxWeeks)]
+# # x_mid    <- mean(c(x_start, x_end))
+# 
+# p2 <- ggplot() +
+#   geom_errorbar(data = immune_summary,
+#                 aes(x = approxWeeks, ymin = ymin_sem, ymax = ymax_sem), width = 0.1) +
+#   geom_line(data  = immune_summary, aes(x = approxWeeks, y = mean_val)) +
+#   geom_point(data = immune_summary, aes(x = approxWeeks, y = mean_val)) +
+#   # annotate("segment", x = x_start, xend = x_end,
+#   #          y = gm_last * 1.8, yend = gm_last * 1.8) +
+#   # annotate("segment", x = x_start, xend = x_start,
+#   #          y = gm_last * 1.6, yend = gm_last * 1.8) +
+#   # annotate("segment", x = x_end,   xend = x_end,
+#   #          y = gm_last * 1.6, yend = gm_last * 1.8) +
+#   # annotate("text", x = x_mid, y = gm_last * 3,
+#   #          label = paste0(fc, "-fold")) +
+#   scale_y_log10(limits = c(1, 1000), breaks = c(1, 10, 100, 1000)) +
+#   annotation_logticks(sides = "l") +
+#   ylab("HBsAb GM ± SEM") + xlab("Approx. Weeks") +
+#   #ggtitle("HBVimmune-Alum") +
+#   theme(plot.title = element_text(hjust = 0.5)) +
+#   tc() + scale_x_continuous(expand = expansion(mult = c(0.2,0.1))) +
+#   theme(
+#   axis.title.y = element_blank()) #,
+#   #axis.text.y  = element_blank())
+# 
+# (p1 | p2) + plot_layout(widths = c(3, 2))
+# 
+# (p1 | p2) + plot_layout(widths = c(3, 1.5))+
+#   plot_annotation(
+#     title = "HBVimmune-Alum HBsAb",
+#     #subtitle = "This subtitle applies to the whole assembly",
+#     #caption = "Source: Your Data Study 2026"
+#     theme = theme(
+#       plot.title = element_text(#size = 18, face = "bold", 
+#         hjust = 0.5)
+#     )
+#   ) #& theme(plot.margin = margin(t = 5, r = 5, b = 0, l = 5))
+# ggsave("./figs/immunealum_timecourse_sem.pdf", width = 4, height = 3)
+
+# --- 4c. Responder trajectory + paired Wilcoxon brackets ---
+# Paired Wilcoxon: early vs late per responder group
+# glimpse(complete_immunealum)
+# 
+# over_paired <- merge(
+#   complete_immunealum[final_tmp_titer == "Over100" & approxWeeks == x_start, .(Participant, elisa.HBsAb)],
+#   complete_immunealum[final_tmp_titer == "Over100" & approxWeeks == x_end,   .(Participant, elisa.HBsAb)],
+#   by = "Participant"
+# )
+# under_paired <- merge(
+#   complete_immunealum[final_tmp_titer == "Under100" & approxWeeks == x_start, .(Participant, elisa.HBsAb)],
+#   complete_immunealum[final_tmp_titer == "Under100" & approxWeeks == x_end,   .(Participant, elisa.HBsAb)],
+#   by = "Participant"
+# )
+# 
+# over_p  <- wilcox.test(over_paired$elisa.HBsAb.x,  over_paired$elisa.HBsAb.y,  paired = TRUE)$p.value
+# under_p <- wilcox.test(under_paired$elisa.HBsAb.x, under_paired$elisa.HBsAb.y, paired = TRUE)$p.value
+# 
+# over_fc  <- round(
+#   10^mean(log10(over_paired$elisa.HBsAb.y  + 1), na.rm = TRUE) /
+#   10^mean(log10(over_paired$elisa.HBsAb.x  + 1), na.rm = TRUE), 1)
+# under_fc <- round(
+#   10^mean(log10(under_paired$elisa.HBsAb.y + 1), na.rm = TRUE) /
+#   10^mean(log10(under_paired$elisa.HBsAb.x + 1), na.rm = TRUE), 1)
+# 
+# make_fc_label <- function(fc, p) {
+#   if (fc < 1) paste0(round((1 - fc) * 100), "% decrease, p=", signif(p, 2))
+#   else        paste0(fc, "-fold increase, p=", signif(p, 2))
+# }
+# over_label  <- make_fc_label(over_fc,  over_p)
+# under_label <- make_fc_label(under_fc, under_p)
+# 
+
+
+interaction_p <- summary(
+  lmer(log10(elisa.HBsAb + 1) ~ approxWeeks * final_tmp_titer + (1 | Participant),
+       data = complete_immunealum)
+)$coefficients["approxWeeks:final_tmp_titerUnder100", "Pr(>|t|)"]
+
+p_label_int_2 <- paste0("p = ", format(interaction_p, digits = 3, scientific = TRUE))
+
+responder_summary <- complete_immunealum[!is.na(final_tmp_titer), .(
+  mean_log = mean(log10(elisa.HBsAb + 1), na.rm = TRUE),
+  sem_log  = sd(log10(elisa.HBsAb + 1),   na.rm = TRUE) / sqrt(.N)
+), by = .(approxWeeks, final_tmp_titer)][, `:=`(
+  mean_val = 10^mean_log - 1,
+  ymin_val = 10^(mean_log - sem_log) - 1,
+  ymax_val = 10^(mean_log + sem_log) - 1
+)]
+
+p_immunealum_resp <- ggplot(
+  responder_summary,
+  aes(x = approxWeeks, y = mean_val, color = final_tmp_titer)
+) +
+  geom_line(position = position_dodge(0.2)) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(
+    aes(ymin = ymin_val, ymax = ymax_val),
+    width = 0.3, position = position_dodge(0.2)
+  ) +
+  scale_color_manual(values = c("Over100" = "steelblue", "Under100" = "firebrick3")) +
+  scale_y_log10(limits = c(1, 1000), breaks = c(1, 10, 100, 1000)) +
+  annotation_logticks(sides = "l") +
+  labs(
+    y        = "",
+    x        = "Approx. Weeks",
+    color    = "v3w4 Response",
+   # subtitle = paste0("Trajectory interaction:\n", p_label_int)
+    subtitle = paste0(#"Trajectory interaction:\n", 
+                      p_label_int_2)
+
+  ) +
+  ggtitle("HBVimmune-Alum") +
+  ct1 + tc() +
+  theme(
+    plot.title    = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5, size = 10),
+    legend.position = "none", axis.title.y = element_blank()
+  ) + scale_x_continuous(expand = expansion(mult = c(0.2,0.1))) 
+p_immunealum_resp
+
+# p_immunealum_resp <- ggplot(
+#   immune_resp_summary,
+#   aes(x = approxWeeks, y = mean_val, color = final_tmp_titer)
+# ) +
+#   geom_line(position = position_dodge(0.1)) +
+#   geom_point(position = position_dodge(0.1)) +
+#   geom_errorbar(
+#     aes(ymin = ymin_val, ymax = ymax_val),
+#     width = 0.2, position = position_dodge(0.1)
+#   ) +
+#   scale_color_manual(values = c("Over100" = "steelblue", "Under100" = "firebrick3")) +
+#   # annotate("segment", x = 0.25, xend = 3.75, y = 400, yend = 400,
+#   #          color = "gray40", linewidth = 0.6) +
+#   # annotate("text", x = x_mid, y = 800, label = over_label,
+#   #          color = "steelblue", size = 3.5, fontface = "italic") +
+#   # annotate("text", x = x_mid, y = 500, label = under_label,
+#   #          color = "firebrick3", size = 3.5, fontface = "italic") +
+#   scale_y_log10(limits = c(1, 1000), breaks = c(1, 10, 100, 1000)) +
+#   annotation_logticks(sides = "l") +
+#   labs(y = "", x = "Weeks", color = "Endpoint Response") +
+#   ggtitle("HBVimmune-Alum") +
+#   ct1 + tc() +
+#   theme(
+#     plot.title = element_text(hjust = 0.5),
+#     axis.title.x = element_text(margin = margin(t = 20)), 
+#     axis.title.y = element_blank()
+#   ) + scale_x_continuous(expand = expansion(mult = c(0.2,0.1))) 
+
+p_immunealum_resp
+ggsave("./figs/immunealum_finalv1w4response.pdf", width = 4, height = 3)
+
+# Combined naive-alum + immune-alum responder panels
+(p_naivealum_resp | p_immunealum_resp) + plot_layout(widths = c(2, 1.5))
+ggsave("./figs/finaltimepointresponse_combined.pdf", width = 5, height = 3)
+
+# Age by responder group (immune-alum)
+stat_age_immune <- elisa_immunealum[!is.na(final_tmp_titer)] %>%
+  unique(by = c("Participant", "Age", "final_tmp_titer")) %>%
+  wilcox_test(elisa.HBsAb ~ final_tmp_titer) %>%
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj")
+
+immune_alum_age <- elisa_immunealum[!is.na(final_tmp_titer)] %>%
+  unique(by = c("Participant", "Age", "final_tmp_titer")) %>%
+  ggplot(aes(x = final_tmp_titer, y = Age, fill = final_tmp_titer)) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.5, linewidth = 0.3, color = "black") +
+  geom_quasirandom(shape = 21) +
+  scale_fill_manual(values = c("Over100" = "steelblue", "Under100" = "firebrick3")) +
+  scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0.05))) +
+  annotate("text", x = 1.5, y = 15,
+           label = paste0("p = ", round(stat_age_immune$p.adj, 3)),
+          # size = 4, 
+          fontface = "italic") +
+  ggtitle("HBVimmune-Alum") +
+  tc() + labs(x = "") + theme(legend.position = "none")
+immune_alum_age
+ggsave("./figs/immunealum_finalv1w4response_age.pdf", width = 1.5, height = 2.5)
+
+naive_alum_age + immune_alum_age
+
+ggsave("./figs/finalresponse_age_comparison.pdf", width = 3, height = 2.5)
+
+
+elisa_immunealum[, vx_visit := fifelse(endsWith(Visit, "0"), "yes", "no")]
+
+
+p2 <- elisa_immunealum %>%
+  ggplot(aes(x = approxWeeks_fromDAYS, y = elisa.HBsAb, fill = vx_visit)) +
+  geom_line(aes(group = Participant), alpha = 0.2
+            ) +
+  geom_point(#alpha = 0.5, 
+    shape = 21) +
+  scale_y_log10(limits = c(1, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("mIU/mL") + xlab("Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  scale_fill_manual(values = c("white","red")) +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.1,0.1))) 
+p2
+
+p2 + theme(legend.position = "none")
+
+ggsave("./figs/immunealum_timecourse_vxvisit.pdf", width =2, height = 3)
+
+
+
+```
+
+## 5. HBVnaive-CpG: Kinetics
+```{r}
+
+# --- 5a. Spaghetti ----
+p1 <- elisa_naivecpg %>%
+  ggplot(aes(x = approxWeeks_fromDAYS, y = elisa.HBsAb)) +
+  geom_line(aes(group = Participant), alpha = 0.2) +
+  geom_point(alpha = 0.5) +
+  scale_y_log10(limits = c(1, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("mIU/mL") + xlab("Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.1,0.1))) 
+
+
+# --- 3b. Geometric mean ± SEM over time (complete cases only) -----
+complete_naivecpg <- elisa_naivecpg[Study.arm == "HBVnaive-CpG"][
+  Visit %in% c("v1w0","v1w1","v2w0","v2w1","v2w4")
+][, if (.N == 5) .SD, by = Participant]
+
+cpg_summary <- complete_naivecpg[, .(
+  mean_log = mean(log10(elisa.HBsAb), na.rm = TRUE),
+  sem_log  = sd(log10(elisa.HBsAb),   na.rm = TRUE) / sqrt(.N)
+), by = approxMonths][, `:=`(
+  mean_val = 10^mean_log,
+  ymin_sem = 10^(mean_log - sem_log),
+  ymax_sem = 10^(mean_log + sem_log),
+  ymin_ci  = 10^(mean_log - 1.96 * sem_log),
+  ymax_ci  = 10^(mean_log + 1.96 * sem_log)
+)]
+naive_summary <- complete_naivealum[, .(
+  mean_log = mean(log10(elisa.HBsAb), na.rm = TRUE),
+  sem_log  = sd(log10(elisa.HBsAb),   na.rm = TRUE) / sqrt(.N)
+), by = approxWeeks][, `:=`(
+  mean_val = 10^mean_log,
+  ymin_sem = 10^(mean_log - sem_log),
+  ymax_sem = 10^(mean_log + sem_log),
+  ymin_ci  = 10^(mean_log - 1.96 * sem_log),
+  ymax_ci  = 10^(mean_log + 1.96 * sem_log)
+)]
+
+p2 <- ggplot() +
+  geom_errorbar(data = naive_summary,
+                aes(x = approxWeeks, ymin = ymin_sem, ymax = ymax_sem), width = 0.3) +
+  geom_line(data  = naive_summary, aes(x = approxWeeks, y = mean_val)) +
+  geom_point(data = naive_summary, aes(x = approxWeeks, y = mean_val)) +
+  scale_y_log10(limits = c(1, 1000), breaks = c(1, 10, 100, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("") + xlab("Approx. Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.2,0.1))) +
+  theme(
+  axis.title.y = element_blank()) #,
+  #axis.text.y  = element_blank())
+
+(p1 | p2) + plot_layout(widths = c(3, 1.5))+
+  plot_annotation(
+    title = "HBVnaive-CpG HBsAb",
+    #subtitle = "This subtitle applies to the whole assembly",
+    #caption = "Source: Your Data Study 2026"
+    theme = theme(
+      plot.title = element_text(#size = 18, face = "bold", 
+        hjust = 0.5)
+    )
+  ) #& theme(plot.margin = margin(t = 5, r = 5, b = 0, l = 5))
+
+ggsave("./figs/naivealum_timecourse_sem.pdf", width = 4, height = 3)
+
+
+# --- 5b. Geometric mean ± SEM (complete cases) ----
+glimpse(elisa_sub)
+
+p2 <- ggplot() +
+  geom_errorbar(data = cpg_summary,
+                aes(x = approxMonths, ymin = ymin_sem, ymax = ymax_sem), width = 0.1) +
+  geom_line(data  = cpg_summary, aes(x = approxMonths, y = mean_val)) +
+  geom_point(data = cpg_summary, aes(x = approxMonths, y = mean_val)) +
+  scale_y_log10(limits = c(1, 1000), breaks = c(1, 10, 100, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("HBsAb GM ± SEM") + xlab("Approx. Months") +
+  ggtitle("HBVnaive-CpG") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  tc()
+
+(p1 | p2) + plot_layout(widths = c(3, 2))
+ggsave("./figs/naiveCpG_timecourse_sem.pdf", width = 6, height = 3)
+
+
+elisa_naivecpg[, vx_visit := fifelse(endsWith(Visit, "0"), "yes", "no")]
+
+
+p2 <- elisa_naivecpg %>%
+  ggplot(aes(x = approxWeeks_fromDAYS, y = elisa.HBsAb, fill = vx_visit)) +
+  geom_line(aes(group = Participant), alpha = 0.2
+            ) +
+  geom_point(#alpha = 0.5, 
+    shape = 21) +
+  scale_y_log10(limits = c(1, 1000)) +
+  annotation_logticks(sides = "l") +
+  ylab("mIU/mL") + xlab("Weeks") +
+  #ggtitle("HBVnaive-Alum") +
+  scale_fill_manual(values = c("white","red")) +
+  tc() + scale_x_continuous(expand = expansion(mult = c(0.1,0.1))) 
+p2
+
+p2 + theme(legend.position = "none")
+
+ggsave("./figs/naivecpg_timecourse_vxvisit.pdf", width =2, height = 3)
+
+
+
+```
+
+
+
+## reviewed up to this point----
+
+## 6. Age-Titer Correlations and overall fold change (All Arms)
+```{r}
+
+
+
+
+
+# Helper: Kendall tau subtitle
+kendall_subtitle <- function(data, x, y) {
+  test <- cor.test(data[[x]], log10(data[[y]] + 1), method = "kendall")
+  tau  <- round(test$estimate, 2)
+  p    <- signif(test$p.value, 2)
+  bquote(tau == .(tau) ~ "," ~ italic(p) == .(p))
+}
+
+# Shared plot factory
+age_cor_plot <- function(data, arm_label, show_ylab = TRUE) {
+  ggplot(data, aes(x = Age, y = final.timepoint.hbsab)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.7) +
+    scale_y_log10(limits = c(1, 1000)) +
+    annotation_logticks(sides = "l") +
+    tc() +
+    ylab(if (show_ylab) "Final Visit HBsAb (mIU/mL)" else "") +
+    labs(
+      title    = arm_label,
+      subtitle = kendall_subtitle(data, "Age", "final.timepoint.hbsab")
+    ) +
+    theme(
+      plot.title    = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5, size = 10, color = "gray30")
+    )
+}
+
+p_cor_all    <- age_cor_plot(elisa_sub,                          "All 3 Study Arms", show_ylab = TRUE)
+p_cor_immune <- age_cor_plot(elisa_sub[Study.arm == "HBVimmune-Alum"], "HBVimmune-Alum",  show_ylab = FALSE)
+p_cor_nalum  <- age_cor_plot(elisa_sub[Study.arm == "HBVnaive-Alum"],  "HBVnaive-Alum",   show_ylab = FALSE)
+p_cor_cpg    <- age_cor_plot(elisa_sub[Study.arm == "HBVnaive-CpG"],   "HBVnaive-CpG",    show_ylab = FALSE)
+
+(p_cor_all / p_cor_immune) | (p_cor_nalum / p_cor_cpg)
+ggsave("./figs/finalresponse_correlation.pdf", width = 10, height = 3)
+
+
+#fold change 
+
+glimpse(elisa_sub)
+
+fold_change_nalum <- elisa_sub[Study.arm == "HBVimmune-Alum",
+  .(GMFR = exp(mean(log(elisa.HBsAb[Visit == "v1w4"] /
+                           elisa.HBsAb[Visit == "v1w0"]), na.rm = TRUE))),
+  by = Participant
+][, .(GMFR = exp(mean(log(GMFR), na.rm = TRUE)))]
+
+fold_change_ialum <- elisa_sub[Study.arm == "HBVnaive-Alum",
+  .(GMFR = exp(mean(log(elisa.HBsAb[Visit == "v3w4"] /
+                           elisa.HBsAb[Visit == "v1w0"]), na.rm = TRUE))),
+  by = Participant
+][, .(GMFR = exp(mean(log(GMFR), na.rm = TRUE)))]
+
+fold_change_ialum <- elisa_sub[Study.arm == "HBVnaive-CpG",
+  .(GMFR = exp(mean(log(elisa.HBsAb[Visit == "v2w4"] /
+                           elisa.HBsAb[Visit == "v1w0"]), na.rm = TRUE))),
+  by = Participant
+][, .(GMFR = exp(mean(log(GMFR), na.rm = TRUE)))]
+
+
+dim(elisa_sub)
+
+```
+
+## 7. Laterality Analysis (HBVnaive-Alum: ipsi vs contra)
+```{r}
+
+laterality_model <- lmer(
+  log10(elisa.HBsAb) ~ approxMonths * Laterality + (1 | Participant),
+  data = elisa_naivealum
+)
+summary(laterality_model)
+
+lat_summary <- elisa_naivealum[, .(
+  mean_log = mean(log10(elisa.HBsAb), na.rm = TRUE),
+  sem_log  = sd(log10(elisa.HBsAb),   na.rm = TRUE) / sqrt(.N)
+), by = .(approxMonths, Laterality)][, `:=`(
+  geo_mean = 10^mean_log,
+  ymin     = 10^(mean_log - sem_log),
+  ymax     = 10^(mean_log + sem_log)
+)]
+
+ggplot(lat_summary, aes(x = approxMonths, y = geo_mean, color = Laterality)) +
+  geom_line(position = position_dodge(0.2), linewidth = 1) +
+  geom_point(position = position_dodge(0.2), size = 3) +
+  geom_errorbar(
+    aes(ymin = ymin, ymax = ymax),
+    width = 0.1, position = position_dodge(0.2)
+  ) +
+  scale_color_manual(values = c("#E66100", "#5D3A9B")) +
+  scale_y_log10() +
+  annotation_logticks(sides = "l") +
+  ylab("HBsAb GM ± SEM") +
+  tsp()
+
+ggsave("./figs/Laterality_SEM.pdf", width = 5, height = 4)
+```
+
+## 8. Response Rate Barplot (HBVnaive-Alum)
+```{r}
+
+status_data <- elisa_naivealum[!is.na(elisa.HBsAb), .(
+  count = .N
+), by = .(Visit, AgeSplit50, HBsAb_group)][
+  , percent := count / sum(count) * 100,
+  by = .(Visit, AgeSplit50)
+]
+
+ggplot(status_data, aes(x = as.factor(Visit), y = percent, fill = HBsAb_group)) +
+  geom_col(color = "white") +
+  facet_wrap(~AgeSplit50) +
+  scale_fill_manual(values = c("< 100" = "deepskyblue", ">= 100" = "orange")) +
+  scale_y_continuous(expand = expansion(mult = c(0.01, 0.05))) +
+  labs(x = "", y = "Percentage of Participants (%)", fill = "Titer Group") +
+  tsp() +
+  theme(
+    legend.position = "top",
+    axis.text.x     = element_text(angle = 90, vjust = 0.5, hjust = 0)
+  )
+
+ggsave("./figs/status_barplot.pdf", width = 6, height = 4)
+
+```
+
+
+
+
+## 9. Meta Exploration
+```{r}
+table(elisa_sub$Study.arm)
+glimpse(elisa_sub)
+final_timepoint_elisa
+
+
+  
+#--- multivariate end titers and meta ----
+
+
+glimpse(elisa_naivealum)
+vars_to_test <- c("Age", "Sex", "BMI", "Product", "SmokingStatus", "PastHistory", "MedsAtEnrollment")
+
+library(tidyverse)
+library(broom)
+
+# ── 1. Prep ──────────────────────────────────────────────────────────────────
+formod <- elisa_naivealum[!is.na(final.timepoint.hbsab)]
+glimpse(formod)
+table(formod$final_tmp_titer)
+
+
+library(tidyverse)
+library(broom)
+
+# ── 1. Prep ───────────────────────────────────────────────────────────────────
+model_df <- formod %>%
+  # deduplicate if needed — hbvx-0015 appears twice (v3w3 and v3w4)
+  arrange(Participant, desc(offset_VisitDate)) %>%
+  distinct(Participant, .keep_all = TRUE) %>%
+  mutate(
+    log10_titer    = log10(final.timepoint.hbsab),
+    responder      = factor(final_tmp_titer, levels = c("Under100", "Over100")),
+    Sex            = factor(Sex),
+    SmokingStatus  = factor(SmokingStatus, levels = c("Never", "Quit", "Active"))
+  ) %>%
+  select(Participant, log10_titer, responder, Age, Sex, BMI, SmokingStatus) %>%
+  drop_na()
+
+cat("N after dedup + drop_na:", nrow(model_df), "\n")
+cat("Responder breakdown:\n"); print(table(model_df$responder))
+
+# ── 2. Univariable pass ───────────────────────────────────────────────────────
+
+
+
+predictors <- c("Age", "Sex", "BMI", "SmokingStatus")
+
+# Linear (log10 titer)
+uni_linear <- map_dfr(predictors, function(v) {
+  f <- as.formula(paste("log10_titer ~", v))
+  tidy(lm(f, data = model_df)) %>%
+    filter(term != "(Intercept)") %>%
+    mutate(predictor = v)
+})
+
+# Logistic (Over/Under 100)
+uni_logistic <- map_dfr(predictors, function(v) {
+  f <- as.formula(paste("responder ~", v))
+  tidy(glm(f, data = model_df, family = binomial()),
+       exponentiate = TRUE, conf.int = TRUE) %>%
+    filter(term != "(Intercept)") %>%
+    mutate(predictor = v)
+})
+
+
+# cat("\n── Univariable: log10 titer ──\n")
+# print(uni_linear %>% select(predictor, term, estimate, std.error, p.value) %>%
+#         mutate(across(where(is.numeric), ~round(.x, 3))))
+# 
+# cat("\n── Univariable: OR (Over100) ──\n")
+# print(uni_logistic %>% select(predictor, term, estimate, conf.low, conf.high, p.value) %>%
+#         rename(OR = estimate) %>%
+#         mutate(across(where(is.numeric), ~round(.x, 3))))
+
+# ── 3. Multivariable ──────────────────────────────────────────────────────────
+
+
+
+
+
+fit_linear <- lm(
+  log10_titer ~ Age + Sex + BMI + SmokingStatus,
+  data = model_df
+)
+
+fit_logistic <- glm(
+  responder ~ Age + Sex + BMI + SmokingStatus,
+  data   = model_df,
+  family = binomial(link = "logit")
+)
+
+
+
+
+
+
+
+
+
+
+
+
+cat("\n── Multivariable: log10 titer ──\n")
+tidy(fit_linear, conf.int = TRUE) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3))) %>%
+  print()
+
+cat("\n── Multivariable: OR (Over100) ──\n")
+tidy(fit_logistic, exponentiate = TRUE, conf.int = TRUE) %>%
+  rename(OR = estimate) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3))) %>%
+  print()
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ── 4. Diagnostics ────────────────────────────────────────────────────────────
+cat("\nLinear model R²:", round(summary(fit_linear)$r.squared, 3),
+    "| Adj R²:", round(summary(fit_linear)$adj.r.squared, 3), "\n")
+cat("Logistic AIC:", round(AIC(fit_logistic), 1), "\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# --- age dist -----
+names(elisa_sub)
+ln_age <- elisa_sub[LNBx == "Y"][, .(Participant, Age)] |> unique()
+ln_age[, group := "CNBx"]
+age <- elisa_sub[, .(Participant, Age)] |> unique()
+age[, group := "Full Cohort"]
+
+all_age <- rbind(ln_age, age)
+
+all_age %>%
+  ggplot(aes(x = group, y = Age)) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.6, linewidth = 0.3, color = "black") +
+  geom_quasirandom(shape = 21, fill = NA, width = 0.3)+
+  tc() + labs(fill = "") + ggtitle("Age Distribution") +
+  theme(plot.title = element_text(hjust = 0.5)) + xlab("") +
+    scale_y_continuous(expand = expansion(mult = c(0, 0)), limits = c(0,100)) 
+all_age[, .(mean_age = mean(Age, na.rm = TRUE)), by = group]
+
+ggsave("./figs/age_distribution.pdf", width = 2, height = 3)
+
+
+
+
+```
+
+
+## 9. Imaging Quantification
+```{r}
+#   #---theme----
+# ct <- theme_bw() +
+#   theme(panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         strip.background = element_blank(),
+#         strip.text = element_text(color = "black"),
+#         axis.text.x = element_text(color = "black", angle = 45, hjust = 1),
+#         axis.text.y = element_text(color = "black"),  
+#         axis.title.x = element_blank())
+# #,
+# #legend.position = "none", 
+# #axis.title.x = element_blank()
+# 
+# ct1 <- theme_bw() +
+#   theme(#panel.grid.major = element_blank(),
+#     # panel.grid.minor = element_blank(),
+#     strip.background = element_blank(),
+#     strip.text = element_text(color = "black"),
+#     axis.text.x = element_text(color = "black", angle = 45, hjust = 1),
+#     axis.text.y = element_text(color = "black"),
+#     axis.title.x = element_blank())
+# 
+# scientific_10 <- function(x) {
+#   parse(text=gsub("e", " %*% 10^", scales::scientific_format()(x)))
+# }
+
+#----load-----
+getwd()
+dt <- read_excel("./data/merged_ln_measurements.xlsx")
+setDT(dt)
+colnames(dt)
+glimpse(dt)
+table(dt$Classification)
+table(dt$subject)
+names(elisa_sub)
+glimpse(elisa_sub)
+table(elisa_sub$LNBx)
+meta <- final_timepoint_elisa[LNBx == "Y"]
+
+ultrasound <- dt[type == "ln"]
+ultrasound %>% ggplot(aes(x = 1, 
+  y = `Area cm^2`)) + geom_quasirandom(shape = 21, fill = "white", width = 0.1) + tc()
+
+area <- ultrasound %>% ggplot(aes(x = 0, y = `Area cm^2`)) +
+  #geom_quasirandom(shape = 21, fill = "white") +
+  geom_quasirandom(size = 2, fill= "white", shape = 21, width = 0.4) +
+    stat_summary(fun = median, geom = "crossbar", width = 0.6,
+                 fatten = 1.5, color = "black") +
+    #scale_shape_manual(values = shape_map) +
+  tc() + xlim(c(-1,1)) + ylim(0, 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 1.5)) +
+    coord_cartesian(clip = "off") + ggtitle("Area") +labs(y = expression(cm^2)) 
+area  
+
+laxis <- ultrasound[Classification == "long_axis"] %>% ggplot(aes(x = 0, y = `Length cm`)) +
+  #geom_quasirandom(shape = 21, fill = "white") +
+  geom_quasirandom(size = 2, fill= "white", shape = 21, width = 0.4) +
+    stat_summary(fun = median, geom = "crossbar", width = 0.6,
+                 fatten = 1.5, color = "black") +
+    #scale_shape_manual(values = shape_map) +
+  tc() + xlim(c(-1,1)) + ylim(0, 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 2.5)) +
+    coord_cartesian(clip = "off") + ggtitle("Long Axis") +labs(y = "cm") 
+laxis  
+
+
+cortex <- ultrasound[Classification == "cortex_thickness"] %>% ggplot(aes(x = 0, y = `Length cm`)) +
+  #geom_quasirandom(shape = 21, fill = "white") +
+  geom_quasirandom(size = 2, fill= "white", shape = 21, width = 0.4) +
+    stat_summary(fun = median, geom = "crossbar", width = 0.6,
+                 fatten = 1.5, color = "black") +
+    #scale_shape_manual(values = shape_map) +
+  tc() + xlim(c(-1,1)) + ylim(0, 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 0.7)) +
+    coord_cartesian(clip = "off") + ggtitle("Cortex") +labs(y = "cm") 
+  
+cortex
+
+area + laxis + cortex
+ggsave("./figs/LN.quant.pdf", height = 2, width = 5)
+
+gc <- dt[type %in% c("hbv_gc", "_tonsil_gc")]
+
+long_axis_mean <- gc[Classification == "long_axis", 
+                             .(mean_length = mean(`Length um`, na.rm = TRUE)), 
+                             by = .(subject, type)]
+
+stat.test <- long_axis_mean %>% 
+  wilcox_test(mean_length ~ type, paired = FALSE) %>% 
+  adjust_pvalue(method = "BH") %>% 
+  add_significance("p.adj") %>% add_xy_position(x = "type")
+stat.test
+stat.test<-stat.test %>% mutate(y.position = 750)
+
+long_axis_mean %>% ggplot(aes(x = type, y = mean_length)) +
+  #geom_quasirandom(shape = 21, fill = "white") +
+  geom_quasirandom(size = 2, fill= "white", shape = 21, width = 0.4) +
+    stat_summary(fun = median, geom = "crossbar", width = 0.6,
+                 fatten = 1.5, color = "black") +
+    #scale_shape_manual(values = shape_map) +
+  tc() +# xlim(c(-1,1)) + ylim(0, 1.5) +
+  theme(axis.title.x = element_blank(),
+        #axis.text.x = element_blank(),
+        #axis.ticks.x = element_blank(),
+        plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 800)
+                     ) +
+    coord_cartesian(clip = "off") + ggtitle("Long Axis") +labs(y = "um") +
+  stat_pvalue_manual(stat.test, label = "p.adj.signif", tip.length = 0
+                     ) + scale_x_discrete(labels = c("Tonsil GC", "HBV GC"))
+
+ggsave("./figs/LN.v.tonsil.longaxis.pdf", height = 2.5, width = 1.5)
+
+ln_meta <- final_timepoint_elisa[LNBx == "Y", .(Participant, final.timepoint.hbsab)]
+ln_meta[,subject := gsub("hbvx-00", "", Participant)]
+
+la_joined <- ln_meta[long_axis_mean, on = "subject"]
+
+la_joined %>% ggplot(aes(x = final.timepoint.hbsab, y = mean_length)) +
+  geom_point() +
+  scale_x_log10() +
+  annotation_logticks(sides = "b") +
+  labs(x = "Final HBsAb (mIU/mL)", y = "Mean Long Axis (um)") +
+  tc() + ggtitle("LN Biopsy Correlation") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
+#----pie n biopsies--------
+
+data <- data.frame(
+  group=c("noLN", "yesLN"),
+  n=c(40, 9)
+)
+
+# Compute the position of labels
+data <- data %>% 
+  arrange(desc(group)) %>%
+  mutate(prop = n / sum(data$n) *100) %>%
+  mutate(ypos = cumsum(prop)- 0.5*prop )
+
+# Basic piechart
+ggplot(data, aes(x="", y=prop, fill=group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() +
+  theme(legend.position="none") +
+  geom_text_repel(aes(y = ypos, label = group), # Use geom_text_repel
+                  size = 6,
+                  nudge_x = 1, # Adjust these values to control label placement
+                  segment.color = 'grey50', # Color of the connecting line
+                  direction = "y" # Restrict movement to vertical if needed
+  ) +
+  scale_fill_brewer(palette="Set1")
+
+
+ggplot(data, aes(x="", y=prop, fill=group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() +
+  theme(legend.position="none") +
+  geom_text_repel(aes(, label = c("YES", "NO"), color = c("#E1BE6A", "#40B0A6")), 
+                  size = 6,
+                  nudge_x = 1, 
+                  segment.color = NA, 
+                  direction = "y"
+  ) +
+  scale_fill_manual(values = c("#E1BE6A", "#40B0A6"))
+###need to layer on treatment info 
+
+
+#------for radius------
+
+df <- read.csv("./data/HBV_GC_radius.csv")
+colnames(df)
+class(df$Subject) <- "character"
+
+df %>% 
+  ggplot(aes(x = Origin, y = Radius.um)) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.7, color = "black", linewidth = 0.5) +
+  geom_quasirandom(stroke = 0.5, size = 1.5, aes(color = Subject)) + 
+  labs(y = expression(paste("radius (", mu, "m", ")"))) + 
+  #scale_shape_manual(values = c(24, 25, 21), name = "Group") + guides(fill = "none") +
+  #scale_fill_manual(values = c("#87C785FF","#F56455FF", "#0066cc", "#b48ef1", "#fff"))+
+  ct
+  
+mean(df$Radius.um)
+sd(df$Radius.um)
+
+
+
+
+```
+
+
+#10. biopsy record
+```{r}
+lnbx <- read_excel("./data/Lymph Node Listing.xlsx")
+table(lnbx$`Offered LNB (Y/N)`)
+names(lnbx)
+table(lnbx$`LNB Successful (Y/N)`)
+table(lnbx$`Agreed to Participate in LNB (Y/N)`)
+
+
+
+```
+
+#11. olink
+```{r}
+
+olink <- read_csv("./data/PRL_HC_1849_Extended_Report.csv")
+setDT(olink)
+glimpse(olink)
+olink_ln <- olink[SampleID %in% c("hbvx_0022", "hbvx_0029", "hbvx_0033", "hbvx_0036", "hbvx_0041", "hbvx_0043", "hbvx_0058", "hbvx_0063", "hbvx_0069",
+                                  "hbvx_0076")]
+over100 <- c("hbvx_0022","hbvx_0041", "hbvx_0043", "hbvx_0058", "hbvx_0069",
+                                  "hbvx_0076")
+olink_ln[, titer.categ := ifelse(SampleID %in% over100, "Over100", "Under100")]
+
+table(olink_ln$Assay)
+table(olink_ln$NPX)
+
+stat.test <- olink_ln %>%
+  dplyr::filter(!is.na(titer.categ), !is.na(NPX)) %>%
+  dplyr::group_by(Assay) %>%
+  dplyr::filter(var(NPX, na.rm = TRUE) > 0) %>%        # drop zero-variance assays
+  wilcox_test(NPX ~ titer.categ) %>%
+  adjust_pvalue(method = "BH") %>%
+  add_significance("p.adj") %>%
+  add_xy_position(x = "titer.categ")
+
+olink_ln %>% ggplot(aes(x = titer.categ, y = NPX)) +
+  geom_boxplot() +
+  geom_quasirandom(width = 0.2, aes(color = titer.categ)) +
+  tc() + labs(x = "Assay", y = "NPX") + ggtitle("LN Biopsy Olink") +
+  theme(plot.title = element_text(hjust = 0.5)) + facet_wrap(~Assay, scales = "free_y") + theme(legend.position = "none")
+
+
+olink_ln %>% ggplot(aes(x = titer.categ, y = QuantifiedValue)) +
+  geom_boxplot() +
+  geom_quasirandom(width = 0.2, aes(color = titer.categ)) +
+  tc() + labs(x = "Assay", y = "pg/mL") + ggtitle("LN Biopsy Olink") +
+  theme(plot.title = element_text(hjust = 0.5)) + facet_wrap(~Assay, scales = "free_y") + theme(legend.position = "none")
+
+
+non_numeric <- which(!apply(pca_mat, 2, is.numeric))
+non_numeric  # shows column names + indices
+
+#PCA
+olink_filt <- olink_ln[SampleType == "SAMPLE" & SampleQC == "PASS" & AssayQC == "PASS" & !is.na(NPX) & !is.na(titer.categ)]
+pca_wide <- dcast(olink_filt, SampleID ~ Assay, value.var = "NPX")
+
+library(ggrepel)
+
+olink_filt <- olink_ln[SampleType == "SAMPLE" & SampleQC == "PASS" & AssayQC == "PASS"]
+
+pca_wide <- dcast(olink_filt, SampleID ~ Assay, value.var = "NPX")
+
+pca_mat <- as.matrix(pca_wide[, !colnames(pca_wide) %in% "SampleID"])
+pca_mat <- apply(pca_mat, 2, as.numeric)
+rownames(pca_mat) <- pca_wide$SampleID
+
+pca_mat_clean <- pca_mat[, colSums(is.na(pca_mat)) == 0]
+
+pca_results <- prcomp(pca_mat_clean, center = TRUE, scale. = TRUE)
+
+var_exp <- pca_results$sdev^2 / sum(pca_results$sdev^2)
+pc1_var <- round(var_exp[1] * 100, 1)
+pc2_var <- round(var_exp[2] * 100, 1)
+
+meta <- unique(olink_filt[, .(SampleID, titer.categ)])
+pca_dt <- as.data.table(pca_results$x, keep.rownames = "SampleID")
+pca_dt <- merge(pca_dt, meta, by = "SampleID")
+
+ggplot(pca_dt, aes(x = PC1, y = PC2, color = titer.categ)) +
+  geom_point(size = 3) +
+  stat_ellipse(aes(group = titer.categ), type = "norm", linetype = "dashed", linewidth = 0.6) +
+  geom_text_repel(
+    aes(label = SampleID),
+    size = 2.5,
+    max.overlaps = 20,
+    show.legend = FALSE
+  ) +
+  tc() +
+  labs(
+    x = paste0("PC1 (", pc1_var, "%)"),
+    y = paste0("PC2 (", pc2_var, "%)"),
+    title = "PCA: LN Biopsy Olink",
+    color = "Titer Group"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
+#scree
+scree_dt <- data.table(
+  PC = paste0("PC", seq_along(var_exp)),
+  variance = var_exp * 100,
+  cumulative = cumsum(var_exp * 100)
+)
+scree_dt[, PC := factor(PC, levels = PC)]  # preserve order
+
+ggplot(scree_dt, aes(x = PC, y = variance)) +
+  geom_col(fill = "#4E79A7", alpha = 0.8) +
+  geom_line(aes(y = cumulative, group = 1), color = "firebrick", linewidth = 0.8) +
+  geom_point(aes(y = cumulative), color = "firebrick", size = 2) +
+  geom_hline(yintercept = 80, linetype = "dashed", color = "grey50") +
+  tc() +
+  labs(
+    x = "Principal Component",
+    y = "Variance Explained (%)",
+    title = "Scree Plot: LN Biopsy Olink PCA"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+
+
+# Extract loadings
+loadings_dt <- as.data.table(pca_results$rotation[, 1:2], keep.rownames = "Assay")
+
+# Scale arrows to fit point cloud
+scale_factor <- max(abs(pca_dt[, .(PC1, PC2)])) / max(abs(loadings_dt[, .(PC1, PC2)])) * 0.7
+
+loadings_dt[, PC1_scaled := PC1 * scale_factor]
+loadings_dt[, PC2_scaled := PC2 * scale_factor]
+
+ggplot() +
+  # Sample points
+  geom_point(data = pca_dt, aes(x = PC1, y = PC2, color = titer.categ), size = 3) +
+  stat_ellipse(data = pca_dt, aes(x = PC1, y = PC2, group = titer.categ, color = titer.categ),
+               type = "t", linetype = "dashed", linewidth = 0.6) +
+  # Loading arrows
+  geom_segment(data = loadings_dt,
+               aes(x = 0, y = 0, xend = PC1_scaled, yend = PC2_scaled),
+               arrow = arrow(length = unit(0.2, "cm")),
+               color = "grey30", linewidth = 0.4, alpha = 0.6) +
+  # Assay labels
+  geom_text_repel(data = loadings_dt,
+                  aes(x = PC1_scaled, y = PC2_scaled, label = Assay),
+                  size = 2.5, color = "grey20", max.overlaps = 30) +
+  # Sample labels
+  geom_text_repel(data = pca_dt,
+                  aes(x = PC1, y = PC2, label = SampleID, color = titer.categ),
+                  size = 2, show.legend = FALSE, max.overlaps = 20) +
+  tc() +
+  labs(
+    x = paste0("PC1 (", pc1_var, "%)"),
+    y = paste0("PC2 (", pc2_var, "%)"),
+    title = "Biplot: LN Biopsy Olink PCA",
+    color = "Titer Group"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
+loadings_dt[, magnitude := sqrt(PC1^2 + PC2^2)]
+top_loadings <- loadings_dt[order(-magnitude)][1:15]
+
+ggplot() +
+  # Sample points
+  geom_point(data = pca_dt, aes(x = PC1, y = PC2, color = titer.categ), size = 3) +
+  stat_ellipse(data = pca_dt, aes(x = PC1, y = PC2, group = titer.categ, color = titer.categ),
+               type = "t", linetype = "dashed", linewidth = 0.6) +
+  # Loading arrows
+  geom_segment(data = top_loadings,
+               aes(x = 0, y = 0, xend = PC1_scaled, yend = PC2_scaled),
+               arrow = arrow(length = unit(0.2, "cm")),
+               color = "grey30", linewidth = 0.4, alpha = 0.6) +
+  # Assay labels
+  geom_text_repel(data = top_loadings,
+                  aes(x = PC1_scaled, y = PC2_scaled, label = Assay),
+                  size = 2.5, color = "grey20", max.overlaps = 30) +
+  # Sample labels
+  geom_text_repel(data = pca_dt,
+                  aes(x = PC1, y = PC2, label = SampleID, color = titer.categ),
+                  size = 2, show.legend = FALSE, max.overlaps = 20) +
+  tc() +
+  labs(
+    x = paste0("PC1 (", pc1_var, "%)"),
+    y = paste0("PC2 (", pc2_var, "%)"),
+    title = "Biplot: LN Biopsy Olink PCA",
+    color = "Titer Group"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
+##heatmap
+# --- 1. Wide format ---
+pca_wide <- dcast(olink_filt, SampleID ~ Assay, value.var = "NPX")
+
+# --- 2. Numeric matrix (explicit, avoids character coercion) ---
+pca_mat <- as.matrix(pca_wide[, !colnames(pca_wide) %in% "SampleID"])
+pca_mat <- apply(pca_mat, 2, as.numeric)
+rownames(pca_mat) <- pca_wide$SampleID
+
+# --- 3. Drop assays with any NA ---
+pca_mat_clean <- pca_mat[, colSums(is.na(pca_mat)) == 0]
+
+library(ComplexHeatmap)
+library(circlize)
+
+# --- Matrix: samples x assays, z-scored ---
+heat_mat <- t(scale(pca_mat_clean))  # scale by assay (row = assay, col = sample)
+ƒ
+# --- Annotation: titer.categ per sample ---
+titer_colors <- c(
+  "Under100" = "#4E79A7",
+  "Over100"  = "#F28E2B"
+)
+
+titer_vec <- meta[match(colnames(heat_mat), SampleID), titer.categ]
+
+col_ann <- HeatmapAnnotation(
+  `Titer Group` = titer_vec,
+  col = list(`Titer Group` = titer_colors),
+  annotation_name_side = "left",
+  annotation_legend_param = list(
+    `Titer Group` = list(title = "Titer Group")
+  )
+)
+
+col_fun <- colorRamp2(c(-2, 0, 2), c("#2166AC", "white", "#B2182B"))
+
+Heatmap(
+  heat_mat,
+  name                         = "NPX\n(z-score)",
+  col                          = col_fun,
+  top_annotation               = col_ann,
+  column_split                 = titer_vec,
+  clustering_distance_rows     = "euclidean",
+  clustering_method_rows       = "ward.D2",
+  clustering_distance_columns  = "euclidean",
+  clustering_method_columns    = "ward.D2",
+  show_column_names            = TRUE,
+  show_row_names               = TRUE,
+  row_names_gp                 = gpar(fontsize = 8),
+  column_names_gp              = gpar(fontsize = 8),
+  column_names_rot             = 45,
+  column_title_gp              = gpar(fontsize = 10, fontface = "bold"),
+  heatmap_legend_param         = list(title_position = "leftcenter-rot")
+)
+
+
+titer_colors <- c(
+  "Under100"  = "#4E79A7",
+  "Over1000"  = "#F28E2B"
+  # add more levels if needed
+)
+unique(meta$titer.categ)
+# and
+meta[match(colnames(heat_mat), SampleID), titer.categ]
+
+col_ann <- HeatmapAnnotation(
+  titer = meta[match(colnames(heat_mat), SampleID), titer.categ],
+  col   = list(titer = titer_colors),
+  annotation_name_side = "left"
+)
+
+# --- Color scale ---
+col_fun <- colorRamp2(c(-2, 0, 2), c("#2166AC", "white", "#B2182B"))
+
+# --- Plot ---
+Heatmap(
+  heat_mat,
+  name                  = "NPX\n(z-score)",
+  col                   = col_fun,
+  top_annotation        = col_ann,
+  clustering_distance_rows = "euclidean",
+  clustering_method_rows   = "ward.D2",
+  clustering_distance_columns = "euclidean",
+  clustering_method_columns   = "ward.D2",
+  show_column_names     = TRUE,
+  show_row_names        = TRUE,
+  row_names_gp          = gpar(fontsize = 8),
+  column_names_gp       = gpar(fontsize = 8),
+  column_names_rot      = 45,
+  column_title          = "LN Biopsy Olink: NPX Heatmap",
+  column_title_gp       = gpar(fontsize = 12, fontface = "bold"),
+  heatmap_legend_param  = list(title_position = "leftcenter-rot")
+)
+
+
+#olink_filt$QuantifiedValue
+
+# --- 1. Wide format using QuantifiedValue ---
+quant_wide <- dcast(olink_filt, SampleID ~ Assay, value.var = "QuantifiedValue")
+
+# --- 2. Numeric matrix ---
+quant_mat <- as.matrix(quant_wide[, !colnames(quant_wide) %in% "SampleID"])
+quant_mat <- apply(quant_mat, 2, as.numeric)
+rownames(quant_mat) <- quant_wide$SampleID
+
+# --- 3. Drop assays with any NA ---
+quant_mat_clean <- quant_mat[, colSums(is.na(quant_mat)) == 0]
+
+# --- 4. Z-score and transpose ---
+heat_mat_quant <- t(scale(quant_mat_clean))
+
+# --- 5. Annotation ---
+titer_vec <- meta[match(colnames(heat_mat_quant), SampleID), titer.categ]
+
+col_ann <- HeatmapAnnotation(
+  `Titer Group` = titer_vec,
+  col = list(`Titer Group` = titer_colors),
+  annotation_name_side = "left"
+)
+
+# --- 6. Plot ---
+Heatmap(
+  heat_mat_quant,
+  name                         = "Quant\n(z-score)",
+  col                          = col_fun,
+  top_annotation               = col_ann,
+  column_split                 = titer_vec,
+  clustering_distance_rows     = "euclidean",
+  clustering_method_rows       = "ward.D2",
+  clustering_distance_columns  = "euclidean",
+  clustering_method_columns    = "ward.D2",
+  show_column_names            = TRUE,
+  show_row_names               = TRUE,
+  row_names_gp                 = gpar(fontsize = 8),
+  column_names_gp              = gpar(fontsize = 8),
+  column_names_rot             = 45,
+  column_title_gp              = gpar(fontsize = 10, fontface = "bold"),
+  heatmap_legend_param         = list(title_position = "leftcenter-rot")
+)
+
+
+```
+
+
+
