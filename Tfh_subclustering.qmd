@@ -149,7 +149,7 @@ rstatix::fisher_test(matrix(c(nrow(m),nrow(cd4seq),nrow(obj1.clean@meta.data),1e
 #*     <dbl>    <dbl> <chr>   
 #1 100006973 8.13e-96 ****    
             
-# rm(x2, x3, meta4, cd4seq, m, cellname, b)
+rm(x2, x3, meta4, cd4seq, m)
 ```
 
 ## Subcluster Tfh
@@ -322,12 +322,14 @@ ggplot(eff.stats, aes(x = effsize, y = tfh.subset.annotation)) +
                    yend = tfh.subset.annotation), color = "grey80", linewidth = 1.2) +
   geom_point(aes(color = tfh.subset.annotation), size = 6) +
   scale_color_manual(values = subset.cols) +
-  annotate("text", y = 0.6, x = 0.25, label = "Over100", color = "steelblue", size=3) +
-  annotate("text", y = 0.6, x = -0.25, label = "Under100", color = "firebrick3", size=3)+ 
+  annotate("text", y = 0.6, x = 0.25, label = "High Resp", color = "steelblue", 
+           size=3) +
+  annotate("text", y = 0.6, x = -0.25, label = "Low Resp", color = "firebrick3", 
+           size=3)+ 
   theme_classic() +
   geom_vline(xintercept=0, colour = 'gray50', alpha=0.5)+
   labs(title = "Tfh Subset frequencies relative to titer",
-       subtitle = "Cohen Effect Size | Over100 vs. Under100",
+       subtitle = "Cohen Effect Size",
        x = "Effect Size", y = NULL) +
   theme(legend.position = "none", axis.text.y = element_text(color = "black"),
         panel.grid.minor = element_blank())
@@ -441,8 +443,8 @@ plotNhoodGraphDA(milo_obj, da_results, alpha=0.1) +
 plotDAbeeswarm(res.daresults[[114]], group.by='tfh.subset.annotation', alpha=0.1) + 
   geom_hline(yintercept=0, color="grey50", alpha=0.5) +
   scale_color_gradient2(low = "steelblue", mid = "grey80", high = "firebrick3") +
-  annotate("text", x = -0.1, y = -5, label = "Over100", color = "steelblue", size=5) +
-  annotate("text", x = -0.1, y = 5, label = "Under100", color = "firebrick3", size=5)+ 
+  annotate("text", x = -0.1, y = -5, label = "High Resp", color = "steelblue", size=3) +
+  annotate("text", x = -0.1, y = 5, label = "Low Resp", color = "firebrick3", size=3)+ 
   theme_classic() +
   theme(axis.title.y= element_blank(), axis.text = element_text(color='black')) 
 # ggsave(filename = "./Images/Tfh_milo_titer_beeswarm.pdf", width = 4.5,height=3)
@@ -498,10 +500,10 @@ ggplot(summary_stats, aes(y = reorder(tfh.subset.annotation, Net_Score))) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
     axis.text.y = element_text(size = 12, color = "black"),
     plot.title = element_text(hjust = 0.5, size = 15) ) +
-  annotate("text", x = -7.5, y = 0.55, label = "Over100", 
-           color = "steelblue", size = 4) +
-  annotate("text", x = 20, y = 0.55, label = "Under100", 
-           color = "firebrick3", size = 4)
+  annotate("text", x = -6, y = 0.65, label = "High Resp", 
+           color = "steelblue", size = 3) +
+  annotate("text", x = 20, y = 0.65, label = "Low Resp", 
+           color = "firebrick3", size = 3)
 # ggsave(filename = 'Images/Tfh_milo_beeswarm_aggregate.pdf', height=3.5,width=6)
 
 
@@ -1297,12 +1299,12 @@ Idents(cluster.sub) <- "titer.categ"
 deg <- FindMarkers(cluster.sub, ident.1 = "Over100", ident.2 = "Under100", test.use = "wilcox")
 deg$gene_label <- rownames(deg)
 deg$diffexpressed <- "Not Significant"
-deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05 & (deg$pct.1 > 0.2 | deg$pct.2 > 0.2)] <- "Higher in Over100"
-deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05 & (deg$pct.1 > 0.2 | deg$pct.2 > 0.2)] <- "Higher in Under100"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05 & (deg$pct.1 > 0.2 | deg$pct.2 > 0.2)] <- "High Resp"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05 & (deg$pct.1 > 0.2 | deg$pct.2 > 0.2)] <- "Low Resp"
 # top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
 # deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
 setDT(deg)
-top_up <- deg[diffexpressed == "Higher in Over100"][order(p_val_adj)][1:12, gene_label]
+top_up <- deg[diffexpressed == "High Resp"][order(p_val_adj)][1:12, gene_label]
 top_down <- deg[diffexpressed == "Higher in Under100"][order(p_val_adj)][1:12, gene_label]
 deg$gene_label <- ifelse(deg$gene %in% c(top_up, top_down), deg$gene_label, "")
 
@@ -1320,25 +1322,25 @@ a <- ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexp
     segment.angle = 50,      # Angle of the callout
     segment.alpha = 0.3
   ) + 
-  scale_color_manual(values = c("Higher in Over100" = "steelblue", 
+  scale_color_manual(values = c("High Resp" = "steelblue", 
                                 "Not Significant" = "grey", 
-                                "Higher in Under100" = "firebrick3")) +  
+                                "Low Resp" = "firebrick3")) +  
   geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed", alpha=0.5) +
   geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed", alpha=0.5) +
   labs(title="GNG4 Tfh by titer", x="log2 Fold Change", y="-log10 Adjusted P-value") +
   coord_cartesian(clip = "off") +
-  annotate("text", x = 4, y = -1.5, label = "Higher in Over100", color = "steelblue") +
-  annotate("text", x = -4, y = -1.5, label = "Higher in Under100", color = "firebrick3") +
+  annotate("text", x = 4, y = -1.5, label = "High Resp", color = "steelblue") +
+  annotate("text", x = -4, y = -1.5, label = "Low Resp", color = "firebrick3") +
   theme(legend.position = 'none'); a
 # ggsave(a, filename = 'Images/Tfh-Volcano-GNG4-Hi-v-Lo.pdf', height=5, width=6)
 
-genes_under <- deg[diffexpressed == "Higher in Under100" & gene_label != "" , gene_label]
-genes_over  <- deg[diffexpressed == "Higher in Over100" & gene_label != "", gene_label]
+genes_under <- deg[diffexpressed == "Low Resp" & gene_label != "" , gene_label]
+genes_over  <- deg[diffexpressed == "High Resp" & gene_label != "", gene_label]
 genes_to_plot <- c(genes_under[1:15], genes_over[1:15])
 genes_to_plot <- intersect(na.omit(genes_to_plot), rownames(cluster.sub))
 
-# genes_to_plot <- deg[which(deg$diffexpressed == "Higher in Under100"), 'gene_label'][1:15]
-# genes_to_plot <- c(genes_to_plot, deg[which(deg$diffexpressed == "Higher in Over100"), 'gene_label'][1:15])
+# genes_to_plot <- deg[which(deg$diffexpressed == "Low Resp"), 'gene_label'][1:15]
+# genes_to_plot <- c(genes_to_plot, deg[which(deg$diffexpressed == "High Resp"), 'gene_label'][1:15])
 
 cluster.sub <- ScaleData(cluster.sub, features = genes_to_plot)
 mat <- as.matrix(GetAssayData(cluster.sub, slot = "scale.data")[genes_to_plot, ])
@@ -1372,25 +1374,25 @@ Idents(cluster.sub) <- "titer.categ"
 deg <- FindMarkers(cluster.sub, ident.1 = "Under100", ident.2 = "Over100", test.use = "wilcox")
 deg$gene_label <- rownames(deg)
 deg$diffexpressed <- "Not Significant"
-deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Higher in Under100"
-deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Higher in Over100"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Low Resp"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "High Resp"
 top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
 deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
 ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
   geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
   ggrepel::geom_text_repel(max.overlaps = 12, box.padding = 0.5) +  
-  scale_color_manual(values = c("Higher in Over100" = "steelblue", 
+  scale_color_manual(values = c("High Resp" = "steelblue", 
                                 "Not Significant" = "grey", 
-                                "Higher in Under100" = "firebrick3")) +  
+                                "Low Resp" = "firebrick3")) +  
   geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
   geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
   labs(title = "GPR183 Tfh by titer", x = "log2 Fold Change",
        y = "-log10 Adjusted P-value") +
   coord_cartesian(clip = "off") +
   annotate("text", x = -4, y = -1.5,
-           label = "Higher in Over100", color = "steelblue") +
+           label = "High Resp", color = "steelblue") +
   annotate("text", x = 4, y = -1.5,
-           label = "Higher in Under100", color = "firebrick3") +
+           label = "Low Resp", color = "firebrick3") +
   theme(legend.position = 'none')
 
 ```
@@ -1432,13 +1434,13 @@ ggplot(plot_data, aes(x = FC, y = pathway)) +
   theme_classic() +
   labs(title = "GNG4 Subset: SCPA Differential Pathways",
        x = "Fold Change (FC)",  y = NULL) +
-  annotate("text", x = -1, y = 0.65, label = "Under100", color = "firebrick4") +
-  annotate("text", x = 1, y = 0.65, label = "Over100", color = "steelblue") +
+  annotate("text", x = -1, y = 0.65, label = "Low Resp", color = "firebrick4") +
+  annotate("text", x = 1, y = 0.65, label = "High Resp", color = "steelblue") +
   coord_cartesian(clip = "off") +
   theme(axis.text.y = element_text(size = 10, color = "black"),
     panel.grid.major.y = element_line(color = "grey92", linewidth = 0.5) ) + 
   coord_cartesian(xlim = c(-4,3))
-ggsave(filename = "Images/GNG4-SCPA-Lollipop.pdf", height=6, width=7)
+# ggsave(filename = "Images/GNG4-SCPA-Lollipop.pdf", height=6, width=7)
 
 
 Idents(gng4.cells) <- "titer.categ"
@@ -1464,10 +1466,10 @@ fgsea::plotEnrichment(pathways_list[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]],
        y = "Enrichment Score (ES)") +
   theme_classic() +
   annotate("text", x = length(ranks) * 0.8, y = 0.4, label = stats_text, hjust=0) +
-  annotate("text", x = length(ranks)*0.15, y = -0.1, label = "Over100", 
+  annotate("text", x = length(ranks)*0.15, y = -0.1, label = "High Resp", 
            color = "steelblue", size = 5) +
   annotate("text", x = length(ranks)*0.85, y = -0.1, 
-           label = "Under100", color = "firebrick3",  size = 5) +
+           label = "Low Resp", color = "firebrick3",  size = 5) +
   coord_cartesian(clip = "off") +
   theme( plot.title = element_text(size = 16),
     plot.margin = margin(t = 10, r = 10, b = 30, l = 10) )
@@ -1485,9 +1487,9 @@ fgsea::plotEnrichment(pathways_list[["HALLMARK_INTERFERON_ALPHA_RESPONSE"]],
   theme_classic() +
   annotate("text", x = length(ranks) * 0.1, y = -0.5, label = stats_text, hjust=0) +
   annotate("text", x = length(ranks)*0.15, y = 0.1, 
-           label = "Over100", color = "steelblue", size = 5) +
+           label = "High Resp", color = "steelblue", size = 5) +
   annotate("text", x = length(ranks)*0.85, y = 0.1, 
-           label = "Under100", color = "firebrick3",  size = 5) +
+           label = "Low Resp", color = "firebrick3",  size = 5) +
   coord_cartesian(clip = "off") +
   theme( plot.title = element_text(size = 16),
     plot.margin = margin(t = 10, r = 10, b = 30, l = 10) )
@@ -1631,21 +1633,19 @@ net <- decoupleR::get_collectri(organism = 'human', split_complexes = FALSE)
 tf_activity.collectri  <- decoupleR::run_ulm(mat = as.matrix(tfh@assays$RNA@data), 
                                   net = net, .source = 'source', .target = 'target',
                                   .mor = 'mor', minsize = 5)
-# tfh$JUN_Activity <- tf_activity.collectri[tf_activity.collectri$source == "JUN", ]$score
-# tfh$FOS_Activity <- tf_activity.collectri[tf_activity.collectri$source == "FOS", ]$score
 
 md <- as.data.table(tfh@meta.data, keep.rownames = "condition")
 setDT(tf_activity.collectri)
-tf_activity.collectri <- merge(tf_activity.collectri, 
+tf_activity.collectri.m <- merge(tf_activity.collectri, 
                                md[, .(condition, titer.categ, tfh.subset.annotation)],
                                by = "condition" )
 
-setDT(tf_activity.collectri)
-tf.stats <- tf_activity.collectri[, .(LFC_Activity = mean(score[titer.categ == "Over100"]) - mean(score[titer.categ == "Under100"]),  
+setDT(tf_activity.collectri.m)
+tf.stats <- tf_activity.collectri.m[, .(LFC_Activity = mean(score[titer.categ == "Over100"]) - mean(score[titer.categ == "Under100"]),  
                     p_val = wilcox.test(score ~ titer.categ)$p.value), by = source]
 tf.stats[, fdr := p.adjust(p_val, method = "BH")]
 setorder(tf.stats, -LFC_Activity)
-subset.tf.stats <- tf_activity.collectri[, .(
+subset.tf.stats <- tf_activity.collectri.m[, .(
   LFC_Activity = mean(score[titer.categ == "Over100"]) - 
     mean(score[titer.categ == "Under100"]),
   p_val = wilcox.test(score ~ titer.categ)$p.value), by = .(source, tfh.subset.annotation)]
@@ -1657,23 +1657,27 @@ plot_tfs <- rbind(head(plot_tfs, 15), tail(plot_tfs, 15))
 StrongAb <- c("BACH2", "STAT4", "BCL6", "MAF", "CREM")
 PoorAb <- c("STAT1", "STAT2", "IRF9", "IRF1", "CIITA", "TBX21", "RELA", "REL", "NFKB1", "HSF2", "HSF1")
 gng4.tf.top[, label_group := "Other"]
-gng4.tf.top[source %in% StrongAb, label_group := "Canonical Axis"]
-gng4.tf.top[source %in% PoorAb, label_group := "Inflammatory Axis"]
-ggplot(gng4.tf.top, aes(x = LFC_Activity, y = -log10(p_val), color = label_group)) +
+gng4.tf.top[source %in% StrongAb, label_group := "High Resp"]
+gng4.tf.top[source %in% PoorAb, label_group := "Low Resp"]
+gng4.tf.top[, p.adj := p.adjust(p_val, method = "fdr")]
+ggplot(gng4.tf.top, aes(x = LFC_Activity, y = -log10(p.adj), color = label_group)) +
   geom_point(alpha = 0.4, size = 1.5) +
   ggrepel::geom_text_repel(data = gng4.tf.top[label_group != "Other"], 
                            aes(label = source), box.padding = 0.5, 
                            max.overlaps = Inf, fontface = "bold", 
                   size = 4, show.legend = FALSE) +
-  scale_color_manual(values = c("Canonical Axis" = "steelblue", 
-                               "Inflammatory Axis" = "firebrick3", 
+  scale_color_manual(values = c("High Resp" = "steelblue", 
+                               "Low Resp" = "firebrick3", 
                                "Other" = "grey80")) +
   theme_classic() +
-  labs(title = "GNG4 Regulatory Landscape", x = "← Under100                    Over100 →", 
-       y = "-log10 (p-value)", color = "Regulatory Program") +
+  labs(title = "GNG4 Regulatory Landscape", 
+       x = "← Low Resp                     High Resp →", 
+       y = "-log10 (p-adj)", color = "Regulatory Program") +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
-  theme(legend.position = "right")
+  theme(legend.position = "none")
 # ggsave(filename = 'Images/Tfh-geneRegulatoryNetwork.pdf', height=5,width=7)
+setorder(gng4.tf.top, p.adj)
+# write.csv(x = gng4.tf.top, file = "output.csv/GNG4.regulon.csv")
 
 # ggplot(tfh@meta.data, aes(x = tfh.subset.annotation, y = JUN_Activity,
 #                           fill = titer.categ)) +
@@ -1711,7 +1715,8 @@ ggplot(gng4.tf.top, aes(x = LFC_Activity, y = -log10(p_val), color = label_group
 
 
 
-rm(gam_mod, StrongAb, PoorAb, gng4.tf.top, tf.stats, subset.tf.stats)
+rm(gam_mod, StrongAb, PoorAb, gng4.tf.top, tf.stats, subset.tf.stats, 
+   tf_activity.collectri.m)
 ```
 
 ## Visium HD tonsil dataset
@@ -1770,6 +1775,12 @@ tonsil <- FindNeighbors(tonsil, dims = 1:30)
 tonsil <- FindClusters(tonsil, resolution = 0.5)
 tonsil <- RunUMAP(tonsil, dims = 1:30)
 DimPlot(tonsil, reduction = "umap", label = TRUE)
+
+```
+
+```{r liana-analysis}
+
+ 
 
 ```
 
