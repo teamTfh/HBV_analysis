@@ -109,7 +109,7 @@ new.cluster.ids <- c( "0" = "Naive_1", "1" = "Fos-Jun", "2" = "Effector memory",
                       "5" = "Treg", "6" = "Quiescent memory", "7" = "Proliferating")
 obj1.clean <- RenameIdents(obj1.clean, new.cluster.ids)
 obj1.clean$CD4.subset.annotation <- Idents(obj1.clean)
-DimPlot(obj1.clean, reduction = "umap", label = TRUE, group.by = 'CD4.subset.annotation') + NoLegend() + ggtitle("Lymph node CD4 T cells")
+DimPlot(obj1.clean, reduction = "umap", label = TRUE, group.by = 'CD4.subset.annotation', label.size = 7) + NoLegend() + ggtitle("Lymph node CD4 T cells")
 # ggsave(filename = 'Images/CD4-UMAP-subsets.pdf', height=5, width=5 )
 
 top.genes <- FindAllMarkers(obj1.clean, only.pos = TRUE, min.pct = 0.25, 
@@ -130,7 +130,7 @@ new.meta <- obj1.clean@meta.data %>% left_join(df, by = "subject")
 rownames(new.meta) <- rownames(obj1.clean@meta.data)
 obj1.clean@meta.data <- new.meta
 obj1.clean$titer.categ <- ifelse(obj1.clean$antibody_titer < 100, "Under100", "Over100")
-
+# qs2::qs_save(obj1.clean, file = "data/20260921_obj1.clean.qs2", compress_level = 10)
 rm(df, obj1)
 ```
 
@@ -185,13 +185,21 @@ if (file.exists("data/iedb_hepatitis_b_epitopes.xlsx") && requireNamespace("read
 
 hbv.specific <- m$barcode
 
-DimPlot(obj1.clean, label=F, cells.highlight = hbv.specific, 
-        cols.highlight = "darkorange", cols= "grey", pt.size=1.5, sizes.highlight=1.5, 
-        group.by = 'CD4.subset.annotation', alpha=0.7) +  
-  ggtitle("HBV clonotypes") + 
-  scale_color_manual(labels = c("CD4 cells","HBV clonotype"), 
-                     values = c("grey90", "darkorange"))  
+DimPlot(obj1.clean, label=F, cells.highlight = hbv.specific, cols.highlight = "darkorange", cols= "grey", pt.size=1.5, 
+        sizes.highlight=1.5, group.by = 'CD4.subset.annotation', alpha=0.7) +  
+  ggtitle("HBV clonotypes") + scale_color_manual(labels = c("CD4 cells","HBV clonotype"), values = c("grey90", "darkorange"))  
 # ggsave(filename = 'Images/CD4-matchCDR3-HBV.pdf', height=6, width=8 )
+
+
+df <- as.data.frame( Embeddings(obj1.clean, reduction = "umap") )
+df$cell <- rownames(df)
+df$highlight <- df$cell %in% hbv.specific
+df <- df[order(df$highlight), ]
+ggplot(df, aes(x = umap_1, y = umap_2)) +
+  geom_density_2d(data = subset(df, highlight == TRUE), color = "grey20", alpha = 1) +
+  geom_point( aes(color = highlight), size = 1, alpha=0.4 ) +
+  scale_color_manual(values = c("FALSE" = "grey90", "TRUE" = "red")) +
+  theme_classic()
 
 rstatix::fisher_test(matrix(c(nrow(m), nrow(cd4seq) - nrow(m),
                               nrow(obj1.clean@meta.data) - nrow(m), 1e8), 
@@ -202,6 +210,8 @@ rstatix::fisher_test(matrix(c(nrow(m), nrow(cd4seq) - nrow(m),
 #*     <dbl>    <dbl> <chr>   
 #1 100006973 8.13e-96 ****    
             
+rm(x2, x3, meta4, m)
+
 rm(x2, x3, meta4, cd4seq, m)
 rm(x2, x3, meta4)
 ```
@@ -263,6 +273,7 @@ DotPlot(tfh, features = genes_to_plot, group.by = "tfh.subset.annotation",
   labs(title = "Top Marker Expression by Subset", x = " ", y = " ")
 # ggsave(filename = 'Images/Tfh_bubbleplot_selectedGenes.pdf', height=3.5, width=10)
 
+rm(obj1.clean)
 ```
 
 ```{r explore-Tfh-subsets}
@@ -276,18 +287,18 @@ subset.cols <- c(
   "TNFR2 subset"  = "skyblue"           # Early Activation/Starter
 )
 DimPlot(tfh, reduction = "umap", label = TRUE, group.by = 'tfh.subset.annotation',
-        cols = subset.cols) + NoLegend() + ggtitle("Tfh subsets")
-# ggsave(filename = 'Images/Tfh-UMAP-subsetLabels.pdf',height=4, width=4)
+        cols = subset.cols, label.size = 7) + NoLegend() + ggtitle("Tfh subsets")
+ggsave(filename = 'Images/Tfh-UMAP-subsetLabels.pdf',height=4, width=4)
 
 
 
 DimPlot(tfh, label=F, cells.highlight = hbv.specific, 
         cols.highlight = "darkorange", cols= "grey", pt.size=1.5, sizes.highlight=3, 
-        group.by = 'CD4.subset.annotation', alpha=0.7) +  
+        group.by = 'CD4.subset.annotation', alpha=0.7, label.size = 7) +  
   ggtitle("HBV clonotypes") + 
   scale_color_manual(labels = c("Tfh cells","HBV clonotype"), 
                      values = c("grey90", "darkorange")) 
-# ggsave(filename = 'Images/Tfh-matchCDR3-HBV.pdf', height=6, width=8 )
+ggsave(filename = 'Images/Tfh-matchCDR3-HBV.pdf', height=6, width=8 )
 
 # rstatix::fisher_test(matrix(c(4,nrow(cd4seq),nrow(tfh@meta.data),1e8), nrow=2))
 rstatix::fisher_test(matrix(c(4, nrow(cd4seq) - 4,
@@ -3066,6 +3077,7 @@ rm(gam_mod, StrongAb, PoorAb, gng4.tf.top, tf.stats, subset.tf.stats,
 
 ```{r import-visiumHD-data-SCtransform, eval=FALSE}
 
+pos <- read_parquet("tissue_positions.parquet")
 pos <- arrow::read_parquet("tissue_positions.parquet")
 write.csv(pos, "tissue_positions.csv", row.names = FALSE)
 
@@ -3147,6 +3159,8 @@ obj1.clean <- AddMetaData(obj1.clean, metadata = as.data.frame( vis.cd4@ModuleHo
 VlnPlot2(obj1.clean, features = "HOTSPOT_2", group.by = "titer.categ", pt.size = 0.1, stat.method = "wilcox.test") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
+## End
+=======
 
 ## Analysis of LN-Tfh by aging
 
@@ -4365,4 +4379,3 @@ p_scatter_tfh <- ggplot(tfh_freq_df, aes(x = BMI, y = Percentage)) +
 print(p_scatter_tfh)
 
 ```
-

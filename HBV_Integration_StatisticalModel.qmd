@@ -58,8 +58,117 @@ sessionInfo()
 
 ```{r load-data}
 
-olink.data <- read.csv(file = 'data/PRL_HC_1849_Extended_Report.csv')
 elisa.meta <- readRDS(file = 'outs/elisa_mergeMeta_with_offsetVisitDates.rds')
 
+```
 
+```{r clean-up-olink}
+
+olink.data <- fread(file = 'data/PRL_HC_1849_Extended_Report.csv')
+
+olink.data <- olink.data[SampleType == 'SAMPLE']  # keep the samples not calibrators
+olink.data <- olink.data[! is.na(QuantifiedValue)]
+x <- sapply(olink.data, unique) 
+keep <- names(x)[which(lapply(x, length) != 1 )]  # retain columns with >1 unique value
+olink.data <- subset(olink.data, select = keep);  rm(keep) 
+olink.data <- olink.data[!(Assay %like% 'Ctrl')]
+
+olink.keep <- c('SampleID', 'Assay', 'QuantifiedValue', "BelowLOD", "LODQuant", "LLOQ", "LQL", "BelowLQL", "ULOQ", "AboveULOQ")
+olink.data <- olink.data[, ..olink.keep];  rm(olink.keep)
+olink.data$SampleID <- str_replace(olink.data$SampleID, '_','-')
+
+
+# incorporate antibody, final titer, Over100/Under100, rate of change? 
+# plan to make two objects: one-line-per-subject and longitudinal data
+
+elisa.meta.finalAb <- _____ 
+
+sub.elisa.meta <- subset(elisa.meta, Visit == 'v1w0')
+sub.elisa.meta <- merge(x=olink.data, y = as.data.table(sub.elisa.meta), by.x ='SampleID', by.y = 'Participant', allow.cartesian = T)
+sub.elisa.meta[, c('MedsAtEnrollment', 'PastHistory', 'ImmunizationHx') := NULL]
+matchedNames <- intersect(names(sub.elisa.meta), names(elisa.meta))
+merge.elisa.meta.olink <- merge(x=elisa.meta, y = sub.elisa.meta, by =matchedNames,
+                                all.x =T);  rm(sub.elisa.meta, matchedNames)
+saveRDS(merge.elisa.meta.olink, file = 'outs/elisa_mergeMeta_olink.rds')
+
+```
+
+```{r add-parameters}
+
+
+
+
+```
+
+```{r single-variate-regression}
+
+baseline.dt <- merge.elisa.meta.olink[Visit == "v1w0" & !is.na(Assay) & 
+                                        !is.na(QuantifiedValue) & !is.na(elisa.HBsAb)]
+baseline.dt[, QuantifiedValue.scaled := scale(QuantifiedValue), by = Assay]
+run_regression <- function(sub_dt) {
+  if (nrow(sub_dt) < 5 || uniqueN(sub_dt$StatusAtEnrollment) < 2) {
+    return(list(Estimate = NA_real_, Std_Error = NA_real_, P_Value = NA_real_))
+  }
+  
+model <- lm(elisa.HBsAb ~ QuantifiedValue.scaled + StatusAtEnrollment, data = sub_dt)
+coef_matrix <- summary(model)$coefficients
+if ("QuantifiedValue.scaled" %in% rownames(coef_matrix)) {
+    return(list(
+      Estimate  = coef_matrix["QuantifiedValue.scaled", "Estimate"],
+      Std_Error = coef_matrix["QuantifiedValue.scaled", "Std. Error"],
+      P_Value   = coef_matrix["QuantifiedValue.scaled", "Pr(>|t|)"]
+    ))
+  } else {
+    return(list(Estimate = NA_real_, Std_Error = NA_real_, P_Value = NA_real_))
+  }
+}
+assoc_results <- baseline.dt[, run_regression(.SD), by = Assay]
+assoc_results[, P.adj := p.adjust(P_Value, method='fdr')]
+```
+
+```{r regularized-regression}
+
+
+library(data.table)
+library(glmnet)
+
+# 1. Prepare wide data matrix (same pivot logic as above)
+baseline_dt <- merge.elisa.meta.olink[Visit == "v1w0" & !is.na(Assay) & !is.na(QuantifiedValue)]
+wide_dt <- dcast(baseline_dt, Participant + elisa.HBsAb + StatusAtEnrollment ~ Assay, 
+                 value.var = "QuantifiedValue", 
+                 fun.aggregate = mean)
+wide_dt <- na.omit(wide_dt)
+
+# 2. Separate target (Y) and predictors (X)
+y <- wide_dt$elisa.HBsAb 
+
+# Convert StatusAtEnrollment to a dummy/numeric indicator variable (0 or 1)
+wide_dt[, Status_Numeric := ifelse(StatusAtEnrollment == "HBVimmune", 1, 0)]
+
+# Build the design matrix X (Status_Numeric + all scaled Assay columns)
+assay_cols <- setdiff(names(wide_dt), c("Participant", "elisa.HBsAb", "StatusAtEnrollment", "Status_Numeric"))
+X_assays   = scale(as.matrix(wide_dt[, ..assay_cols]))
+X_matrix   = cbind(Status = wide_dt$Status_Numeric, X_assays)
+
+# 3. Set penalty factors: 0 means do not penalize (forces Status to remain in the model)
+# 1 means penalize normally (applies to all assays)
+penalty_factors <- c(0, rep(1, length(assay_cols)))
+
+# 4. Cross-validated Lasso to find optimal lambda penalty
+set.seed(42) # For reproducibility of cross-validation folds
+cv_lasso <- cv.glmnet(X_matrix, y, 
+                      alpha = 0.5, 
+                      penalty.factor = penalty_factors, 
+                      nfolds = 10)
+
+# Plot coefficients across lambda values
+plot(cv_lasso)
+
+# 5. Extract non-zero coefficients at the optimal lambda (minimum mean squared error)
+best_coefs <- coef(cv_lasso, s = "lambda.min")
+matrix_coefs <- as.matrix(best_coefs)
+selected_features <- matrix_coefs[matrix_coefs[, 1] != 0, , drop = FALSE]
+
+print("Assays cleanly selected by the multivariate model:")
+print(selected_features)
 ```
