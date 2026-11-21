@@ -48,6 +48,7 @@ library(SeuratExtend)  # remotes::install_github("huayc09/SeuratExtend")
 library(miloR)
 library(fgsea)
 library(circlize)
+sessionInfo()
 library(liana) # remotes::install_github('saezlab/liana')
 library(SCopeLoomR)
 library(SCENIC)
@@ -136,7 +137,7 @@ rm(df, obj1)
 ## HBV clonotypes overlay
 
 ```{r hbv-clonotypes-overlay}
-
+if (!exists("obj1.clean")) { obj1.clean <- qs2::qs_read(file = "data/20260921_obj1.clean.qs2")} 
 x <- obj1.clean@meta.data
 x<- x %>% separate(CTaa, into = c("TRA","TRB"), sep = "_", remove=F)
 x <- subset(x, TRB != "NA")
@@ -150,6 +151,9 @@ colnames(x3) <- c("barcode","TRB")
 meta4 <- rbind(x2, x3)  # now contains all of the TCRB in tonsil CD4
 
 # matches in cd4s ln vs hep b iedb
+cd4seq <- readxl::read_excel("data/iedb_hepatitis_b_epitopes.xlsx")
+cd4seq <- cd4seq[,c('Chain 2...53')]  # the 53rd column has the CDR3
+cd4seq <- distinct(cd4seq)  # ~500 duplicates removed
 # if ( requireNamespace("readxl", quietly = TRUE))
 # { 
 #   cd4seq <- readxl::read_excel("data/iedb_hepatitis_b_epitopes.xlsx")
@@ -198,11 +202,8 @@ rstatix::fisher_test(matrix(c(nrow(m), nrow(cd4seq) - nrow(m),
 #*     <dbl>    <dbl> <chr>   
 #1 100006973 8.13e-96 ****    
             
-<<<<<<< HEAD
 rm(x2, x3, meta4, cd4seq, m)
-=======
 rm(x2, x3, meta4)
->>>>>>> 85e14192d503c924e6f596dfdf0271d5e96b260c
 ```
 
 ## Subcluster Tfh
@@ -2323,6 +2324,271 @@ rm(comp_pathways, ranks, top, min_p, selected)
 
 Again, I think this tells me that the Hotspots are not uniform. I see a lot of results that are in-line with expectations. For example, top hit for NES is Tfh-vs-Th1-UP for HOTSPOT_3. But then the next hit is Tfh-vs-LY6Cloweffector_DOWN which does not make sense (same for the next few hits). But anyway these enrichments are weak and the -log10(Padj) do not exceed 1.3 (= Padj\<0.05). So this result may not be reliable.
 
+## Clonal sharing in Tfh subsets
+
+```{r clonal-sharing-among-tfh}
+
+clonotype_df <- tfh@meta.data %>%
+  select(tfh.subset.annotation, CTstrict) %>% # Use your clonotype column name
+  filter(!is.na(CTstrict))
+
+# 2. Identify clones present in more than one cluster
+shared_clones <- clonotype_df %>% group_by(CTstrict) %>%
+  filter(n_distinct(tfh.subset.annotation) > 1) %>% ungroup()
+
+# 3. Create the adjacency matrix (Sharing counts)
+# This counts how many times Cluster A and Cluster B share the same clone
+sharing_matrix <- table(shared_clones$tfh.subset.annotation, shared_clones$CTstrict)
+adjacency_matrix <- sharing_matrix %*% t(sharing_matrix)
+diag(adjacency_matrix) <- 0 # Remove self-sharing to focus on cross-cluster links
+grid_cols = c("TNFR2 subset"   = "skyblue",           # Closest to #80B1D3
+              "GNG4 subset"   = "mediumaquamarine",  # Closest to #8DD3C7
+              "GPR183 subset" = "thistle",           # Closest to #BEBADA
+              "IL7R subset"   = "salmon",            # Closest to #FB8072
+              "HSP subset"   = "sandybrown",        # Closest to #FDB462
+              "VIM subset"   = "yellowgreen"        # Closest to #B3DE69
+              )
+circos.clear()
+pdf(file = 'Images/Tfh-Circos-subsets-clonalSharing.pdf', width = 7, height = 7)
+circos.par(canvas.xlim = c(-1.5, 1.5), 
+           canvas.ylim = c(-1.5, 1.5),
+           gap.after = c(rep(2, length(grid_cols)-1), 10)) # Small gap for readability
+
+# Draw the Chord Diagram but SUPPRESS the default text and axis ticks
+# (annotationTrack = "grid" draws only the colored rings)
+chordDiagram(adjacency_matrix,
+             grid.col = grid_cols,
+             transparency = 0.4,
+             annotationTrack = "grid", # Only the ring, no default text
+             preAllocateTracks = list(track.height = 0.1)) # Allocate outer space
+
+# Add labels manually outside the grids using low-level functions
+circos.track(track.index = 1, 
+             panel.fun = function(x, y)  {
+    # Get info for current sector (the Tfh subset)
+    xlim = get.cell.meta.data("xlim")
+    xcenter = get.cell.meta.data("xcenter")
+    sector.name = get.cell.meta.data("sector.index")
+    clean_name <- gsub(" subset", "", sector.name)
+    circos.text(
+      xcenter,
+      get.cell.meta.data("ylim")[1] + mm_y(2), # Small offset to push text away
+      labels = clean_name, 
+      facing = "clockwise", 
+      niceFacing = TRUE, 
+      adj = c(0, 0.5), # Anchor at the start of the text
+      cex = 0.8       # Font size
+      )
+    # circos.text(xcenter, 1, # Position at top center of outer track
+    #             sector.name, 
+    #             facing = "clockwise", 
+    #             niceFacing = TRUE, # makes text readable 
+    #             adj = c(0, 0.5), # Anchor text at start of text, vertically centered
+    #             cex = 0.8) # Shrink font slightly
+    }, 
+  bg.border = NA) # No border for text track
+dev.off()
+circos.clear()
+
+print(adjacency_matrix)
+rm(adjacency_matrix, shared_clones, clonotype_df, sharing_matrix)
+```
+
+## Assessing clonal diversity
+
+```{r tfh-clonal-diversity}
+
+md <- as.data.table(tfh@meta.data)
+entropy_results <- md[!is.na(CTstrict), .N, by = .(tfh.subset.annotation, CTstrict)][,
+  .(
+    Unique_Clonotypes = .N,
+    Shannon_H = -sum((N/sum(N)) * log(N/sum(N)))
+  ), 
+  by = tfh.subset.annotation]
+
+setorder(entropy_results, -Shannon_H)
+scale_factor <- max(entropy_results$Unique_Clonotypes) / max(entropy_results$Shannon_H)
+ggplot(entropy_results, aes(x = reorder(tfh.subset.annotation, -Shannon_H))) +
+  geom_bar(aes(y = Shannon_H, fill = tfh.subset.annotation), 
+           stat = "identity", color = "black", alpha = 0.7) +
+  # We divide by the scale_factor to bring the numbers down to the Entropy range
+  geom_path(aes(y = Unique_Clonotypes / scale_factor, group = 1), 
+            color = "black", size = 1, linetype = "dashed") +
+  geom_point(aes(y = Unique_Clonotypes / scale_factor), 
+             size = 3, color = "black") +
+  scale_y_continuous(name = "Shannon entropy (H)",
+    sec.axis = sec_axis(~ . * scale_factor, name = "# unique clonotypes")) +
+  scale_fill_manual(values = subset.cols) +
+  theme_minimal() +
+  labs(title = "Tfh clonal landscape", x="") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    axis.title.y.right = element_text(color = "black", margin = margin(l = 10))  )
+# ggsave(filename = 'Images/Tfh-subsets-Entropy-perSubset.pdf', height=3.5, width=2.5)
+
+
+entropy_results <- md[!is.na(CTstrict), .N, by = .(subject, tfh.subset.annotation, CTstrict)][, .(
+  Shannon_H = -sum((N/sum(N)) * log(N/sum(N)))
+    ), by = .(subject, tfh.subset.annotation)]
+
+ggplot(entropy_results, aes(x = tfh.subset.annotation, y = Shannon_H)) +
+  geom_line(aes(group = subject), color = "lightgrey", size = 0.5, alpha = 0.7) +
+  geom_point(aes(color = tfh.subset.annotation), size = 3) +
+  geom_boxplot(aes(fill = tfh.subset.annotation), alpha = 0.2, outlier.shape = NA) +
+  scale_color_manual(values = subset.cols) +
+  scale_fill_manual(values = subset.cols) +
+  theme_minimal() +
+  labs(title = "Clonal entropy by participant", x="", y = "Shannon's entropy (H)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "none")
+ggsave(filename = 'Images/Tfh-subsets-Entropy-perparticipant.pdf', height=3, width=4)
+rm(entropy_results, scale_factor)
+```
+
+## Slingshot trajectory analysis
+
+```{r slingshot-analysis-tfh}
+
+library(slingshot)
+sce <- as.SingleCellExperiment(tfh)
+sce <- slingshot(sce, clusterLabels = 'tfh.subset.annotation', 
+                 reducedDim = 'UMAP')
+pt_matrix <- slingPseudotime(sce)
+tfh$Pseudotime_Lin1 <- pt_matrix[, 1]
+FeaturePlot(tfh, features = "Pseudotime_Lin1", pt.size = 0.7) +
+  scale_color_viridis_c(option = "viridis", name = "Pseudotime") +
+  labs(title = "Tfh Developmental Trajectory") +
+  theme_classic()
+# ggsave(filename = 'Images/Tfh-UMAP-Slingshot-Pseudotime.pdf', height=4, width=5)
+
+tfh.over100 <- subset(tfh, titer.categ=='Over100' )
+tfh.under100 <- subset(tfh, titer.categ=='Under100' )
+sce.over100 <- as.SingleCellExperiment(tfh.over100)
+sce.under100 <- as.SingleCellExperiment(tfh.under100)
+sce.over100 <- slingshot(sce.over100, clusterLabels = 'tfh.subset.annotation', 
+                         reducedDim = 'UMAP')
+sce.under100 <- slingshot(sce.under100, clusterLabels = 'tfh.subset.annotation', 
+                         reducedDim = 'UMAP')
+tfh.over100$Pseudotime_Lin1 <- slingPseudotime(sce.over100)[, 1]
+tfh.under100$Pseudotime_Lin1 <- slingPseudotime(sce.under100)[, 1]
+x<-FeaturePlot(tfh.over100, features = "Pseudotime_Lin1", pt.size = 0.7) +
+  scale_color_viridis_c(option = "viridis", name = "Pseudotime") +
+  labs(title = "Tfh Developmental Trajectory - Over100") + theme_minimal()
+y<-FeaturePlot(tfh.under100, features = "Pseudotime_Lin1", pt.size = 0.7) +
+  scale_color_viridis_c(option = "viridis", name = "Pseudotime") +
+  labs(title = "Tfh Developmental Trajectory - Under100") + theme_minimal()
+x+y
+
+rm(sce.under100, sce.over100, x, y)
+
+
+md <- as.data.table(tfh@meta.data)
+root_audit <- md[!is.na(Pseudotime_Lin1), .(
+  Mean_PT = mean(Pseudotime_Lin1),
+  Median_PT = median(Pseudotime_Lin1)
+), by = tfh.subset.annotation][order(Mean_PT)]
+
+invisible(
+  md[, tfh.subset.annotation := factor(tfh.subset.annotation, 
+                                       levels = rev(root_audit$tfh.subset.annotation))]
+)
+
+ggplot(md[!is.na(Pseudotime_Lin1)], aes(x = Pseudotime_Lin1, 
+                                        y = tfh.subset.annotation, 
+                                        fill = tfh.subset.annotation)) +
+  geom_violin(alpha = 0.5, color = "black", width = 0.6) +
+  ggbeeswarm::geom_beeswarm(cex = 0.5, alpha = 0.5, color = "grey20", corral='wrap') +
+  scale_fill_viridis_d(option = "mako", direction = -1) + 
+  theme_classic() +
+  labs(title = "Unsupervised Slingshot Trajectory",
+       x = "Pseudotime (0 = Math Root)",
+       y = " ") +
+  theme(legend.position = "none")
+# ggsave(filename = 'Images/Tfh-Slingshot-Pseudotime-subsets.pdf', height=3, width=5)
+
+invisible(md[, TCR_beta := sub(".*_", "", CTaa)])
+top_clones <- md[!is.na(CTstrict), .N, by = .(CTstrict, TCR_beta)][order(-N)][1:10]  # filter out NAs so we are only looking at cells with resolved TCRs
+plot_md <- md[CTstrict %in% top_clones$CTstrict & !is.na(Pseudotime_Lin1)]  # Keep top clones AND cells assigned a Pseudotime score
+invisible(
+  plot_md[, TCR_beta := factor(TCR_beta, levels = top_clones[order(N)]$TCR_beta)]  # This ensures the Y-axis follows the maturation (Pseudotime)  
+)
+ggplot(plot_md, aes(x = Pseudotime_Lin1, y = TCR_beta, fill = TCR_beta)) +
+  ggridges::geom_density_ridges(bandwidth = 0.4, scale = 2.5, alpha = 0.8, 
+                                color = "white") +
+  scale_fill_viridis_d(option = "viridis") +
+  ggridges::theme_ridges() +
+  labs(title = "HBV Clonal Maturation", x = "Slingshot Pseudotime", 
+       y = "TCRBeta CDR3aa Sequence") +
+  theme(legend.position = "none", axis.text.y = element_text(size = 8))
+
+# rm(sce, root_audit, plot_md, top_clones, pt_matrix)
+
+# saveRDS(tfh, "20260407_tfh_slingshot.RDS")
+tfh <- readRDS("data/20260407_tfh_slingshot.RDS")
+```
+
+## CytoTRACE2 calculation
+
+```{r tfh-cytotrace2-calculate, eval=FALSE}
+library(CytoTRACE2)
+tfh <- cytotrace2(tfh, is_seurat=T, slot_type = "counts", 
+                  species='human', batch_size = 10000)
+
+res.cytotrace <- cytotrace2(tfh, is_seurat=T, slot_type = "counts", 
+                  species='human', parallelize_models = F)
+plots <- plotData(cytotrace2_result = res.cytotrace, 
+                  annotation = res.cytotrace@meta.data, is_seurat = T)
+plots$CytoTRACE2_Relative_UMAP
+
+```
+
+## CytoTRACE2 analysis and plots
+
+```{r tfh-cytotrace2-makePlots, eval=FALSE}
+md <- as.data.table(res.cytotrace@meta.data)
+summary_md <- md[, .(Mean_Score = mean(CytoTRACE2_Score, na.rm = TRUE),
+  SEM = sd(CytoTRACE2_Score, na.rm = TRUE) / sqrt(.N)), by = tfh.subset.annotation]
+ggplot(summary_md, aes(x = reorder(tfh.subset.annotation, -Mean_Score), 
+                       y = Mean_Score, fill = Mean_Score)) +
+  geom_bar(stat = "identity", color = "black", width = 0.7) +
+  geom_errorbar(aes(ymin = Mean_Score - SEM, ymax = Mean_Score + SEM), width = 0.2) +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  theme_classic() +
+  labs(title = "Average Developmental Potential by Subset",
+       x = "Tfh Subset",
+       y = "Mean CytoTRACE2 Score (High = Primitive)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(md, aes(x = nCount_RNA, y = nFeature_RNA, color = tfh.subset.annotation)) +
+    geom_point(alpha = 0.3, size = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
+    scale_x_log10() + scale_y_log10() +
+    theme_minimal() +
+    labs(title = "Transcriptional Diversity vs. Sequencing Depth",
+         x = "Total RNA Counts (log10)",
+         y = "Unique Genes Detected (log10)")
+
+ggplot(md[!is.na(Pseudotime_Lin1)], aes(x = Pseudotime_Lin1, y = nFeature_RNA, color = tfh.subset.annotation)) +
+  geom_point(alpha = 0.4, size = 1) +
+  # Using a GAM (Generalized Additive Model) to see the non-linear trend
+  geom_smooth(method = "gam", color = "black", linewidth = 1.2) +
+  scale_color_brewer(palette = "Set1") +
+  theme_classic() +
+  labs(title = "Trajectory Audit: Pseudotime vs. Transcriptional Diversity",
+       subtitle = "Is the mathematical timeline driven by gene counts?",
+       x = "Slingshot Pseudotime (Maturation)",
+       y = "nFeature_RNA (Unique Genes Detected)") +
+  theme(legend.title = element_blank())
+
+
+
+rm(summary_md, res.cytotrace, plots)
+```
+
+From this, it seems like Cytotrace is unable to find enough meaningful differences to properly call differentiation, as the result will depend on how transcriptionally diverse the subset is. The presumption is that differentiation -\> less transcriptional diversity but whether that's true for Tfh is unknown. Likely these subsets are relatively similar. The plots for \# features detected vs slingshot pseudotime is interesting and worth coming back to later.
+
+=======
 ## Differential expression by aging
 
 ```{r differential-expression-byAging}
@@ -2366,7 +2632,7 @@ plotDAbeeswarm(da_results, group.by='tfh.subset.annotation', alpha=0.1)
 
 ```
 
-<<<<<<< HEAD
+
 ## Differential expression by titer
 
 ```{r differential-expression-byTiter}
@@ -2800,7 +3066,7 @@ rm(gam_mod, StrongAb, PoorAb, gng4.tf.top, tf.stats, subset.tf.stats,
 
 ```{r import-visiumHD-data-SCtransform, eval=FALSE}
 
-pos <- read_parquet("tissue_positions.parquet")
+pos <- arrow::read_parquet("tissue_positions.parquet")
 write.csv(pos, "tissue_positions.csv", row.names = FALSE)
 
 # 
@@ -2881,6 +3147,1222 @@ obj1.clean <- AddMetaData(obj1.clean, metadata = as.data.frame( vis.cd4@ModuleHo
 VlnPlot2(obj1.clean, features = "HOTSPOT_2", group.by = "titer.categ", pt.size = 0.1, stat.method = "wilcox.test") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
-=======
-## End
->>>>>>> 85e14192d503c924e6f596dfdf0271d5e96b260c
+
+## Analysis of LN-Tfh by aging
+
+```{r differential-expression-byAging}
+tfh <- readRDS("data/20260407_tfh_slingshot.RDS")
+obj1.clean <- qs2::qs_read("data/20260921_obj1.clean.qs2")
+DimPlot(tfh, group.by = "age_group",label = F, pt.size = 1) + ggtitle("Tfh, reclustered")
+
+cluster0 <- subset(tfh, idents = "GNG4 subset")
+Idents(cluster0) <- "age_group"
+deg <- FindMarkers(cluster0, ident.1 = "Older", ident.2 = "Younger", test.use = "wilcox")
+deg$gene_label <- rownames(deg)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() +  
+  scale_color_manual(values = c("steelblue", "grey", "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "GNG4+ Tfh by age_group", x = "log2 Fold Change",y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank())
+
+
+setDT(deg, keep.rownames = "gene")
+topOlder <- deg[diffexpressed == "Up" & (pct.1 > 0.15 | pct.2 > 0.15 )][order(p_val_adj)][1:15,gene]
+topYounger <- deg[diffexpressed == "Down" & (pct.1 > 0.15 | pct.2 > 0.15 )][order(p_val_adj)][1:15,gene]
+age.genes.to.plot <- na.omit(c(topOlder, topYounger))
+age.genes.to.plot <- intersect(age.genes.to.plot, rownames(cluster0[["RNA"]]))
+avg.expression <- AverageExpression(cluster0, features = age.genes.to.plot, group.by = "subject")$RNA
+mat_age <- t(scale(t(as.matrix(avg.expression))))
+subj_meta <- unique(as.data.table(cluster0@meta.data)[, .(subject, Age, age_group, titer.categ, antibody_titer)])
+setorder(subj_meta, Age)
+colnames(mat_age) <- gsub("^g", "", colnames(mat_age))
+if (!all(subj_meta$subject %in% colnames(mat_age))) { colnames(mat_age) <- gsub("_", "-", colnames(mat_age))  }
+subj_meta <- subj_meta[subject %in% colnames(mat_age)]
+mat_age <- mat_age[, subj_meta$subject, drop = FALSE]
+age_col_fun <- circlize::colorRamp2(
+  c(min(subj_meta$Age, na.rm = TRUE), median(subj_meta$Age, na.rm = TRUE), max(subj_meta$Age, na.rm = TRUE)), 
+  c("#f7fcf0", "#4eb3d3", "#084081")
+)
+col_annot_age <- ComplexHeatmap::HeatmapAnnotation(Age = subj_meta$Age, Age_Group = subj_meta$age_group,
+                                                   Titer_Group = subj_meta$titer.categ, col = list(
+                                                     Age = age_col_fun, Age_Group = c("Younger" = "mediumseagreen", 
+                                                                                      "Older" = "slateblue4"),
+                                                     Titer_Group = c("Under100" = "firebrick3", "Over100" = "steelblue")),
+                                                   annotation_name_side = "left", 
+                                                   annotation_name_gp = grid::gpar(fontsize = 9, fontface = "bold"))
+ComplexHeatmap::Heatmap(
+  mat_age,
+  name = "Z-score",
+  top_annotation = col_annot_age,
+  cluster_columns = FALSE, # Keep columns ordered strictly from youngest to oldest participant
+  cluster_rows = TRUE,
+  show_row_dend = TRUE,
+  col = circlize::colorRamp2(c(-1.5, 0, 1.5), c("darkorchid4", "moccasin", "darkorange")),
+  row_names_gp = grid::gpar(fontsize = 8, fontface = "italic"),
+  column_names_gp = grid::gpar(fontsize = 9),
+  column_names_rot = 45,
+  column_title = "GNG4+ Tfh: Top Age-Associated DEGs per Participant (Ordered by Age)",
+  column_title_gp = grid::gpar(fontsize = 11, fontface = "bold"),
+  row_names_side = "right",
+  row_dend_width = unit(10, "mm"),
+  border = TRUE
+)
+
+
+# --- Pseudobulk DE by Age on GNG4 subset to prevent single-donor inflation ---
+
+cluster0 <- subset(tfh, subset = tfh.subset.annotation == "GNG4 subset")
+
+# 1. Aggregate raw counts per donor (pseudobulk)
+pb_counts <- AggregateExpression(
+  cluster0, 
+  assays = "RNA", 
+  return.seurat = FALSE, 
+  group.by = "subject", 
+  slot = "counts"
+)$RNA
+
+# Ensure donor metadata is aligned
+pb_meta <- unique(as.data.table(cluster0@meta.data)[, .(subject, Age, titer.categ)])
+pb_meta <- pb_meta[subject %in% colnames(pb_counts)]
+setkey(pb_meta, subject)
+pb_meta <- pb_meta[colnames(pb_counts)] # Match column order exactly
+
+# Filter low-expression genes across donors
+keep_genes <- rowSums(pb_counts >= 10) >= 3
+pb_counts_filt <- pb_counts[keep_genes, ]
+
+# 2. Run DESeq2 modeling continuous Age
+col_data <- data.frame(
+  subject = pb_meta$subject,
+  Age = as.numeric(pb_meta$Age),
+  titer = factor(pb_meta$titer.categ),
+  row.names = pb_meta$subject
+)
+
+dds <- DESeqDataSetFromMatrix(
+  countData = round(pb_counts_filt),
+  colData = col_data,
+  design = ~ Age
+)
+
+dds <- DESeq(dds)
+res_age <- results(dds, name = "Age")
+res_dt <- as.data.table(as.data.frame(res_age), keep.rownames = "gene")
+setorder(res_dt, pvalue)
+
+# Inspect whether any genes clear FDR < 0.1
+print(head(res_dt[!is.na(padj)], 20))
+sig_age_genes <- res_dt[padj < 0.1, gene]
+
+# 3. If real age-associated genes exist, plot them; otherwise take top nominally significant
+genes_for_heatmap <- if (length(sig_age_genes) >= 10) {
+  sig_age_genes[1:min(30, length(sig_age_genes))]
+} else {
+  # Take top 15 positive and top 15 negative log2FC by nominal p-value
+  c(res_dt[log2FoldChange < 0][order(pvalue)][1:15, gene],
+    res_dt[log2FoldChange > 0][order(pvalue)][1:15, gene])
+}
+genes_for_heatmap <- na.omit(genes_for_heatmap)
+
+# 4. Extract VST-normalized counts for plotting
+vst_mat <- assay(vst(dds, blind = FALSE))[genes_for_heatmap, ]
+mat_age_pb <- t(scale(t(vst_mat)))
+
+# Sort columns strictly by continuous Age
+ordered_subjs <- pb_meta[order(Age), subject]
+mat_age_pb <- mat_age_pb[, ordered_subjs, drop = FALSE]
+pb_meta_ordered <- pb_meta[order(Age)]
+
+# Configure Heatmap Annotations
+age_col_fun <- circlize::colorRamp2(
+  c(min(pb_meta$Age), median(pb_meta$Age), max(pb_meta$Age)), 
+  c("#f7fcf0", "#4eb3d3", "#084081")
+)
+
+col_annot_age <- ComplexHeatmap::HeatmapAnnotation(
+  Age = pb_meta_ordered$Age,
+  Titer_Group = pb_meta_ordered$titer.categ,
+  col = list(
+    Age = age_col_fun,
+    Titer_Group = c("Under100" = "firebrick3", "Over100" = "steelblue")
+  ),
+  annotation_name_side = "left"
+)
+
+# Filter out non-coding RNA and uncharacterized gene IDs for publication display
+annotated_genes <- genes_for_heatmap[!grepl("^(LINC|MIR|ENSG|LOC)", genes_for_heatmap)]
+
+# Re-extract and re-order
+mat_pub <- mat_age_pb[annotated_genes, ]
+
+# Split rows into Age-Up and Age-Down modules based on DESeq2 log2FC
+gene_dir <- ifelse(res_dt[match(annotated_genes, gene), log2FoldChange] > 0, "Enriched in Older", "Enriched in Younger")
+gene_dir <- factor(gene_dir, levels = c("Enriched in Older", "Enriched in Younger"))
+
+ComplexHeatmap::Heatmap(
+  mat_pub,
+  name = "Z-score",
+  top_annotation = col_annot_age,
+  cluster_columns = FALSE,
+  cluster_rows = TRUE,
+  row_split = gene_dir,
+  row_title_gp = grid::gpar(fontsize = 10, fontface = "bold"),
+  show_row_dend = TRUE,
+  col = circlize::colorRamp2(c(-2, 0, 2), c("darkorchid4", "linen", "darkorange")),
+  row_names_gp = grid::gpar(fontsize = 8.5, fontface = "italic"),
+  column_names_gp = grid::gpar(fontsize = 9),
+  column_names_rot = 45,
+  column_title = "GNG4+ Tfh: Age-Associated Gene Expression (Pseudobulk DESeq2)",
+  column_title_gp = grid::gpar(fontsize = 11, fontface = "bold"),
+  row_dend_width = unit(8, "mm"),
+  border = TRUE
+)
+
+volcano_df <- copy(res_dt)
+volcano_df <- volcano_df[!is.na(pvalue) & !is.na(log2FoldChange)]
+
+# Replace p-values of 0 (if any) with the minimum non-zero p-value for plotting
+min_p <- min(volcano_df[pvalue > 0, pvalue], na.rm = TRUE)
+volcano_df[pvalue == 0, pvalue := min_p]
+
+# Categorize significance and direction
+# Using pvalue < 0.05 and |log2FC| > 0.5 given n=10 pseudobulk power
+volcano_df[, diffexpressed := "Not Significant"]
+volcano_df[log2FoldChange > 0.5 & pvalue < 0.05, diffexpressed := "Enriched in Older"]
+volcano_df[log2FoldChange < -0.5 & pvalue < 0.05, diffexpressed := "Enriched in Younger"]
+
+# Filter out unannotated/non-coding RNA labels so priority goes to canonical genes
+candidate_labels <- volcano_df[diffexpressed != "Not Significant" & 
+                               !grepl("^(LINC|MIR|ENSG|LOC)", gene)]
+
+# Select top 12 genes per direction by p-value to label
+top_older_labels <- candidate_labels[diffexpressed == "Enriched in Older"][order(pvalue)][1:12, gene]
+top_younger_labels <- candidate_labels[diffexpressed == "Enriched in Younger"][order(pvalue)][1:12, gene]
+
+volcano_df[, gene_label := ifelse(gene %in% c(top_older_labels, top_younger_labels), gene, "")]
+
+# Determine symmetric x-axis limits
+max_fc <- max(abs(volcano_df$log2FoldChange), na.rm = TRUE)
+x_lim <- ceiling(max_fc) + 0.5
+
+volcano_plot <- ggplot(volcano_df, aes(x = log2FoldChange, y = -log10(pvalue), col = diffexpressed)) +
+  geom_point(alpha = 0.5, size = 1.8) +
+  scale_color_manual(values = c(
+    "Enriched in Younger" = "steelblue",
+    "Not Significant"     = "grey75",
+    "Enriched in Older"   = "firebrick3"
+  )) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed", alpha = 0.5) +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed", alpha = 0.5) +
+  ggrepel::geom_text_repel(
+    aes(label = gene_label),
+    max.overlaps = Inf,
+    box.padding = 0.6,
+    point.padding = 0.4,
+    segment.color = "grey30",
+    segment.size = 0.3,
+    size = 3.8,
+    fontface = "italic",
+    show.legend = FALSE
+  ) +
+  scale_x_continuous(limits = c(-x_lim, x_lim)) +
+  coord_cartesian(clip = "off") +
+  theme_classic() +
+  labs(
+    title = "GNG4+ Tfh: Differential Expression Across Age",
+    subtitle = "Pseudobulk DESeq2 (n = 10 donors; continuous Age model)",
+    x = "log2 Fold Change (per unit increase in Age)",
+    y = "-log10 Nominal P-value"
+  ) +
+  annotate("text", x = x_lim * 0.7, y = max(-log10(volcano_df$pvalue)) * 0.95, 
+           label = "Enriched in Older", color = "firebrick3", fontface = "bold", size = 4.2) +
+  annotate("text", x = -x_lim * 0.7, y = max(-log10(volcano_df$pvalue)) * 0.95, 
+           label = "Enriched in Younger", color = "steelblue", fontface = "bold", size = 4.2) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 10, hjust = 0.5),
+    axis.text = element_text(color = "black", size = 10),
+    axis.title = element_text(size = 11)
+  )
+
+volcano_plot
+
+res_dt[order(padj, decreasing = F)][1:20]
+
+```
+
+There is no robust, biologically meaningful age-associated transcriptional signature in GNG4+ Tfh cells in this dataset.
+
+```{r evaluate-other-tfh-by-age}
+
+md <- as.data.table(obj1.clean@meta.data)
+
+# Aggregate cell counts per participant and subset
+subj_subset_counts <- md[, .N, by = .(subject, Age, age_group, titer.categ, CD4.subset.annotation)]
+subj_subset_counts[, Total_CD4 := sum(N), by = subject]
+subj_subset_counts[, Percentage := (N / Total_CD4) * 100]
+
+# Complete grid to ensure 0% is represented if a subset is missing in a donor
+all_combinations <- CJ(
+  subject = unique(md$subject),
+  CD4.subset.annotation = unique(md$CD4.subset.annotation)
+)
+donor_demo <- unique(md[, .(subject, Age, age_group, titer.categ)])
+full_grid <- merge(all_combinations, donor_demo, by = "subject")
+CD4_freq_df <- merge(full_grid, subj_subset_counts[, .(subject, CD4.subset.annotation, Percentage)], 
+                     by = c("subject", "CD4.subset.annotation"), all.x = TRUE)
+CD4_freq_df[is.na(Percentage), Percentage := 0]
+
+# Ensure factor order aligns with your color scheme
+subset_order <- c("Naive_1", "Fos-Jun", "Effector memory", "Tfh", "Naive_2", "Treg" , "Quiescent memory", "Proliferating" )
+CD4_freq_df[, CD4.subset.annotation := factor(CD4.subset.annotation, levels = subset_order)]
+
+# 2. Statistical Testing
+
+# A. Categorical Comparison: Older vs Younger (<50 vs >=50)
+cat_stats <- CD4_freq_df[, {
+  wt <- wilcox.test(Percentage ~ age_group, exact = FALSE)
+  cd <- rstatix::cohens_d(data = .SD, Percentage ~ age_group)
+  .(
+    Median_Younger = median(Percentage[age_group == "Younger"]),
+    Median_Older   = median(Percentage[age_group == "Older"]),
+    Wilcox_p       = wt$p.value,
+    Cohens_d       = cd$effsize,
+    Magnitude      = cd$magnitude
+  )
+}, by = CD4.subset.annotation]
+cat_stats[, FDR := p.adjust(Wilcox_p, method = "BH")]
+setorder(cat_stats, Wilcox_p)
+
+# B. Continuous Correlation: Percentage vs continuous Age
+cor_stats <- CD4_freq_df[, {
+  sp <- cor.test(Age, Percentage, method = "spearman", exact = FALSE)
+  .(
+    Spearman_rho = sp$estimate,
+    Cor_p        = sp$p.value
+  )
+}, by = CD4.subset.annotation]
+cor_stats[, Cor_FDR := p.adjust(Cor_p, method = "BH")]
+
+# Merge summary table
+age_freq_summary <- merge(cat_stats, cor_stats, by = "CD4.subset.annotation")
+print(age_freq_summary)
+
+
+# 3. Visualization
+
+# Palette from your script
+# subset.cols <- c(
+#   "GNG4 subset"   = "mediumaquamarine",
+#   "HSP subset"    = "darkorange3",
+#   "IL7R subset"   = "salmon",
+#   "GPR183 subset" = "thistle",
+#   "VIM subset"    = "yellowgreen",
+#   "TNFR2 subset"  = "skyblue"
+# )
+
+# Figure A: Boxplot by Age Group (<50 vs >=50)
+p_box <- ggplot(CD4_freq_df, aes(x = age_group, y = Percentage, fill = age_group)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6, width = 0.5) +
+  ggbeeswarm::geom_quasirandom(width = 0.2, size = 2.5, shape = 21, color = "black", alpha = 0.9) +
+  facet_wrap(~CD4.subset.annotation, scales = "free_y", ncol = 3) +
+  scale_fill_manual(values = c("Younger" = "mediumseagreen", "Older" = "slateblue4")) +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.25)), limits = c(0, NA)) +
+  ggpubr::stat_compare_means(method = "wilcox.test", label = "p.format", label.x.npc = "center", label.y.npc = 0.95) +
+  theme_classic() +
+  labs(title = "CD4 Subset Frequencies by Age Group",
+       x = NULL, y = "% of Total CD4") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "none",
+    axis.text = element_text(color = "black")
+  )
+
+print(p_box)
+# ggsave(p_box, filename = "Images/CD4-subsets-frequency-vs-AgeGroup.pdf", height = 5, width = 7.5)
+
+# Figure B: Scatterplot vs Continuous Age
+p_scatter <- ggplot(CD4_freq_df, aes(x = Age, y = Percentage)) +
+  geom_point(aes(color = CD4.subset.annotation, shape = titer.categ), size = 3, alpha = 0.85) +
+  geom_smooth(method = "lm", se = TRUE, color = "grey30", linewidth = 0.8, fill = "grey80", alpha = 0.4) +
+  facet_wrap(~CD4.subset.annotation, scales = "free_y", ncol = 3) +
+  # scale_color_manual(values = subset.cols) +
+  scale_shape_manual(values = c("Over100" = 16, "Under100" = 17)) +
+  ggpubr::stat_cor(method = "spearman", label.x.npc = "left", label.y.npc = 0.95, size = 3.5) +
+  theme_classic() +
+  labs(title = "CD4 Subset Frequencies across Continuous Age",
+       x = "Age (Years)", y = "% of Total CD4",
+       shape = "Titer Group") +
+  guides(color = "none") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "top",
+    axis.text = element_text(color = "black")
+  )
+
+print(p_scatter)
+
+
+
+# 1. Compute subset frequencies per participant
+md <- as.data.table(tfh@meta.data)
+
+# Aggregate cell counts per participant and subset
+subj_subset_counts <- md[, .N, by = .(subject, Age, age_group, titer.categ, tfh.subset.annotation)]
+subj_subset_counts[, Total_Tfh := sum(N), by = subject]
+subj_subset_counts[, Percentage := (N / Total_Tfh) * 100]
+
+# Complete grid to ensure 0% is represented if a subset is missing in a donor
+all_combinations <- CJ(
+  subject = unique(md$subject),
+  tfh.subset.annotation = unique(md$tfh.subset.annotation)
+)
+donor_demo <- unique(md[, .(subject, Age, age_group, titer.categ)])
+full_grid <- merge(all_combinations, donor_demo, by = "subject")
+tfh_freq_df <- merge(full_grid, subj_subset_counts[, .(subject, tfh.subset.annotation, Percentage)], 
+                     by = c("subject", "tfh.subset.annotation"), all.x = TRUE)
+tfh_freq_df[is.na(Percentage), Percentage := 0]
+
+# Ensure factor order aligns with your color scheme
+subset_order <- c("GNG4 subset", "HSP subset", "IL7R subset", "GPR183 subset", "VIM subset", "TNFR2 subset")
+tfh_freq_df[, tfh.subset.annotation := factor(tfh.subset.annotation, levels = subset_order)]
+
+# 2. Statistical Testing
+
+# A. Categorical Comparison: Older vs Younger (<50 vs >=50)
+cat_stats <- tfh_freq_df[, {
+  wt <- wilcox.test(Percentage ~ age_group, exact = FALSE)
+  cd <- rstatix::cohens_d(data = .SD, Percentage ~ age_group)
+  .(
+    Median_Younger = median(Percentage[age_group == "Younger"]),
+    Median_Older   = median(Percentage[age_group == "Older"]),
+    Wilcox_p       = wt$p.value,
+    Cohens_d       = cd$effsize,
+    Magnitude      = cd$magnitude
+  )
+}, by = tfh.subset.annotation]
+cat_stats[, FDR := p.adjust(Wilcox_p, method = "BH")]
+setorder(cat_stats, Wilcox_p)
+
+# B. Continuous Correlation: Percentage vs continuous Age
+cor_stats <- tfh_freq_df[, {
+  sp <- cor.test(Age, Percentage, method = "spearman", exact = FALSE)
+  .(
+    Spearman_rho = sp$estimate,
+    Cor_p        = sp$p.value
+  )
+}, by = tfh.subset.annotation]
+cor_stats[, Cor_FDR := p.adjust(Cor_p, method = "BH")]
+
+# Merge summary table
+age_freq_summary <- merge(cat_stats, cor_stats, by = "tfh.subset.annotation")
+print(age_freq_summary)
+
+
+# 3. Visualization
+
+# Palette from your script
+subset.cols <- c(
+  "GNG4 subset"   = "mediumaquamarine",
+  "HSP subset"    = "darkorange3",
+  "IL7R subset"   = "salmon",
+  "GPR183 subset" = "thistle",
+  "VIM subset"    = "yellowgreen",
+  "TNFR2 subset"  = "skyblue"
+)
+
+# Figure A: Boxplot by Age Group (<50 vs >=50)
+p_box <- ggplot(tfh_freq_df, aes(x = age_group, y = Percentage, fill = age_group)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6, width = 0.5) +
+  ggbeeswarm::geom_quasirandom(width = 0.2, size = 2.5, shape = 21, color = "black", alpha = 0.9) +
+  facet_wrap(~tfh.subset.annotation, scales = "free_y", ncol = 3) +
+  scale_fill_manual(values = c("Younger" = "mediumseagreen", "Older" = "slateblue4")) +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.25)), limits = c(0, NA)) +
+  ggpubr::stat_compare_means(method = "wilcox.test", label = "p.format", label.x.npc = "center", label.y.npc = 0.95) +
+  theme_classic() +
+  labs(title = "Tfh Subset Frequencies by Age Group",
+       x = NULL, y = "% of Total Tfh") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "none",
+    axis.text = element_text(color = "black")
+  )
+
+print(p_box)
+# ggsave(p_box, filename = "Images/Tfh-subsets-frequency-vs-AgeGroup.pdf", height = 5, width = 7.5)
+
+# Figure B: Scatterplot vs Continuous Age
+p_scatter <- ggplot(tfh_freq_df, aes(x = Age, y = Percentage)) +
+  geom_point(aes(color = tfh.subset.annotation, shape = titer.categ), size = 3, alpha = 0.85) +
+  geom_smooth(method = "lm", se = TRUE, color = "grey30", linewidth = 0.8, fill = "grey80", alpha = 0.4) +
+  facet_wrap(~tfh.subset.annotation, scales = "free_y", ncol = 3) +
+  scale_color_manual(values = subset.cols) +
+  scale_shape_manual(values = c("Over100" = 16, "Under100" = 17)) +
+  ggpubr::stat_cor(method = "spearman", label.x.npc = "left", label.y.npc = 0.95, size = 3.5) +
+  theme_classic() +
+  labs(title = "Tfh Subset Frequencies across Continuous Age",
+       x = "Age (Years)", y = "% of Total Tfh",
+       shape = "Titer Group") +
+  guides(color = "none") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "top",
+    axis.text = element_text(color = "black")
+  )
+
+print(p_scatter)
+# ggsave(p_scatter, filename = "Images/Tfh-subsets-frequency-vs-ContinuousAge.pdf", height = 5, width = 7.5)
+
+```
+
+# focus on il7R subset
+
+```{r evaluate-deg-by-aging-il7r}
+
+# ==============================================================================
+# 1. IL7R SUBSET: PSEUDOBULK DIFFERENTIAL EXPRESSION ACROSS AGE (DESeq2)
+# ==============================================================================
+
+library(DESeq2)
+library(data.table)
+library(ComplexHeatmap)
+library(circlize)
+library(ggplot2)
+library(ggrepel)
+
+# Subset to IL7R Tfh cells
+il7r.cells <- subset(tfh, subset = tfh.subset.annotation == "IL7R subset")
+
+# Aggregate raw counts per donor (pseudobulk)
+pb_counts_il7r <- AggregateExpression(
+  il7r.cells, 
+  assays = "RNA", 
+  return.seurat = FALSE, 
+  group.by = "subject", 
+  slot = "counts"
+)$RNA
+
+# Extract and align donor metadata
+pb_meta_il7r <- unique(as.data.table(il7r.cells@meta.data)[, .(subject, Age, age_group, titer.categ)])
+pb_meta_il7r <- pb_meta_il7r[subject %in% colnames(pb_counts_il7r)]
+setkey(pb_meta_il7r, subject)
+pb_meta_il7r <- pb_meta_il7r[colnames(pb_counts_il7r)]
+
+# Filter low-expression genes (require >=10 counts in at least 3 donors)
+keep_genes_il7r <- rowSums(pb_counts_il7r >= 10) >= 3
+pb_counts_il7r_filt <- pb_counts_il7r[keep_genes_il7r, ]
+
+# Run DESeq2 modeling continuous Age
+col_data_il7r <- data.frame(
+  subject = pb_meta_il7r$subject,
+  Age = as.numeric(pb_meta_il7r$Age),
+  titer = factor(pb_meta_il7r$titer.categ),
+  row.names = pb_meta_il7r$subject
+)
+
+dds_il7r <- DESeqDataSetFromMatrix(
+  countData = round(pb_counts_il7r_filt),
+  colData = col_data_il7r,
+  design = ~ Age
+)
+
+dds_il7r <- DESeq(dds_il7r)
+res_age_il7r <- results(dds_il7r, name = "Age")
+res_dt_il7r <- as.data.table(as.data.frame(res_age_il7r), keep.rownames = "gene")
+setorder(res_dt_il7r, pvalue)
+
+print("Top 20 pseudobulk hits by p-value in IL7R subset:")
+print(head(res_dt_il7r[!is.na(pvalue)], 20))
+
+# --- Volcano Plot (IL7R DE by Age) ---
+volcano_il7r <- copy(res_dt_il7r[!is.na(pvalue) & !is.na(log2FoldChange)])
+min_p <- min(volcano_il7r[pvalue > 0, pvalue], na.rm = TRUE)
+volcano_il7r[pvalue == 0, pvalue := min_p]
+
+volcano_il7r[, diffexpressed := "Not Significant"]
+volcano_il7r[log2FoldChange > 0.05 & pvalue < 0.05, diffexpressed := "Enriched in Older"]
+volcano_il7r[log2FoldChange < -0.05 & pvalue < 0.05, diffexpressed := "Enriched in Younger"]
+
+candidate_labels <- volcano_il7r[diffexpressed != "Not Significant" & !grepl("^(LINC|MIR|ENSG|LOC)", gene)]
+top_older_labels <- candidate_labels[diffexpressed == "Enriched in Older"][order(pvalue)][1:10, gene]
+top_younger_labels <- candidate_labels[diffexpressed == "Enriched in Younger"][order(pvalue)][1:10, gene]
+volcano_il7r[, gene_label := ifelse(gene %in% c(top_older_labels, top_younger_labels), gene, "")]
+
+p_volcano_il7r <- ggplot(volcano_il7r, aes(x = log2FoldChange, y = -log10(pvalue), col = diffexpressed)) +
+  geom_point(alpha = 0.5, size = 1.8) +
+  scale_color_manual(values = c("Enriched in Younger" = "steelblue", "Not Significant" = "grey75", "Enriched in Older" = "firebrick3")) +
+  geom_vline(xintercept = c(-0.05, 0.05), col = "black", linetype = "dashed", alpha = 0.5) +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed", alpha = 0.5) +
+  ggrepel::geom_text_repel(aes(label = gene_label), max.overlaps = Inf, box.padding = 0.6, fontface = "italic", show.legend = FALSE) +
+  theme_classic() +
+  labs(
+    title = "IL7R+ Tfh: Differential Expression Across Age",
+    subtitle = "Pseudobulk DESeq2 (continuous Age model)",
+    x = "log2 Fold Change (per year of Age)",
+    y = "-log10 Nominal P-value"
+  ) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold", hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+print(p_volcano_il7r)
+
+
+# ==============================================================================
+# 2. IL7R SUBSET: CLONAL DIVERSITY AND SHANNON ENTROPY ACROSS AGE
+# ==============================================================================
+
+library(rstatix)
+
+md <- as.data.table(tfh@meta.data)
+
+# Calculate Shannon entropy and unique clonotypes per subject for each subset
+entropy_by_subject <- md[!is.na(CTstrict), .N, by = .(subject, Age, age_group, titer.categ, tfh.subset.annotation, CTstrict)][, .(
+  Total_Cells       = sum(N),
+  Unique_Clonotypes = .N,
+  Shannon_H         = -sum((N / sum(N)) * log(N / sum(N)))
+), by = .(subject, Age, age_group, titer.categ, tfh.subset.annotation)]
+
+# Calculate normalized entropy (evenness: Shannon_H / ln(Unique_Clonotypes)) to account for cell count differences
+entropy_by_subject[, Pielou_Evenness := ifelse(Unique_Clonotypes > 1, Shannon_H / log(Unique_Clonotypes), 0)]
+
+# Filter to IL7R subset
+il7r_entropy <- entropy_by_subject[tfh.subset.annotation == "IL7R subset"]
+
+# Statistical testing across continuous Age
+cor_shannon <- cor.test(il7r_entropy$Age, il7r_entropy$Shannon_H, method = "spearman", exact = FALSE)
+cor_unique  <- cor.test(il7r_entropy$Age, il7r_entropy$Unique_Clonotypes, method = "spearman", exact = FALSE)
+cor_even    <- cor.test(il7r_entropy$Age, il7r_entropy$Pielou_Evenness, method = "spearman", exact = FALSE)
+
+cat("\n--- IL7R Subset Clonal Diversity vs. Age (Spearman) ---\n")
+cat("Shannon Entropy (H):  R =", round(cor_shannon$estimate, 3), "| p =", format.pval(cor_shannon$p.value, digits = 3), "\n")
+cat("Unique Clonotypes:    R =", round(cor_unique$estimate, 3),  "| p =", format.pval(cor_unique$p.value, digits = 3), "\n")
+cat("Clonal Evenness (J):  R =", round(cor_even$estimate, 3),    "| p =", format.pval(cor_even$p.value, digits = 3), "\n")
+
+# --- Diversity Visualization across Age ---
+p_entropy <- ggplot(il7r_entropy, aes(x = Age, y = Shannon_H)) +
+  geom_point(aes(shape = titer.categ), fill = "salmon", color = "black", size = 3.5, alpha = 0.9) +
+  geom_smooth(method = "lm", se = TRUE, color = "salmon4", fill = "salmon", alpha = 0.2, linewidth = 0.9) +
+  scale_shape_manual(values = c("Over100" = 21, "Under100" = 24)) +
+  ggpubr::stat_cor(method = "spearman", label.x.npc = "left", label.y.npc = 0.95, size = 4) +
+  theme_classic() +
+  labs(
+    title = "IL7R+ Tfh Clonal Diversity vs. Age",
+    subtitle = "Participant-level Shannon Entropy (H)",
+    x = "Participant Age (Years)",
+    y = "Shannon's Entropy (H)",
+    shape = "Titer Group"
+  ) +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+p_clones <- ggplot(il7r_entropy, aes(x = Age, y = Unique_Clonotypes)) +
+  geom_point(aes(shape = titer.categ), fill = "salmon", color = "black", size = 3.5, alpha = 0.9) +
+  geom_smooth(method = "lm", se = TRUE, color = "salmon4", fill = "salmon", alpha = 0.2, linewidth = 0.9) +
+  scale_shape_manual(values = c("Over100" = 21, "Under100" = 24)) +
+  ggpubr::stat_cor(method = "spearman", label.x.npc = "left", label.y.npc = 0.95, size = 4) +
+  theme_classic() +
+  labs(
+    title = "IL7R+ Tfh Unique Repertoire Size vs. Age",
+    subtitle = "Number of Distinct CDR3 Sequences",
+    x = "Participant Age (Years)",
+    y = "Unique Clonotypes (Count)",
+    shape = "Titer Group"
+  ) +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+
+library(patchwork)
+p_entropy + p_clones
+
+# ==============================================================================
+# MSigDB Hallmark Pathway Analysis: IL7R Subset Across Age
+# ==============================================================================
+
+library(fgsea)
+library(msigdbr)
+library(data.table)
+library(ggplot2)
+
+# ------------------------------------------------------------------------------
+# 1. Preranked FGSEA on Continuous Age DESeq2 Statistics
+# ------------------------------------------------------------------------------
+
+# Retrieve MSigDB Hallmark gene sets (Homo sapiens)
+hallmark_df <- msigdbr(species = "Homo sapiens", category = "H")
+hallmark_list <- split(hallmark_df$gene_symbol, hallmark_df$gs_name)
+
+# Generate a continuous rank metric from pseudobulk DESeq2 results (res_dt_il7r)
+# sign(log2FC) * -log10(pvalue) captures directionality and statistical confidence
+ranks_dt <- copy(res_dt_il7r[!is.na(pvalue) & !is.na(log2FoldChange)])
+min_p <- min(ranks_dt[pvalue > 0, pvalue], na.rm = TRUE)
+ranks_dt[pvalue == 0, pvalue := min_p]
+ranks_dt[, rank_metric := sign(log2FoldChange) * -log10(pvalue)]
+
+ranks_age <- ranks_dt$rank_metric
+names(ranks_age) <- ranks_dt$gene
+ranks_age <- sort(ranks_age, decreasing = TRUE)
+
+# Run fgsea
+set.seed(42)
+fgsea_age <- fgsea(
+  pathways = hallmark_list, 
+  stats = ranks_age, 
+  minSize = 10, 
+  maxSize = 500,
+  nPermSimple = 10000
+)
+
+setDT(fgsea_age)
+fgsea_age[, pathway := gsub("HALLMARK_", "", pathway)]
+setorder(fgsea_age, -NES)
+
+print("Top Hallmark GSEA Hits by NES across Age in IL7R Subset:")
+print(fgsea_age[, .(pathway, NES, pval, padj, size)][1:15])
+
+# Lollipop Plot of Top Enriched Hallmark Signatures
+top_gsea <- rbind(
+  fgsea_age[NES > 0][order(-NES)][1:min(10, .N)],
+  fgsea_age[NES < 0][order(NES)][1:min(10, .N)]
+)
+top_gsea <- top_gsea[!is.na(pathway)]
+top_gsea[, pathway := factor(pathway, levels = pathway[order(NES)])]
+top_gsea[, direction := ifelse(NES > 0, "Enriched with Age", "Decreased with Age")]
+
+p_gsea <- ggplot(top_gsea, aes(x = NES, y = pathway)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
+  geom_segment(aes(x = 0, xend = NES, y = pathway, yend = pathway), color = "grey70", linewidth = 1) +
+  geom_point(aes(fill = direction, size = -log10(pval)), shape = 21, color = "black") +
+  scale_fill_manual(values = c("Enriched with Age" = "firebrick3", "Decreased with Age" = "steelblue")) +
+  scale_size_continuous(range = c(2, 7), name = "-log10(p-value)") +
+  theme_classic() +
+  labs(
+    title = "IL7R+ Tfh: Hallmark Pathways Across Age",
+    subtitle = "Preranked GSEA (Continuous Age Pseudobulk Model)",
+    x = "Normalized Enrichment Score (NES)",
+    y = NULL,
+    fill = NULL
+  ) +
+  theme(
+    axis.text.y = element_text(size = 9, color = "black"),
+    plot.title = element_text(face = "bold", size = 12),
+    legend.position = "right"
+  )
+
+print(p_gsea)
+# ggsave(p_gsea, filename = "Images/IL7R-Hallmark-GSEA-Age.pdf", height = 5.5, width = 7.5)
+
+
+# ------------------------------------------------------------------------------
+# 2. SCPA Multivariate Pathway Comparison: Younger vs. Older IL7R+ Tfh
+# ------------------------------------------------------------------------------
+
+# Compare multivariate gene-gene correlation structures between Age Groups
+il7r.cells <- subset(tfh, subset = tfh.subset.annotation == "IL7R subset")
+
+# Format count matrices using the normalized SCT assay
+mat_younger <- as.matrix(GetAssayData(il7r.cells, assay = "SCT", slot = "data")[, il7r.cells$age_group == "Younger"])
+mat_older   <- as.matrix(GetAssayData(il7r.cells, assay = "SCT", slot = "data")[, il7r.cells$age_group == "Older"])
+
+pathways_scpa <- hallmark_df %>% SCPA::format_pathways()
+
+scpa_age <- SCPA::compare_pathways(
+  samples = list(mat_older, mat_younger),
+  pathways = pathways_scpa
+)
+
+scpa_age <- scpa_age %>%
+  mutate(adjPvalBH = p.adjust(Pval, method = "BH"),
+         logP = -log10(adjPvalBH)) %>%
+  arrange(desc(qval))
+
+setDT(scpa_age)
+scpa_age[, direction := ifelse(FC > 0, "Older", "Younger")]
+scpa_age[, pathway := gsub("HALLMARK_", "", Pathway)]
+
+plot_scpa <- scpa_age[order(-qval), head(.SD, 10), by = direction]
+plot_scpa <- plot_scpa[order(FC)]
+plot_scpa[, pathway := factor(pathway, levels = pathway)]
+
+p_scpa <- ggplot(plot_scpa, aes(x = FC, y = pathway)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey70") +
+  geom_segment(aes(x = 0, xend = FC, y = pathway, yend = pathway), color = "grey60", linewidth = 1) +
+  geom_point(aes(size = logP, fill = FC), shape = 21, color = "black") +
+  scale_fill_gradient2(
+    low = "steelblue", 
+    mid = "grey95", 
+    high = "firebrick4", 
+    midpoint = 0, 
+    name = "Fold Change"
+  ) +
+  scale_size_continuous(range = c(2, 8), name = "-log10(adjP)") +
+  theme_classic() +
+  labs(
+    title = "IL7R+ Tfh: SCPA Hallmark Pathway Shifts",
+    subtitle = "Multivariate Distribution Changes (Older vs. Younger)",
+    x = "Fold Change (FC)", y = NULL ) +
+  theme(
+    axis.text.y = element_text(size = 9, color = "black"),
+    panel.grid.major.y = element_line(color = "grey92", linewidth = 0.5),
+    plot.title = element_text(face = "bold", size = 12)
+  )
+
+print(p_scpa)
+# ggsave(p_scpa, filename = "Images/IL7R-SCPA-Hallmark-Age.pdf", height = 5.5, width = 7)
+```
+
+# BMI-focused analysis
+
+```{r bmi-focused}
+
+# ==============================================================================
+# 1. SETUP BMI GROUPS & GNG4+ TFH DIFFERENTIAL EXPRESSION BY BMI
+# ==============================================================================
+
+# Ensure BMI is numeric and create categorical stratification (cutoff = 30 kg/m^2)
+tfh$BMI <- as.numeric(tfh$BMI)
+tfh$bmi_group <- ifelse(tfh$BMI >= 30, "Obese", "Non-Obese")
+tfh$bmi_group <- factor(tfh$bmi_group, levels = c("Non-Obese", "Obese"))
+
+if (exists("obj1.clean")) {
+  obj1.clean$BMI <- as.numeric(obj1.clean$BMI)
+  obj1.clean$bmi_group <- ifelse(obj1.clean$BMI >= 30, "Obese", "Non-Obese")
+  obj1.clean$bmi_group <- factor(obj1.clean$bmi_group, levels = c("Non-Obese", "Obese"))
+}
+
+DimPlot(tfh, group.by = "bmi_group", label = FALSE, pt.size = 1) + 
+  ggtitle("Tfh, reclustered by BMI Group")
+
+# Cell-level DE on GNG4 subset (Obese vs Non-Obese)
+Idents(tfh) <- "tfh.subset.annotation"
+cluster0 <- subset(tfh, idents = "GNG4 subset")
+Idents(cluster0) <- "bmi_group"
+
+deg <- FindMarkers(cluster0, ident.1 = "Obese", ident.2 = "Non-Obese", test.use = "wilcox")
+deg$gene_label <- rownames(deg)
+deg$diffexpressed <- "Not Significant"
+deg$diffexpressed[deg$avg_log2FC > 0.5 & deg$p_val_adj < 0.05] <- "Up"
+deg$diffexpressed[deg$avg_log2FC < -0.5 & deg$p_val_adj < 0.05] <- "Down"
+top_genes <- rownames(deg[deg$diffexpressed != "Not Significant", ])[1:90]
+deg$gene_label[rownames(deg) %in% top_genes] <- rownames(deg)[rownames(deg) %in% top_genes]
+
+ggplot(data = deg, aes(x = avg_log2FC, y = -log10(p_val_adj), col = diffexpressed, label = gene_label)) +
+  geom_point(alpha = 0.4, size = 1.5) + theme_minimal() +
+  ggrepel::geom_text_repel() +  
+  scale_color_manual(values = c("Down" = "steelblue", "Not Significant" = "grey", "Up" = "firebrick3")) +
+  geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed") +
+  labs(title = "GNG4+ Tfh by bmi_group (Obese vs. Non-Obese)", x = "log2 Fold Change", y = "-log10 Adjusted P-value") +
+  theme(legend.title = element_blank())
+
+# Cell-level DEG Heatmap ordered by continuous BMI
+setDT(deg, keep.rownames = "gene")
+topObese    <- deg[diffexpressed == "Up" & (pct.1 > 0.15 | pct.2 > 0.15)][order(p_val_adj)][1:15, gene]
+topNonObese <- deg[diffexpressed == "Down" & (pct.1 > 0.15 | pct.2 > 0.15)][order(p_val_adj)][1:15, gene]
+bmi.genes.to.plot <- na.omit(c(topObese, topNonObese))
+bmi.genes.to.plot <- intersect(bmi.genes.to.plot, rownames(cluster0[["RNA"]]))
+
+avg.expression <- AverageExpression(cluster0, features = bmi.genes.to.plot, group.by = "subject")$RNA
+mat_bmi <- t(scale(t(as.matrix(avg.expression))))
+
+subj_meta <- unique(as.data.table(cluster0@meta.data)[, .(subject, BMI, bmi_group, titer.categ, antibody_titer)])
+setorder(subj_meta, BMI)
+
+colnames(mat_bmi) <- gsub("^g", "", colnames(mat_bmi))
+if (!all(subj_meta$subject %in% colnames(mat_bmi))) { colnames(mat_bmi) <- gsub("_", "-", colnames(mat_bmi)) }
+subj_meta <- subj_meta[subject %in% colnames(mat_bmi)]
+mat_bmi <- mat_bmi[, subj_meta$subject, drop = FALSE]
+
+bmi_col_fun <- circlize::colorRamp2(
+  c(min(subj_meta$BMI, na.rm = TRUE), median(subj_meta$BMI, na.rm = TRUE), max(subj_meta$BMI, na.rm = TRUE)), 
+  c("#f7fcf0", "#4eb3d3", "#084081")
+)
+
+col_annot_bmi <- ComplexHeatmap::HeatmapAnnotation(
+  BMI = subj_meta$BMI, 
+  BMI_Group = subj_meta$bmi_group,
+  Titer_Group = subj_meta$titer.categ, 
+  col = list(
+    BMI = bmi_col_fun, 
+    BMI_Group = c("Non-Obese" = "mediumseagreen", "Obese" = "slateblue4"),
+    Titer_Group = c("Under100" = "firebrick3", "Over100" = "steelblue")
+  ),
+  annotation_name_side = "left", 
+  annotation_name_gp = grid::gpar(fontsize = 9, fontface = "bold")
+)
+
+ComplexHeatmap::Heatmap(
+  mat_bmi,
+  name = "Z-score",
+  top_annotation = col_annot_bmi,
+  cluster_columns = FALSE, # Ordered strictly from lowest to highest BMI
+  cluster_rows = TRUE,
+  show_row_dend = TRUE,
+  col = circlize::colorRamp2(c(-1.5, 0, 1.5), c("darkorchid4", "moccasin", "darkorange")),
+  row_names_gp = grid::gpar(fontsize = 8, fontface = "italic"),
+  column_names_gp = grid::gpar(fontsize = 9),
+  column_names_rot = 45,
+  column_title = "GNG4+ Tfh: Top BMI-Associated DEGs per Participant (Ordered by BMI)",
+  column_title_gp = grid::gpar(fontsize = 11, fontface = "bold"),
+  row_names_side = "right",
+  row_dend_width = unit(10, "mm"),
+  border = TRUE
+)
+
+
+# ==============================================================================
+# 2. PSEUDOBULK DE BY CONTINUOUS BMI ON GNG4 SUBSET (DESeq2)
+# ==============================================================================
+
+cluster0 <- subset(tfh, subset = tfh.subset.annotation == "GNG4 subset")
+
+pb_counts <- AggregateExpression(
+  cluster0, 
+  assays = "RNA", 
+  return.seurat = FALSE, 
+  group.by = "subject", 
+  slot = "counts"
+)$RNA
+
+pb_meta <- unique(as.data.table(cluster0@meta.data)[, .(subject, BMI, titer.categ)])
+pb_meta <- pb_meta[!is.na(BMI) & subject %in% colnames(pb_counts)]
+setkey(pb_meta, subject)
+pb_counts <- pb_counts[, pb_meta$subject, drop = FALSE]
+
+keep_genes <- rowSums(pb_counts >= 10) >= 3
+pb_counts_filt <- pb_counts[keep_genes, ]
+
+col_data <- data.frame(
+  subject = pb_meta$subject,
+  BMI = as.numeric(pb_meta$BMI),
+  titer = factor(pb_meta$titer.categ),
+  row.names = pb_meta$subject
+)
+
+dds <- DESeqDataSetFromMatrix(
+  countData = round(pb_counts_filt),
+  colData = col_data,
+  design = ~ BMI
+)
+
+dds <- DESeq(dds)
+res_bmi <- results(dds, name = "BMI")
+res_dt <- as.data.table(as.data.frame(res_bmi), keep.rownames = "gene")
+setorder(res_dt, pvalue)
+
+print(head(res_dt[!is.na(padj)], 20))
+sig_bmi_genes <- res_dt[padj < 0.1, gene]
+
+genes_for_heatmap <- if (length(sig_bmi_genes) >= 10) {
+  sig_bmi_genes[1:min(30, length(sig_bmi_genes))]
+} else {
+  c(res_dt[log2FoldChange < 0][order(pvalue)][1:15, gene],
+    res_dt[log2FoldChange > 0][order(pvalue)][1:15, gene])
+}
+genes_for_heatmap <- na.omit(genes_for_heatmap)
+
+vst_mat <- assay(vst(dds, blind = FALSE))[genes_for_heatmap, ]
+mat_bmi_pb <- t(scale(t(vst_mat)))
+
+ordered_subjs <- pb_meta[order(BMI), subject]
+mat_bmi_pb <- mat_bmi_pb[, ordered_subjs, drop = FALSE]
+pb_meta_ordered <- pb_meta[order(BMI)]
+
+bmi_col_fun <- circlize::colorRamp2(
+  c(min(pb_meta$BMI), median(pb_meta$BMI), max(pb_meta$BMI)), 
+  c("#f7fcf0", "#4eb3d3", "#084081")
+)
+
+col_annot_bmi <- ComplexHeatmap::HeatmapAnnotation(
+  BMI = pb_meta_ordered$BMI,
+  Titer_Group = pb_meta_ordered$titer.categ,
+  col = list(
+    BMI = bmi_col_fun,
+    Titer_Group = c("Under100" = "firebrick3", "Over100" = "steelblue")
+  ),
+  annotation_name_side = "left"
+)
+
+annotated_genes <- genes_for_heatmap[!grepl("^(LINC|MIR|ENSG|LOC)", genes_for_heatmap)]
+mat_pub <- mat_bmi_pb[annotated_genes, ]
+
+gene_dir <- ifelse(res_dt[match(annotated_genes, gene), log2FoldChange] > 0, "Enriched in High BMI", "Enriched in Low BMI")
+gene_dir <- factor(gene_dir, levels = c("Enriched in High BMI", "Enriched in Low BMI"))
+
+ComplexHeatmap::Heatmap(
+  mat_pub,
+  name = "Z-score",
+  top_annotation = col_annot_bmi,
+  cluster_columns = FALSE,
+  cluster_rows = TRUE,
+  row_split = gene_dir,
+  row_title_gp = grid::gpar(fontsize = 10, fontface = "bold"),
+  show_row_dend = TRUE,
+  col = circlize::colorRamp2(c(-2, 0, 2), c("darkorchid4", "linen", "darkorange")),
+  row_names_gp = grid::gpar(fontsize = 8.5, fontface = "italic"),
+  column_names_gp = grid::gpar(fontsize = 9),
+  column_names_rot = 45,
+  column_title = "GNG4+ Tfh: BMI-Associated Gene Expression (Pseudobulk DESeq2)",
+  column_title_gp = grid::gpar(fontsize = 11, fontface = "bold"),
+  row_dend_width = unit(8, "mm"),
+  border = TRUE
+)
+
+# Pseudobulk Volcano Plot for BMI
+volcano_df <- copy(res_dt)
+volcano_df <- volcano_df[!is.na(pvalue) & !is.na(log2FoldChange)]
+
+min_p <- min(volcano_df[pvalue > 0, pvalue], na.rm = TRUE)
+volcano_df[pvalue == 0, pvalue := min_p]
+
+volcano_df[, diffexpressed := "Not Significant"]
+volcano_df[log2FoldChange > 0.2 & pvalue < 0.05, diffexpressed := "Enriched in High BMI"]
+volcano_df[log2FoldChange < -0.2 & pvalue < 0.05, diffexpressed := "Enriched in Low BMI"]
+
+candidate_labels <- volcano_df[diffexpressed != "Not Significant" & !grepl("^(LINC|MIR|ENSG|LOC)", gene)]
+top_high_labels <- candidate_labels[diffexpressed == "Enriched in High BMI"][order(pvalue)][1:12, gene]
+top_low_labels  <- candidate_labels[diffexpressed == "Enriched in Low BMI"][order(pvalue)][1:12, gene]
+
+volcano_df[, gene_label := ifelse(gene %in% c(top_high_labels, top_low_labels), gene, "")]
+
+max_fc <- max(abs(volcano_df$log2FoldChange), na.rm = TRUE)
+x_lim <- max(0.6, ceiling(max_fc * 10) / 10 + 0.1)
+
+volcano_plot <- ggplot(volcano_df, aes(x = log2FoldChange, y = -log10(pvalue), col = diffexpressed)) +
+  geom_point(alpha = 0.5, size = 1.8) +
+  scale_color_manual(values = c(
+    "Enriched in Low BMI"  = "steelblue",
+    "Not Significant"      = "grey75",
+    "Enriched in High BMI" = "firebrick3"
+  )) +
+  geom_vline(xintercept = c(-0.2, 0.2), col = "black", linetype = "dashed", alpha = 0.5) +
+  geom_hline(yintercept = -log10(0.05), col = "black", linetype = "dashed", alpha = 0.5) +
+  ggrepel::geom_text_repel(
+    aes(label = gene_label),
+    max.overlaps = Inf,
+    box.padding = 0.6,
+    point.padding = 0.4,
+    segment.color = "grey30",
+    segment.size = 0.3,
+    size = 3.8,
+    fontface = "italic",
+    show.legend = FALSE
+  ) +
+  scale_x_continuous(limits = c(-x_lim, x_lim)) +
+  coord_cartesian(clip = "off") +
+  theme_classic() +
+  labs(
+    title = "GNG4+ Tfh: Differential Expression Across BMI",
+    subtitle = "Pseudobulk DESeq2 (n = 10 donors; continuous BMI model)",
+    x = "log2 Fold Change (per unit increase in BMI)",
+    y = "-log10 Nominal P-value"
+  ) +
+  annotate("text", x = x_lim * 0.7, y = max(-log10(volcano_df$pvalue)) * 0.95, 
+           label = "Enriched in High BMI", color = "firebrick3", fontface = "bold", size = 4.2) +
+  annotate("text", x = -x_lim * 0.7, y = max(-log10(volcano_df$pvalue)) * 0.95, 
+           label = "Enriched in Low BMI", color = "steelblue", fontface = "bold", size = 4.2) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 13, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 10, hjust = 0.5),
+    axis.text = element_text(color = "black", size = 10),
+    axis.title = element_text(size = 11)
+  )
+
+volcano_plot
+res_dt[order(padj, decreasing = FALSE)][1:20]
+
+
+# ==============================================================================
+# 3. EVALUATE CD4 AND TFH SUBSET FREQUENCIES BY BMI
+# ==============================================================================
+
+# --- PART A: Total CD4 Subsets ---
+md_cd4 <- as.data.table(obj1.clean@meta.data)[!is.na(BMI)]
+
+subj_cd4_counts <- md_cd4[, .N, by = .(subject, BMI, bmi_group, titer.categ, CD4.subset.annotation)]
+subj_cd4_counts[, Total_CD4 := sum(N), by = subject]
+subj_cd4_counts[, Percentage := (N / Total_CD4) * 100]
+
+all_cd4_comb <- CJ(
+  subject = unique(md_cd4$subject),
+  CD4.subset.annotation = unique(md_cd4$CD4.subset.annotation)
+)
+donor_demo_cd4 <- unique(md_cd4[, .(subject, BMI, bmi_group, titer.categ)])
+full_grid_cd4 <- merge(all_cd4_comb, donor_demo_cd4, by = "subject")
+CD4_freq_df <- merge(full_grid_cd4, subj_cd4_counts[, .(subject, CD4.subset.annotation, Percentage)], 
+                     by = c("subject", "CD4.subset.annotation"), all.x = TRUE)
+CD4_freq_df[is.na(Percentage), Percentage := 0]
+
+cd4_order <- c("Naive_1", "Fos-Jun", "Effector memory", "Tfh", "Naive_2", "Treg", "Quiescent memory", "Proliferating")
+CD4_freq_df[, CD4.subset.annotation := factor(CD4.subset.annotation, levels = cd4_order)]
+
+cat_stats_cd4 <- CD4_freq_df[, {
+  wt <- wilcox.test(Percentage ~ bmi_group, exact = FALSE)
+  cd <- rstatix::cohens_d(data = .SD, Percentage ~ bmi_group)
+  .(
+    Median_NonObese = median(Percentage[bmi_group == "Non-Obese"]),
+    Median_Obese    = median(Percentage[bmi_group == "Obese"]),
+    Wilcox_p        = wt$p.value,
+    Cohens_d        = cd$effsize,
+    Magnitude       = cd$magnitude
+  )
+}, by = CD4.subset.annotation]
+cat_stats_cd4[, FDR := p.adjust(Wilcox_p, method = "BH")]
+setorder(cat_stats_cd4, Wilcox_p)
+
+cor_stats_cd4 <- CD4_freq_df[, {
+  sp <- cor.test(BMI, Percentage, method = "spearman", exact = FALSE)
+  .(
+    Spearman_rho = sp$estimate,
+    Cor_p        = sp$p.value
+  )
+}, by = CD4.subset.annotation]
+cor_stats_cd4[, Cor_FDR := p.adjust(Cor_p, method = "BH")]
+
+bmi_cd4_summary <- merge(cat_stats_cd4, cor_stats_cd4, by = "CD4.subset.annotation")
+print(bmi_cd4_summary)
+
+p_box_cd4 <- ggplot(CD4_freq_df, aes(x = bmi_group, y = Percentage, fill = bmi_group)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6, width = 0.5) +
+  ggbeeswarm::geom_quasirandom(width = 0.2, size = 2.5, shape = 21, color = "black", alpha = 0.9) +
+  facet_wrap(~CD4.subset.annotation, scales = "free_y", ncol = 3) +
+  scale_fill_manual(values = c("Non-Obese" = "mediumseagreen", "Obese" = "slateblue4")) +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.25)), limits = c(0, NA)) +
+  ggpubr::stat_compare_means(method = "wilcox.test", label = "p.format", label.x.npc = "center", label.y.npc = 0.95) +
+  theme_classic() +
+  labs(title = "CD4 Subset Frequencies by BMI Group (<30 vs >=30)",
+       x = NULL, y = "% of Total CD4") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "none",
+    axis.text = element_text(color = "black")
+  )
+print(p_box_cd4)
+
+p_scatter_cd4 <- ggplot(CD4_freq_df, aes(x = BMI, y = Percentage)) +
+  geom_point(aes(color = CD4.subset.annotation, shape = titer.categ), size = 3, alpha = 0.85) +
+  geom_smooth(method = "lm", se = TRUE, color = "grey30", linewidth = 0.8, fill = "grey80", alpha = 0.4) +
+  facet_wrap(~CD4.subset.annotation, scales = "free_y", ncol = 3) +
+  scale_shape_manual(values = c("Over100" = 16, "Under100" = 17)) +
+  ggpubr::stat_cor(method = "spearman", label.x.npc = "left", label.y.npc = 0.95, size = 3.5) +
+  theme_classic() +
+  labs(title = "CD4 Subset Frequencies across Continuous BMI",
+       x = "BMI (kg/m²)", y = "% of Total CD4",
+       shape = "Titer Group") +
+  guides(color = "none") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "top",
+    axis.text = element_text(color = "black")
+  )
+print(p_scatter_cd4)
+
+
+# --- PART B: Tfh Subsets ---
+md_tfh <- as.data.table(tfh@meta.data)[!is.na(BMI)]
+
+subj_tfh_counts <- md_tfh[, .N, by = .(subject, BMI, bmi_group, titer.categ, tfh.subset.annotation)]
+subj_tfh_counts[, Total_Tfh := sum(N), by = subject]
+subj_tfh_counts[, Percentage := (N / Total_Tfh) * 100]
+
+all_tfh_comb <- CJ(
+  subject = unique(md_tfh$subject),
+  tfh.subset.annotation = unique(md_tfh$tfh.subset.annotation)
+)
+donor_demo_tfh <- unique(md_tfh[, .(subject, BMI, bmi_group, titer.categ)])
+full_grid_tfh <- merge(all_tfh_comb, donor_demo_tfh, by = "subject")
+tfh_freq_df <- merge(full_grid_tfh, subj_tfh_counts[, .(subject, tfh.subset.annotation, Percentage)], 
+                     by = c("subject", "tfh.subset.annotation"), all.x = TRUE)
+tfh_freq_df[is.na(Percentage), Percentage := 0]
+
+tfh_order <- c("GNG4 subset", "HSP subset", "IL7R subset", "GPR183 subset", "VIM subset", "TNFR2 subset")
+tfh_freq_df[, tfh.subset.annotation := factor(tfh.subset.annotation, levels = tfh_order)]
+
+cat_stats_tfh <- tfh_freq_df[, {
+  wt <- wilcox.test(Percentage ~ bmi_group, exact = FALSE)
+  cd <- rstatix::cohens_d(data = .SD, Percentage ~ bmi_group)
+  .(
+    Median_NonObese = median(Percentage[bmi_group == "Non-Obese"]),
+    Median_Obese    = median(Percentage[bmi_group == "Obese"]),
+    Wilcox_p        = wt$p.value,
+    Cohens_d        = cd$effsize,
+    Magnitude       = cd$magnitude
+  )
+}, by = tfh.subset.annotation]
+cat_stats_tfh[, FDR := p.adjust(Wilcox_p, method = "BH")]
+setorder(cat_stats_tfh, Wilcox_p)
+
+cor_stats_tfh <- tfh_freq_df[, {
+  sp <- cor.test(BMI, Percentage, method = "spearman", exact = FALSE)
+  .(
+    Spearman_rho = sp$estimate,
+    Cor_p        = sp$p.value
+  )
+}, by = tfh.subset.annotation]
+cor_stats_tfh[, Cor_FDR := p.adjust(Cor_p, method = "BH")]
+
+bmi_tfh_summary <- merge(cat_stats_tfh, cor_stats_tfh, by = "tfh.subset.annotation")
+print(bmi_tfh_summary)
+
+subset.cols <- c(
+  "GNG4 subset"   = "mediumaquamarine",
+  "HSP subset"    = "darkorange3",
+  "IL7R subset"   = "salmon",
+  "GPR183 subset" = "thistle",
+  "VIM subset"    = "yellowgreen",
+  "TNFR2 subset"  = "skyblue"
+)
+
+p_box_tfh <- ggplot(tfh_freq_df, aes(x = bmi_group, y = Percentage, fill = bmi_group)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6, width = 0.5) +
+  ggbeeswarm::geom_quasirandom(width = 0.2, size = 2.5, shape = 21, color = "black", alpha = 0.9) +
+  facet_wrap(~tfh.subset.annotation, scales = "free_y", ncol = 3) +
+  scale_fill_manual(values = c("Non-Obese" = "mediumseagreen", "Obese" = "slateblue4")) +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.25)), limits = c(0, NA)) +
+  ggpubr::stat_compare_means(method = "wilcox.test", label = "p.format", label.x.npc = "center", label.y.npc = 0.95) +
+  theme_classic() +
+  labs(title = "Tfh Subset Frequencies by BMI Group (<30 vs >=30)",
+       x = NULL, y = "% of Total Tfh") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "none",
+    axis.text = element_text(color = "black")
+  )
+print(p_box_tfh)
+
+p_scatter_tfh <- ggplot(tfh_freq_df, aes(x = BMI, y = Percentage)) +
+  geom_point(aes(color = tfh.subset.annotation, shape = titer.categ), size = 3, alpha = 0.85) +
+  geom_smooth(method = "lm", se = TRUE, color = "grey30", linewidth = 0.8, fill = "grey80", alpha = 0.4) +
+  facet_wrap(~tfh.subset.annotation, scales = "free_y", ncol = 3) +
+  scale_color_manual(values = subset.cols) +
+  scale_shape_manual(values = c("Over100" = 16, "Under100" = 17)) +
+  ggpubr::stat_cor(method = "spearman", label.x.npc = "left", label.y.npc = 0.95, size = 3.5) +
+  theme_classic() +
+  labs(title = "Tfh Subset Frequencies across Continuous BMI",
+       x = "BMI (kg/m²)", y = "% of Total Tfh",
+       shape = "Titer Group") +
+  guides(color = "none") +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 10),
+    legend.position = "top",
+    axis.text = element_text(color = "black")
+  )
+print(p_scatter_tfh)
+
+```
+
