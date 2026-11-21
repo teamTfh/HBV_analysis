@@ -839,7 +839,7 @@ ggplot(entropy_results, aes(x = tfh.subset.annotation, y = Shannon_H)) +
 rm(entropy_results, scale_factor)
 ```
 
-## Slingshot trajectory 
+## Slingshot trajectory
 
 ```{r slingshot-analysis-tfh}
 
@@ -1993,7 +1993,7 @@ VlnPlot2(obj1.clean, features = "HOTSPOT_2", group.by = "titer.categ", pt.size =
 
 ```
 
-## Cytotrace 
+## Cytotrace
 
 ```{r tfh-cytotrace2-calculate, eval=FALSE}
 library(CytoTRACE2)
@@ -2599,8 +2599,7 @@ rm(summary_md, res.cytotrace, plots)
 
 From this, it seems like Cytotrace is unable to find enough meaningful differences to properly call differentiation, as the result will depend on how transcriptionally diverse the subset is. The presumption is that differentiation -\> less transcriptional diversity but whether that's true for Tfh is unknown. Likely these subsets are relatively similar. The plots for \# features detected vs slingshot pseudotime is interesting and worth coming back to later.
 
-=======
-## Differential expression by aging
+======= \## Differential expression by aging
 
 ```{r differential-expression-byAging}
 
@@ -2642,7 +2641,6 @@ plotDAbeeswarm(da_results, group.by='tfh.subset.annotation', alpha=0.1)
 
 
 ```
-
 
 ## Differential expression by titer
 
@@ -3159,8 +3157,6 @@ obj1.clean <- AddMetaData(obj1.clean, metadata = as.data.frame( vis.cd4@ModuleHo
 VlnPlot2(obj1.clean, features = "HOTSPOT_2", group.by = "titer.categ", pt.size = 0.1, stat.method = "wilcox.test") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
-## End
-=======
 
 ## Analysis of LN-Tfh by aging
 
