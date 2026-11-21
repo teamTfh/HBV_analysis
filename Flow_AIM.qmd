@@ -1,0 +1,265 @@
+---
+title: "Flow_AIM"
+author: "Xiaomin"
+format: html
+editor: visual
+---
+
+##load library
+
+```{r}
+# --- Load Libraries ---
+
+library(flowCore)
+library(uwot)
+library(tidyverse)
+library(viridis)
+library(ggh4x)
+library(dbplyr)
+# --- Custom Theme ---
+# A custom ggplot theme is defined for consistent plot styling.
+ct2 <- theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(color = "black"),
+        # axis.text.x = element_text(color = "black", angle = 45, hjust = 1),
+        axis.text.y = element_text(color = "black"),
+        # text = element_text(family = "Arial"),
+        plot.title = element_text(hjust = 0.5), 
+        axis.ticks.x.bottom = element_blank())
+```
+
+# Read the exported CD4+ file
+
+```{r}
+
+fcs_file <- read.FCS("./data/AIMmerged_CD4.fcs", 
+                     transformation = FALSE, 
+                     truncate_max_range = FALSE)
+markernames(fcs_file)
+```
+# UMAP from flowjo
+```{r}
+umap_coords <- exprs(fcs_file)[, c(47, 48)]
+plot_df <- as.data.frame(umap_coords)
+
+# 2. Rename for easier plotting
+colnames(plot_df) <- c("UMAP1", "UMAP2")
+
+# 3. Create a density plot (best for 200k cells)
+ggplot(plot_df, aes(x = UMAP2, y = UMAP1)) +
+  stat_density_2d(aes(fill = after_stat(level)), geom = "polygon") +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = "Existing FlowJo CD4+ UMAP",
+       x = "UMAP-X", y = "UMAP-Y")
+
+
+
+```
+#---viualizing each AIM marker on the umap-----------------------------------------
+```{r}
+
+# 1. Map markers to FJComp channels
+marker_map <- pData(parameters(fcs_file))[, c("name", "desc")]
+my_markers <- c("TNFa", "OX40", "CD25", "CD137", "CD40L", "IL-2", "CD200", "CD69")
+
+# Lookup the correct detector names
+target_channels <- marker_map$name[match(my_markers, marker_map$desc)]
+names(target_channels) <- my_markers 
+
+# 2. Extract UMAP coords and Marker data from the full fcs_file
+# Using the specific CD4+ UMAP columns (47 and 48) identified earlier
+plot_data <- as.data.frame(exprs(fcs_file)[, c("UMAP.1.CD4+.KTVZ", "UMAP.2.CD4+.KTVZ", target_channels)])
+colnames(plot_data) <- c("UMAP1", "UMAP2", names(target_channels))
+
+# 3. Reshape and Transform
+plot_long <- plot_data %>%
+  pivot_longer(cols = all_of(names(target_channels)), 
+               names_to = "Marker", 
+               values_to = "Intensity") %>%
+  mutate(Intensity = asinh(Intensity / 150))
+# 0. Capture the original ranges from the full dataset
+xlim_range <- range(plot_long$UMAP2)
+ylim_range <- range(plot_long$UMAP1)
+# 4. Normalize each marker's intensity to 0-1 range
+plot_long_norm <- plot_long %>%
+  group_by(Marker) %>%
+  mutate(Intensity = (Intensity - min(Intensity)) / (max(Intensity) - min(Intensity))) %>%
+  ungroup()
+# Define your specific thresholds for each marker
+custom_thresholds <- data.frame(
+  Marker = c("TNFa", "OX40", "CD25", "CD137", "CD40L", "IL-2", "CD200", "CD69"),
+  threshold = c(0.65,  0.70,   0.75,   0.80,    0.75,    0.80,   0.70,    0.80)
+)
+
+# Apply the specific thresholds
+plot_long_high <- plot_long_norm %>%
+  inner_join(custom_thresholds, by = "Marker") %>%
+  dplyr::filter(Intensity > threshold) %>%
+  ungroup()
+# 5. Plot using the normalized data
+plot <- ggplot(plot_long_norm, aes(x = UMAP2, y = UMAP1, z = Intensity)) +
+  stat_summary_2d(fun = mean, bins = 500, color = NA) + 
+  # This line forces the plot to stay the same size regardless of the filter
+  coord_fixed(xlim = xlim_range, ylim = ylim_range) +
+  scale_fill_gradientn(colors = c("black", "blue", "red"), 
+                       name = "Relative\nExpression") +
+  facet_wrap(~Marker, ncol = 4) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(), # Remove major grid
+    panel.grid.minor = element_blank(), # Remove minor grid
+    axis.text = element_blank(),        # Optional: Remove UMAP coordinates
+    axis.ticks = element_blank(),       # Optional: Remove ticks
+    strip.text = element_text(size = 14, face = "bold"),
+    panel.background = element_rect(fill = "white", color = NA), # Black background makes colors pop
+    plot.background = element_rect(fill = "white", color = NA)    # Keep outer area white
+  ) +
+  labs(title = "Normalized Marker Expression (Min-Max scaled per panel)")
+ggsave("./figs/CD4_UMAP_Panels.pdf", plot = plot, width = 20, height = 8, units = "in", limitsize = FALSE)
+# 6. Plot using the normalized data, high intensity cells
+plotHighAIM <- ggplot(plot_long_high, aes(x = UMAP2, y = UMAP1, z = Intensity)) +
+  stat_summary_2d(fun = mean, bins = 500, color = NA) + 
+  # This line forces the plot to stay the same size regardless of the filter
+  coord_fixed(xlim = xlim_range, ylim = ylim_range) +
+  scale_fill_gradientn(colors = c("black", "blue", "red"), limits = c(0, 1),
+                       name = "Relative\nExpression") +
+  facet_wrap(~Marker, ncol = 4) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(), # Remove major grid
+    panel.grid.minor = element_blank(), # Remove minor grid
+    axis.text = element_blank(),        # Optional: Remove UMAP coordinates
+    axis.ticks = element_blank(),       # Optional: Remove ticks
+    strip.text = element_text(size = 14, face = "bold"),
+    panel.background = element_rect(fill = "white", color = NA), # Black background makes colors pop
+    plot.background = element_rect(fill = "white", color = NA)    # Keep outer area white
+  ) +
+  labs(title = "top Normalized Marker Expression (Min-Max scaled per panel)")
+ggsave("./figs/CD4_UMAP_Panels_AIMhigh.pdf", plot = plotHighAIM, width = 20, height = 8, units = "in", limitsize = FALSE)
+#-----------overlapping the top cells---------------------------
+
+# 1. Identify cells that passed the threshold and count how many markers they express
+polyfunctional_data <- plot_long_high %>%
+  group_by(UMAP1, UMAP2) %>% 
+  summarise(OverlapCount = n(), .groups = "drop")
+polyfunctional_data <- polyfunctional_data %>% dplyr::filter(OverlapCount > 2) 
+
+
+plotoverlay <- ggplot(polyfunctional_data, aes(x = UMAP2, y = UMAP1, z = OverlapCount)) +
+  # Use stat_summary_2d to show the 'hottest' count in each area
+  stat_summary_2d(fun = max, bins = 500, color = NA) + 
+  # This line forces the plot to stay the same size regardless of the filter
+  coord_fixed(xlim = xlim_range, ylim = ylim_range) +
+  # Custom scale: 0 (Black) to 8 (Yellow)
+  scale_fill_gradientn(colors = c("black", "red"), 
+                       breaks = 1:8,
+                       limits = c(1, 8),
+                       name = "Number of\nMarkers") +
+  
+  coord_fixed() +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.background = element_rect(fill = "white"),
+    plot.background = element_rect(fill = "white")
+  ) +
+  labs(title = "Polyfunctional CD4+ T-cells",
+       subtitle = "AIM marker co-expression (overlap >=3 )")
+ggsave("./figs/CD4_UMAP_Panels_AIMhighoverlay(n>=3).pdf", plot = plotoverlay, width = 20, height = 8, units = "in", limitsize = FALSE)
+
+plot_long_combined <- plot_long_high %>%
+  left_join(polyfunctional_data, by = c("UMAP1", "UMAP2"))
+plot_long_combined<-plot_long_combined%>%dplyr::filter(OverlapCount > 2) 
+plotoverlaypanels <- ggplot(plot_long_combined, aes(x = UMAP2, y = UMAP1, z = Intensity)) +
+  stat_summary_2d(fun = mean, bins = 500, color = NA) + 
+  # This line forces the plot to stay the same size regardless of the filter
+  coord_fixed(xlim = xlim_range, ylim = ylim_range) +
+  scale_fill_gradientn(colors = c("black", "blue", "red"), limits = c(0, 1),
+                       name = "Relative\nExpression") +
+  facet_wrap(~Marker, ncol = 4) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(), # Remove major grid
+    panel.grid.minor = element_blank(), # Remove minor grid
+    axis.text = element_blank(),        # Optional: Remove UMAP coordinates
+    axis.ticks = element_blank(),       # Optional: Remove ticks
+    strip.text = element_text(size = 14, face = "bold"),
+    panel.background = element_rect(fill = "white", color = NA), # Black background makes colors pop
+    plot.background = element_rect(fill = "white", color = NA)    # Keep outer area white
+  ) +
+  labs(title = "AIM marker co-expression (overlap >=3 ))")
+ggsave("./figs/CD4_UMAP_Panels_AIMhighoverlaypanels.pdf", plot = plotoverlaypanels, width = 20, height = 8, units = "in", limitsize = FALSE)
+
+
+
+```
+
+# look at the distribution of overlapcount
+
+```{r}
+# Calculate the frequency of each overlap count
+dist_data_poly <- polyfunctional_data %>% 
+  dplyr::filter(OverlapCount > 2) 
+dist_data_poly<- dist_data_poly %>% count(OverlapCount) %>% 
+  mutate(Percent = n / sum(n) * 100) # Optional: calculate percentage
+
+# Plot the distribution
+ggplot(dist_data_poly, aes(x = factor(OverlapCount), y = n, fill = OverlapCount)) +
+  geom_col(color = "black") +
+  # Apply your specific Black -> Blue -> Yellow theme to the bars
+  scale_fill_gradientn(colors = c("black", "blue", "cyan", "yellow"), 
+                       limits = c(1, 8)) +
+  theme_minimal() +
+  labs(title = "Distribution of Marker Overlaps",
+       subtitle = "Frequency of polyfunctional CD4+ cells",
+       x = "Number of Markers (Overlap Count)",
+       y = "Number of Cells") +
+  geom_text(aes(label = paste0(round(Percent, 1), "%")), vjust = -0.5) + # Add % labels
+  theme(panel.grid.major.x = element_blank())
+```
+
+
+# UMAP new calculation
+```{r}
+# 3. Downsample to 200,000 cells
+set.seed(123)
+target_cells <- 200000
+if (nrow(fcs_file) > target_cells) {
+  idx <- sample(1:nrow(fcs_file), target_cells)
+  fcs_sub <- fcs_file[idx, ]
+} else {
+  fcs_sub <- fcs_file
+}
+
+# 4. Transform Markers
+# IMPORTANT: Replace these with your actual fluorescent channel names
+my_markers <- c("TNFa", "OX40", "CD25", "CD137", "CD40L", "IL-2", "CD200","CD69") 
+
+umap_input <- exprs(fcs_sub)[, my_markers]
+umap_input <- asinh(umap_input / 150) # Arcsinh transform
+
+# 5. Optimized UMAP
+# n_threads: Set to your CPU cores (usually 4 or 8)
+umap_results <- uwot::umap(umap_input, 
+                           n_neighbors = 15, 
+                           min_dist = 0.1, 
+                           fast_sgd = TRUE, # Speeds up optimization
+                           n_threads = 4,   # Parallel processing
+                           verbose = TRUE)
+
+# 6. Visualize with Density
+plot_df <- as.data.frame(umap_results)
+colnames(plot_df) <- c("UMAP1", "UMAP2")
+
+ggplot(plot_df, aes(x = UMAP1, y = UMAP2)) +
+  geom_bin2d(bins = 200) + # Bins prevent "point blobs" with 200k cells
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = "UMAP: 200,000 CD4+ Cells")
+```
+
